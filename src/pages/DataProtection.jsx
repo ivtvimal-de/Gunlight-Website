@@ -4,7 +4,7 @@ import { MessageCircle } from "lucide-react";
 import { COMPANY, WHATSAPP_URL } from "../config";
 import SEO from "../components/SEO";
 
-export default function PrivacyPolicy() {
+export default function DataProtection() {
   return (
     <>
       <SEO

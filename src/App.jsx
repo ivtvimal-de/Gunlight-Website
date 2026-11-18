@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { CartProvider } from "./context/CartContext";
+
 import CartDrawer from "./components/CartDrawer";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -12,7 +13,7 @@ import TigerDetails from "./pages/TigerDetails";
 import SniperDetails from "./pages/SniperDetails";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
+import DataProtection from "./pages/DataProtection";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import ReturnRefundPolicy from "./pages/ReturnRefundPolicy";
 import TermsConditions from "./pages/TermsConditions";
@@ -35,7 +36,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           
           {/* Legal / Policy Routes */}
-          <Route path="/privacy"  element={<PrivacyPolicy />} />
+          <Route path="/privacy"  element={<DataProtection />} />
           <Route path="/shipping" element={<ShippingPolicy />} />
           <Route path="/returns"  element={<ReturnRefundPolicy />} />
           <Route path="/terms"    element={<TermsConditions />} />
