@@ -1,35 +1,39 @@
 import SEO from "../components/SEO";
-import HeroSection from "../section/Hero";
-import PopularTorch from "../section/PopularTorch";
+import Hero from "../section/Hero";
+import ShopByCategory from "../section/ShopByCategory";
 import FeaturedProducts from "../section/FeaturedProducts";
-import About from "../section/About";
-import Contact from "../section/Contact";
+import TrustBar from "../section/TrustBar";
+import BrandStory from "../section/BrandStory";
+import DealerBanner from "../section/DealerBanner";
 
 export default function Home() {
   return (
     <>
       <SEO
         title="High-Power LED Torches & Search Lights"
-        description="Explore GunLite professional high-power LED searchlights and torches by Jerone Enterprises. Long-range focus, 10000mAh battery backup, and rugged aluminium body. Pan-India delivery."
+        description="GunLite e-commerce store by Jerone Enterprises. Professional high-power LED searchlights and torches. Long-range optics, 10000mAh battery backup, and rugged aluminium body. Pan-India safe transit."
         path="/"
-        image="/images/hero.webp"
+        image="/images/eaglemain.webp"
         type="website"
       />
-      <main className="pt-16">
-        {/* HERO SECTION */}
-        <HeroSection />
+      <main>
+        {/* 3. Hero banner slider with product image, headline, Shop Now CTA */}
+        <Hero />
 
-        {/* POPULAR TORCHES */}
-        <PopularTorch />
+        {/* 4. Shop by Category tile row */}
+        <ShopByCategory />
 
-        {/* FEATURED PRODUCTS */}
+        {/* 5 & 6. Featured Products (4-column grid, 2 on mobile) & Product Cards */}
         <FeaturedProducts />
 
-        {/* ABOUT SECTION */}
-        <About />
+        {/* 7. Trust bar (Warranty, WhatsApp, Shipping, Support) */}
+        <TrustBar />
 
-        {/* CONTACT / ENQUIRY SECTION */}
-        <Contact />
+        {/* 8. Brand / About strip */}
+        <BrandStory />
+
+        {/* 9. Bulk or dealer enquiry banner */}
+        <DealerBanner />
       </main>
     </>
   );

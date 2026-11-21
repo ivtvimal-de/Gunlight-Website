@@ -13,125 +13,104 @@ export default function DataProtection() {
         path="/privacy"
         type="website"
       />
-      <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pt-20 pb-20 text-slate-300">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        {/* Breadcrumb / Top Tag */}
-        <div className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-wider">
-          <Link to="/" className="hover:text-cyan-300 transition">Home</Link>
-          <span>/</span>
-          <span>Legal</span>
-          <span>/</span>
-          <span className="text-slate-400">Privacy Policy</span>
+      <main className="min-h-screen bg-[#fafaf8] pt-32 sm:pt-36 pb-20 text-[#4a5058]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          {/* Breadcrumb / Top Tag */}
+          <div className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
+            <Link to="/" className="hover:text-[#14161a] transition-colors">Home</Link>
+            <span className="text-[#cfcfc8]">/</span>
+            <span>Legal</span>
+            <span className="text-[#cfcfc8]">/</span>
+            <span className="text-[#6b727c]">Privacy Policy</span>
+          </div>
+
+          {/* Header */}
+          <header className="mb-8">
+            <h1 className="font-['Outfit'] text-3xl sm:text-4xl font-bold text-[#14161a] mb-3 tracking-tight">
+              Privacy Policy
+            </h1>
+            <p className="text-xs sm:text-sm text-[#6b727c]">
+              Last Updated: November 2026 | Compliant with the Information Technology Act, 2000 (India)
+            </p>
+          </header>
+
+          {/* Quick Policy Nav */}
+          <div className="mb-8 flex flex-wrap gap-2 border-b border-[#e6e6e1] pb-4 text-xs font-medium">
+            <Link to="/privacy" className="rounded-lg bg-[var(--accent)] text-white font-semibold px-3 py-1.5 shadow-xs">Privacy Policy</Link>
+            <Link to="/shipping" className="rounded-lg border border-[#e6e6e1] bg-white px-3 py-1.5 text-[#6b727c] hover:text-[#14161a] hover:border-[#cfcfc8] transition-colors">Shipping Policy</Link>
+            <Link to="/returns" className="rounded-lg border border-[#e6e6e1] bg-white px-3 py-1.5 text-[#6b727c] hover:text-[#14161a] hover:border-[#cfcfc8] transition-colors">Return &amp; Refund</Link>
+            <Link to="/terms" className="rounded-lg border border-[#e6e6e1] bg-white px-3 py-1.5 text-[#6b727c] hover:text-[#14161a] hover:border-[#cfcfc8] transition-colors">Terms &amp; Conditions</Link>
+          </div>
+
+          {/* Content Body */}
+          <div className="rounded-2xl border border-[#e6e6e1] bg-white p-6 sm:p-8 space-y-8 text-sm leading-relaxed shadow-[0_4px_20px_rgba(20,22,26,0.06)]">
+            
+            <section>
+              <h2 className="font-['Outfit'] text-lg font-bold text-[#14161a] mb-2">1. Introduction</h2>
+              <p>
+                Welcome to <strong className="text-[#14161a]">{COMPANY.brand}</strong>, operated by <strong className="text-[#14161a]">{COMPANY.name}</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;), located at {COMPANY.address}. We respect your privacy and are committed to protecting any personal data collected when you browse our website, explore our catalogue, or place product enquiries.
+              </p>
+            </section>
+
+            {/* Highlight Notice */}
+            <section className="rounded-xl border border-[#e6e6e1] bg-[#f4f4f1] p-4 sm:p-5 text-[#4a5058]">
+              <h3 className="font-['Outfit'] font-bold text-[#14161a] mb-1.5 flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-[var(--accent)]" /> Order Confirmation via WhatsApp
+              </h3>
+              <p className="text-xs sm:text-sm text-[#4a5058] leading-relaxed">
+                When you click &ldquo;Order on WhatsApp&rdquo; or submit an enquiry, you voluntarily transfer communication to WhatsApp (Meta Platforms, Inc.). Any chat conversation, address shared for dispatch, or payment confirmation exchanged over WhatsApp is governed by WhatsApp&rsquo;s end-to-end encryption protocols and privacy policy.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-['Outfit'] text-lg font-bold text-[#14161a] mb-2">2. Information We Collect</h2>
+              <p className="mb-2">We collect only information necessary to respond to your queries and deliver physical goods:</p>
+              <ul className="list-disc list-inside space-y-1.5 pl-2 text-[#4a5058]">
+                <li><strong className="text-[#14161a]">Contact Information:</strong> Your name, phone number, and delivery address provided directly by you.</li>
+                <li><strong className="text-[#14161a]">Order Details:</strong> Product models, quantities, and transaction details required for invoicing and shipping.</li>
+                <li><strong className="text-[#14161a]">Technical Analytics:</strong> Basic anonymous site usage metrics via standard browser logs. We do not sell your personal data.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="font-['Outfit'] text-lg font-bold text-[#14161a] mb-2">3. Purpose and Legal Basis of Processing</h2>
+              <p className="mb-2">Your information is processed in compliance with the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011, for:</p>
+              <ul className="list-disc list-inside space-y-1.5 pl-2 text-[#4a5058]">
+                <li>Confirming stock, finalizing prices, and coordinating parcel dispatch.</li>
+                <li>Generating tax invoices compliant with Indian GST laws.</li>
+                <li>Providing after-sales support and warranty service for GunLite products.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="font-['Outfit'] text-lg font-bold text-[#14161a] mb-2">4. Third-Party Disclosures</h2>
+              <p>
+                We do not sell, rent, or trade your personal data. We share shipping addresses strictly with verified courier partners (e.g., India Post, DTDC, Professional Couriers, Delhivery) solely for parcel delivery.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-['Outfit'] text-lg font-bold text-[#14161a] mb-2">5. Data Retention &amp; Security</h2>
+              <p>
+                We maintain appropriate administrative and technical safeguards to protect your personal data from unauthorized access, alteration, or disclosure. Invoicing records are retained as required by Indian tax statutes.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="font-['Outfit'] text-lg font-bold text-[#14161a] mb-2">6. Grievance Officer &amp; Contact</h2>
+              <p className="mb-3">
+                In accordance with the Information Technology Act 2000 and the Rules made thereunder:
+              </p>
+              <div className="rounded-xl border border-[#e6e6e1] bg-[#f4f4f1] p-4 text-xs sm:text-sm space-y-1">
+                <p><strong className="text-[#14161a]">Grievance Desk:</strong> Jerone Enterprises</p>
+                <p><strong className="text-[#14161a]">Address:</strong> {COMPANY.address}</p>
+                <p><strong className="text-[#14161a]">Phone:</strong> {COMPANY.phone}</p>
+                <p><strong className="text-[#14161a]">Email:</strong> {COMPANY.email}</p>
+              </div>
+            </section>
+          </div>
         </div>
-
-        {/* Header */}
-        <header className="mb-10 text-center sm:text-left">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-3">
-            Privacy Policy
-          </h1>
-          <p className="text-sm text-slate-400">
-            Last Updated: November 2026 | Compliant with the Information Technology Act, 2000 (India)
-          </p>
-        </header>
-
-        {/* Quick Policy Nav */}
-        <div className="mb-10 flex flex-wrap gap-2 border-b border-slate-800 pb-4 text-xs sm:text-sm font-medium">
-          <Link to="/privacy" className="rounded-lg bg-blue-600/30 border border-blue-500/50 px-3.5 py-1.5 text-white">Privacy Policy</Link>
-          <Link to="/shipping" className="rounded-lg border border-slate-800 bg-slate-900/50 px-3.5 py-1.5 text-slate-400 hover:text-white hover:border-slate-700 transition">Shipping Policy</Link>
-          <Link to="/returns" className="rounded-lg border border-slate-800 bg-slate-900/50 px-3.5 py-1.5 text-slate-400 hover:text-white hover:border-slate-700 transition">Return & Refund</Link>
-          <Link to="/terms" className="rounded-lg border border-slate-800 bg-slate-900/50 px-3.5 py-1.5 text-slate-400 hover:text-white hover:border-slate-700 transition">Terms & Conditions</Link>
-        </div>
-
-        {/* Content Body */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-10 shadow-2xl backdrop-blur-md space-y-8 text-sm sm:text-base leading-relaxed">
-          
-          <section>
-            <h2 className="text-xl font-bold text-white mb-3">1. Introduction</h2>
-            <p>
-              Welcome to <strong>{COMPANY.brand}</strong>, operated by <strong>{COMPANY.name}</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;), located at {COMPANY.address}. We respect your privacy and are committed to protecting any personal data collected when you browse our website, explore our catalogue, or place product enquiries.
-            </p>
-          </section>
-
-          {/* Highlight Notice */}
-          <section className="rounded-xl border border-blue-500/30 bg-blue-950/40 p-4 sm:p-5 text-blue-200">
-            <h3 className="font-semibold text-white mb-1.5 flex items-center gap-2">
-              <MessageCircle className="w-4 h-4 text-[#00e5ff]" /> Order Confirmation via WhatsApp
-            </h3>
-            <p className="text-sm text-blue-200/90 leading-normal">
-              Please note that order details, pricing quotes, and delivery confirmations on this website are facilitated and verified directly via <strong>WhatsApp</strong>. When you communicate with us through WhatsApp, relevant details (such as your name, contact number, and delivery address) are used strictly to finalize and deliver your order.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-white mb-3">2. Information We Collect</h2>
-            <p className="mb-2">We collect only necessary information to serve you effectively:</p>
-            <ul className="list-disc list-inside space-y-2 pl-2 text-slate-300">
-              <li><strong>Contact Information:</strong> Name, phone number, delivery address, and email address provided during enquiry or order placement.</li>
-              <li><strong>WhatsApp Communications:</strong> Order specifications, model preferences, and delivery instructions shared in WhatsApp chats.</li>
-              <li><strong>Technical Browsing Data:</strong> Standard server logs, browser type, and anonymous analytics to maintain website security and user experience.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-white mb-3">3. How We Use Your Information</h2>
-            <ul className="list-disc list-inside space-y-2 pl-2 text-slate-300">
-              <li>To confirm, process, package, and deliver your torch and searchlight orders across India.</li>
-              <li>To share dispatch updates, courier tracking numbers, and delivery ETAs via WhatsApp or SMS.</li>
-              <li>To provide customer support, warranty assistance, and post-purchase guidance.</li>
-              <li>To comply with statutory legal and tax obligations under applicable Indian laws (including GST documentation).</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-white mb-3">4. Data Protection & No-Sale Policy</h2>
-            <p>
-              We <strong>do not sell, rent, trade, or monetize</strong> your personal contact information to any third parties for advertising or telemarketing purposes. Your data is shared solely with trusted logistics/courier partners (e.g., Delhivery, India Post, DTDC) strictly for delivery fulfilment.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-white mb-3">5. Product Usage & Safety Compliance</h2>
-            <p>
-              Our products are high-power LED searchlights and portable illumination torches. In compliance with safety advisories, we do not intentionally collect data from or market products directly to minors without parental consent. Customers are encouraged to read operating instructions carefully to ensure safe handling of high-lumen optical equipment.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-white mb-3">6. Cookies and Local Storage</h2>
-            <p>
-              Our website uses lightweight browser local storage to preserve your cart items between browsing sessions. You can clear your browser storage at any time without impacting your ability to view products.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-white mb-3">7. Grievance Officer & Contact Details</h2>
-            <p className="mb-3">
-              In accordance with the Information Technology Act, 2000 and rules made thereunder, for questions or concerns regarding this policy, please reach out to our team:
-            </p>
-            <div className="rounded-lg bg-slate-950 p-4 border border-slate-800 text-sm space-y-1.5 font-mono">
-              <p><strong>Business Name:</strong> {COMPANY.name}</p>
-              <p><strong>Brand:</strong> {COMPANY.brand}</p>
-              <p><strong>Address:</strong> {COMPANY.address}</p>
-              <p><strong>Email:</strong> {COMPANY.email}</p>
-              <p><strong>Phone:</strong> {COMPANY.phone}</p>
-              <p><strong>GSTIN:</strong> {COMPANY.gst}</p>
-            </div>
-            <div className="mt-4">
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 transition"
-              >
-                <MessageCircle className="w-4 h-4 text-white" /> Chat on WhatsApp
-              </a>
-            </div>
-          </section>
-
-        </div>
-      </div>
-    </main>
+      </main>
     </>
   );
 }
-

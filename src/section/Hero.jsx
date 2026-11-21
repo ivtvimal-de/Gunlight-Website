@@ -1,177 +1,245 @@
-import React, { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { gsap } from "gsap";
-import { MessageCircle, ArrowRight } from "lucide-react";
-import { WHATSAPP_URL, SPECS } from "../config";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  ShieldCheck,
+  Truck,
+  MessageCircle,
+  Zap,
+} from "lucide-react";
+import { CLAIMS, WHATSAPP_URL } from "../config";
 
-const HeroTorchBlue = () => {
-  const heroRef = useRef(null);
-  const badgeRef = useRef(null);
-  const titleRef = useRef(null);
-  const descRef = useRef(null);
-  const buttonRef = useRef(null);
-  const specsRef = useRef(null);
+const HERO_SLIDES = [
+  {
+    id: "eagle",
+    badge: "Flagship Search Light",
+    title: "Eagle 3.1 GunLite",
+    tagline: "50W High-Power LED with Focused Fresnel Optics",
+    desc: "Engineered for intense long-range illumination. Aircraft-grade aluminium housing with USB Type-C fast charging and 4 interchangeable color filters.",
+    price: "₹2,499",
+    specs: ["50W LED Chip", "Fresnel Lens", "Type-C Rechargeable"],
+    primaryLink: "/eagle",
+    secondaryLink: "/shop?category=Search+Light",
+    imgPng: "/images/eaglemain.png",
+    imgWebp: "/images/eaglemain.webp",
+    alt: "GunLite Eagle 3.1 50W Search Light",
+  },
+  {
+    id: "everest",
+    badge: "Long Runtime Edition",
+    title: "Everest LED GunLite",
+    tagline: "55W Power with 10,000 mAh Dual-Battery Bank",
+    desc: "Heavy-duty rechargeable searchlight designed for night patrols, security estates, and industrial facilities with power bank reverse charging.",
+    price: "₹1,999",
+    specs: ["55W LED", "10,000mAh Battery", "Reverse USB Out"],
+    primaryLink: "/everest",
+    secondaryLink: "/shop?category=LED+Torch",
+    imgPng: "/images/evmain.png",
+    imgWebp: "/images/evmain.webp",
+    alt: "GunLite Everest 55W LED Torch",
+  },
+  {
+    id: "sniper",
+    badge: "Tactical Series",
+    title: "Sniper X2 GunLite",
+    tagline: "1000 Lumens with Precision Flood-to-Spot Zoom",
+    desc: "Compact tactical flashlight powered by dual 18650 lithium cells. Quick sliding focal head for versatile close-up flood and distance spotting.",
+    price: "₹999",
+    specs: ["1000 Lumens", "Adjustable Zoom", "Dual 18650 Cells"],
+    primaryLink: "/sniper",
+    secondaryLink: "/shop",
+    imgPng: "/images/simain.png",
+    imgWebp: "/images/simain.webp",
+    alt: "GunLite Sniper X2 Tactical Zoom Torch",
+  },
+];
+
+export default function Hero() {
+  const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const slideCount = HERO_SLIDES.length;
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        defaults: { duration: 1.1, ease: "power3.out" },
-      });
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slideCount);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [isPaused, slideCount]);
 
-      tl.from(badgeRef.current, {
-        y: 20,
-        opacity: 0,
-        duration: 0.8,
-      });
+  const prevSlide = () => {
+    setCurrent((prev) => (prev - 1 + slideCount) % slideCount);
+  };
 
-      const titleLines = titleRef.current.querySelectorAll(".title-line");
-      tl.from(
-        titleLines,
-        {
-          y: 40,
-          opacity: 0,
-          filter: "blur(6px)",
-          stagger: 0.15,
-          duration: 1.0,
-          ease: "power4.out",
-        },
-        "-=0.5",
-      );
+  const nextSlide = () => {
+    setCurrent((prev) => (prev + 1) % slideCount);
+  };
 
-      tl.from(descRef.current, { y: 25, opacity: 0, duration: 0.8 }, "-=0.7");
-      tl.from(
-        buttonRef.current,
-        { scale: 0.92, opacity: 0, duration: 0.8, ease: "back.out(1.4)" },
-        "-=0.6",
-      );
-      tl.from(
-        specsRef.current.children,
-        {
-          y: 30,
-          opacity: 0,
-          stagger: 0.1,
-          duration: 0.7,
-        },
-        "-=0.5",
-      );
-    }, heroRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  const specs = SPECS.hero;
+  const slide = HERO_SLIDES[current];
 
   return (
     <section
-      ref={heroRef}
-      className="relative min-h-[92vh] flex items-center justify-center overflow-hidden bg-[#020617] pt-20 pb-16"
+      className="relative bg-[var(--bg-canvas)] border-b border-[var(--border-subtle)] pt-32 sm:pt-36 lg:pt-36 pb-8 sm:pb-12 overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      aria-label="Featured Store Products Slider"
     >
-      {/* ── Full-Width Product Background Image ── */}
-      <div className="absolute inset-0 z-0">
-        <picture>
-          <source srcSet="/images/hero.webp" type="image/webp" />
-          <img
-            src="/images/hero.jpg"
-            alt="GunLite high-power tactical flashlight beam cutting through darkness"
-            width={1920}
-            height={1080}
-            fetchPriority="high"
-            className="h-full w-full object-cover object-center"
-          />
-        </picture>
-
-        {/* Sophisticated Darkening & Vignette Overlays */}
-        <div className="absolute inset-0 bg-[#020617]/70" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/40 to-[#020617]/85" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-transparent to-[#020617]" />
-      </div>
-
-      {/* ── Precision Cyan Beam Glow (Focused Behind Content) ── */}
-      <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 w-[420px] sm:w-[600px] rounded-full bg-[#00e5ff]/15 blur-[120px]" />
-      <div className="pointer-events-none absolute bottom-12 right-1/4 h-64 w-64 rounded-full bg-[#0ea5e9]/10 blur-[90px]" />
-
-      {/* ── Main Content Container ── */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Tactical Category Tag */}
-        <div ref={badgeRef} className="inline-flex items-center gap-2 mb-6">
-          <span className="badge-tactical border-[#00e5ff]/40 bg-[#00e5ff]/10 text-[#00e5ff]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#00e5ff] shadow-[0_0_6px_#00e5ff]" />
-            Professional &amp; Tactical Illumination
-          </span>
-        </div>
+        {/* ── Main Hero Card / Banner Container ── */}
+        <div className="relative rounded-3xl border border-[var(--border-subtle)] bg-white p-6 sm:p-10 lg:p-12 shadow-[0_4px_24px_rgba(20,22,26,0.06)] overflow-hidden">
+          
+          {/* Background Ambient Glow */}
+          <div className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-[var(--accent-tint)] opacity-70 blur-3xl" />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            
+            {/* Left Column: Headline, Copy & CTAs */}
+            <div className="lg:col-span-7 z-10 flex flex-col justify-center">
+              
+              {/* Category / Badge Pill */}
+              <div className="mb-4 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] px-3.5 py-1 text-xs font-semibold text-[var(--accent)] tracking-wide">
+                  <Zap className="w-3.5 h-3.5 text-[var(--accent)]" />
+                  {slide.badge}
+                </span>
+                <span className="text-xs font-mono font-bold text-[var(--text-primary)] px-2.5 py-0.5 rounded-md bg-[var(--bg-surface-2)]">
+                  {slide.price}
+                </span>
+              </div>
 
-        {/* Powerful Headline */}
-        <h1 ref={titleRef} className="mb-6 space-y-1 font-display tracking-wider uppercase">
-          <div className="title-line text-3xl sm:text-5xl lg:text-7xl font-bold text-white drop-shadow-md">
-            Power in Every Beam
-          </div>
-          <div className="title-line text-3xl sm:text-5xl lg:text-7xl font-bold bg-gradient-to-r from-[#00e5ff] via-[#38bdf8] to-white bg-clip-text text-transparent">
-            Built for Professionals
-          </div>
-        </h1>
+              {/* Title */}
+              <h1 className="font-['Outfit'] text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--text-primary)] tracking-tight leading-tight mb-3">
+                {slide.title}
+              </h1>
 
-        {/* Crisp Sub-headline */}
-        <p
-          ref={descRef}
-          className="mb-10 max-w-2xl mx-auto text-sm sm:text-base md:text-lg text-slate-300 leading-relaxed font-sans"
-        >
-          High-performance LED searchlights and portable torches engineered for
-          maximum beam throw, extreme battery endurance, and all-weather tactical reliability.
-        </p>
-
-        {/* Dual Primary & Secondary CTAs */}
-        <div
-          ref={buttonRef}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
-        >
-          {/* Primary CTA */}
-          <Link
-            to="/shop"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-[#0ea5e9] to-[#00e5ff] px-8 py-3.5 font-display text-sm font-bold uppercase tracking-wider text-[#020617] shadow-[0_4px_25px_-2px_rgba(0,229,255,0.45)] hover:shadow-[0_6px_35px_-2px_rgba(0,229,255,0.65)] hover:-translate-y-0.5 transition-all duration-200"
-          >
-            <span>Shop Now</span>
-            <ArrowRight className="w-4 h-4 text-[#020617]" />
-          </Link>
-
-          {/* Secondary CTA */}
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#0f172a]/90 border border-white/[0.12] hover:border-[#00e5ff]/50 px-7 py-3.5 font-display text-sm font-semibold uppercase tracking-wider text-white hover:text-[#00e5ff] hover:bg-[#1e293b] hover:-translate-y-0.5 transition-all duration-200 backdrop-blur-sm shadow-md"
-          >
-            <MessageCircle className="w-4 h-4 text-[#00e5ff]" />
-            <span>Enquire on WhatsApp</span>
-          </a>
-        </div>
-
-        {/* ── Key Tactical Specifications Row (4 Cards) ── */}
-        <div
-          ref={specsRef}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto pt-6 border-t border-white/[0.08]"
-        >
-          {specs.map((item) => (
-            <div
-              key={item.label}
-              className="rounded-xl border border-white/[0.06] bg-[#090e1a]/70 p-3.5 sm:p-4 backdrop-blur-md text-left hover:border-[#00e5ff]/30 transition-colors"
-            >
-              <p className="text-[11px] font-mono uppercase tracking-wider text-[#8494ab] mb-0.5">
-                {item.label}
+              {/* Subheading / Tagline */}
+              <p className="font-['Outfit'] text-base sm:text-lg font-semibold text-[var(--accent)] mb-3">
+                {slide.tagline}
               </p>
-              <p className="font-display text-lg sm:text-xl font-bold text-white tracking-wide">
-                {item.value}
+
+              {/* Description */}
+              <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-xl mb-6">
+                {slide.desc}
               </p>
-              <p className="text-[11px] text-slate-400 truncate mt-0.5">
-                {item.detail}
-              </p>
+
+              {/* Spec Chips Row */}
+              <div className="flex flex-wrap gap-2 mb-8">
+                {slide.specs.map((spec) => (
+                  <span
+                    key={spec}
+                    className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)]"
+                  >
+                    {spec}
+                  </span>
+                ))}
+              </div>
+
+              {/* Buttons */}
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                <Link
+                  to={slide.primaryLink}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-7 py-3.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:shadow"
+                >
+                  <span>Shop Now</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+
+                <Link
+                  to={slide.secondaryLink}
+                  className="inline-flex items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-white hover:bg-[var(--bg-surface-2)] px-6 py-3.5 text-xs sm:text-sm font-semibold text-[var(--text-primary)] transition-colors shadow-2xs"
+                >
+                  View Catalogue
+                </Link>
+
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--accent)] px-3 py-2 transition-colors ml-auto sm:ml-0"
+                >
+                  <MessageCircle className="w-4 h-4 text-[var(--accent)]" />
+                  <span>Enquire on WhatsApp</span>
+                </a>
+              </div>
+
             </div>
-          ))}
+
+            {/* Right Column: Product Image in #F4F4F1 Area */}
+            <div className="lg:col-span-5 z-10 flex flex-col items-center justify-center">
+              <div className="relative w-full rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] p-6 sm:p-8 flex items-center justify-center min-h-[280px] sm:min-h-[360px] lg:min-h-[400px]">
+                
+                <picture className="w-full flex items-center justify-center">
+                  <source srcSet={slide.imgWebp} type="image/webp" />
+                  <img
+                    src={slide.imgPng}
+                    alt={slide.alt}
+                    width={480}
+                    height={400}
+                    fetchPriority="high"
+                    className="max-h-64 sm:max-h-80 w-auto object-contain drop-shadow-md transition-all duration-500 hover:scale-105"
+                  />
+                </picture>
+
+                {/* Direct Detail Link Badge */}
+                <div className="absolute bottom-4 right-4">
+                  <Link
+                    to={slide.primaryLink}
+                    className="rounded-lg bg-white/90 backdrop-blur-xs border border-[var(--border-subtle)] px-3 py-1.5 text-[11px] font-semibold text-[var(--text-primary)] hover:text-[var(--accent)] shadow-xs transition-colors"
+                  >
+                    Inspect Model →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Slider Controls & Dots Bar */}
+          <div className="mt-8 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between">
+            {/* Slide Indicators */}
+            <div className="flex items-center gap-2">
+              {HERO_SLIDES.map((s, index) => (
+                <button
+                  key={s.id}
+                  onClick={() => setCurrent(index)}
+                  aria-label={`Go to slide ${index + 1}: ${s.title}`}
+                  className={`h-2 transition-all rounded-full ${
+                    current === index
+                      ? "w-8 bg-[var(--accent)]"
+                      : "w-2 bg-[var(--border-strong)] hover:bg-[var(--text-muted)]"
+                  }`}
+                />
+              ))}
+              <span className="text-[11px] font-mono text-[var(--text-muted)] ml-2">
+                0{current + 1} / 0{slideCount}
+              </span>
+            </div>
+
+            {/* Arrow Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={prevSlide}
+                aria-label="Previous slide"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-white text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors shadow-2xs"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={nextSlide}
+                aria-label="Next slide"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-white text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors shadow-2xs"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
         </div>
 
       </div>
     </section>
   );
-};
-
-export default HeroTorchBlue;
+}

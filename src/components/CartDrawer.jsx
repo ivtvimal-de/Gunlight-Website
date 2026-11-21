@@ -69,7 +69,7 @@ export default function CartDrawer() {
       {/* ── Backdrop ── */}
       {isCartOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs"
           onClick={closeCart}
           aria-hidden="true"
         />
@@ -78,24 +78,26 @@ export default function CartDrawer() {
       {/* ── Drawer panel ── */}
       <aside
         aria-label="Shopping cart"
-        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white border-l border-[var(--border-subtle)] text-[var(--text-primary)] shadow-2xl transition-transform duration-300 ease-in-out ${
           isCartOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-          <h2 className="text-lg font-bold text-gray-900">
-            Your Cart{" "}
+        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4 bg-[var(--bg-canvas)]">
+          <div className="flex items-center gap-2">
+            <h2 className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)]">
+              Your Cart
+            </h2>
             {cartCount > 0 && (
-              <span className="ml-2 rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+              <span className="rounded-full bg-[var(--accent-tint)] border border-[var(--border-subtle)] px-2 py-0.5 text-xs font-bold text-[var(--accent)]">
                 {cartCount}
               </span>
             )}
-          </h2>
+          </div>
           <button
             onClick={closeCart}
             aria-label="Close cart"
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-white/[0.06] hover:text-white transition"
+            className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-surface-2)] hover:text-[var(--text-primary)] transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -104,17 +106,17 @@ export default function CartDrawer() {
         {/* Body */}
         {items.length === 0 ? (
           /* ── Empty state ── */
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#00e5ff]/10 border border-[#00e5ff]/20">
-              <Flashlight className="h-10 w-10 text-[#00e5ff]" />
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center bg-white">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border-subtle)]">
+              <Flashlight className="h-10 w-10 text-[var(--accent)]" />
             </div>
-            <p className="text-lg font-semibold text-gray-800">Your cart is empty</p>
-            <p className="text-sm text-gray-500">
+            <p className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)]">Your cart is empty</p>
+            <p className="text-sm text-[var(--text-muted)]">
               Browse our collection and add a torch to your cart.
             </p>
             <button
               onClick={closeCart}
-              className="mt-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition"
+              className="mt-2 rounded-lg bg-[var(--accent)] px-6 py-2.5 text-xs font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors shadow-xs"
             >
               Shop Now →
             </button>
@@ -122,7 +124,7 @@ export default function CartDrawer() {
         ) : (
           <>
             {/* ── Item list ── */}
-            <ul className="flex-1 divide-y divide-gray-100 overflow-y-auto px-5 py-2">
+            <ul className="flex-1 divide-y divide-[var(--border-subtle)] overflow-y-auto px-5 py-2 bg-white">
               {items.map((item) => {
                 const lineTotal = item.priceNum > 0
                   ? formatPrice(item.priceNum * item.quantity)
@@ -131,7 +133,7 @@ export default function CartDrawer() {
                 return (
                   <li key={item.id} className="flex gap-4 py-4">
                     {/* Image */}
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-gray-50 p-1 border border-gray-100">
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--bg-surface-2)] p-1.5 border border-[var(--border-subtle)]">
                       <img
                         src={item.img}
                         alt={`${item.title} - GunLite cart item`}
@@ -144,8 +146,8 @@ export default function CartDrawer() {
 
                     {/* Info */}
                     <div className="flex flex-1 flex-col gap-1 min-w-0">
-                      <p className="truncate text-sm font-semibold text-gray-900">{item.title}</p>
-                      <p className="text-xs text-gray-500">{item.price}</p>
+                      <p className="truncate font-['Outfit'] text-sm font-bold text-[var(--text-primary)]">{item.title}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{item.price}</p>
 
                       {/* Quantity stepper */}
                       <div className="mt-1 flex items-center gap-2">
@@ -153,17 +155,17 @@ export default function CartDrawer() {
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
                           aria-label="Decrease quantity"
-                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-40 transition text-sm font-bold"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40 transition-colors text-sm font-bold"
                         >
                           −
                         </button>
-                        <span className="w-6 text-center text-sm font-semibold text-gray-900">
+                        <span className="w-6 text-center text-xs font-semibold text-[var(--text-primary)]">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           aria-label="Increase quantity"
-                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-600 transition text-sm font-bold"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors text-sm font-bold"
                         >
                           +
                         </button>
@@ -172,11 +174,11 @@ export default function CartDrawer() {
 
                     {/* Line total + Remove */}
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                      <p className="text-sm font-bold text-blue-700">{lineTotal}</p>
+                      <p className="font-['Outfit'] text-sm font-bold text-[var(--accent)]">{lineTotal}</p>
                       <button
                         onClick={() => removeItem(item.id)}
                         aria-label={`Remove ${item.title}`}
-                        className="mt-auto text-xs text-red-500 hover:text-red-700 hover:underline transition"
+                        className="mt-auto text-xs text-[var(--text-muted)] hover:text-red-500 hover:underline transition-colors"
                       >
                         Remove
                       </button>
@@ -187,19 +189,19 @@ export default function CartDrawer() {
             </ul>
 
             {/* ── Footer: totals + actions ── */}
-            <div className="border-t border-gray-200 bg-gray-50 px-5 py-5 space-y-4">
+            <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-5 py-5 space-y-4">
               {/* Subtotal */}
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Subtotal ({cartCount} item{cartCount !== 1 ? "s" : ""})</span>
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-[var(--text-muted)]">Subtotal ({cartCount} item{cartCount !== 1 ? "s" : ""})</span>
+                <span className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)]">
                   {cartTotalStr ?? "To be quoted"}
                 </span>
               </div>
 
               {/* On-request notice */}
               {items.some((i) => i.priceNum === 0) && (
-                <p className="flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-300">
-                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <p className="flex items-start gap-2 rounded-lg bg-[var(--accent-tint)] border border-[var(--border-subtle)] px-3 py-2 text-xs text-[var(--accent)] font-medium">
+                  <AlertTriangle className="w-4 h-4 text-[var(--accent)] shrink-0 mt-0.5" />
                   <span>One or more items are priced <strong>On Request</strong>. We will confirm the final price on WhatsApp.</span>
                 </p>
               )}
@@ -207,7 +209,7 @@ export default function CartDrawer() {
               {/* Send on WhatsApp */}
               <button
                 onClick={handleSendWhatsApp}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-green-500 py-3.5 text-sm font-bold text-white shadow hover:bg-green-600 transition-all"
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-[var(--accent)] py-3.5 text-xs font-semibold text-white shadow-xs hover:bg-[var(--accent-hover)] transition-colors"
               >
                 <MessageCircle className="w-4 h-4 text-white" />
                 <span>Send Order on WhatsApp</span>
@@ -217,13 +219,13 @@ export default function CartDrawer() {
               <div className="flex items-center justify-between">
                 <button
                   onClick={closeCart}
-                  className="text-xs text-gray-500 hover:text-gray-700 hover:underline transition"
+                  className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:underline transition-colors"
                 >
                   ← Continue Shopping
                 </button>
                 <button
                   onClick={clearCart}
-                  className="text-xs text-red-500 hover:text-red-700 hover:underline transition"
+                  className="text-xs text-[var(--text-muted)] hover:text-red-500 hover:underline transition-colors"
                 >
                   Clear Cart
                 </button>
@@ -235,4 +237,3 @@ export default function CartDrawer() {
     </>
   );
 }
-

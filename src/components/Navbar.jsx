@@ -1,312 +1,355 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, MessageCircle, X } from "lucide-react";
+import {
+  Search,
+  ShoppingBag,
+  MessageCircle,
+  X,
+  Truck,
+  ShieldCheck,
+  Headphones,
+  User,
+  ChevronRight,
+  Menu,
+} from "lucide-react";
 import { useCart } from "../context/CartContext";
-import { WHATSAPP_URL, COMPANY } from "../config";
+import { WHATSAPP_URL, COMPANY, CLAIMS } from "../config";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const searchInputRef = useRef(null);
+  const [announcementIdx, setAnnouncementIdx] = useState(0);
 
   const navigate = useNavigate();
   const location = useLocation();
   const { cartCount, openCart } = useCart();
 
-  // Clear search input when navigating away from /shop
-  useEffect(() => {
-    if (!location.pathname.startsWith("/shop")) {
-      setSearchQuery("");
-      setSearchExpanded(false);
-    }
-  }, [location.pathname]);
+  const announcements = [
+    {
+      icon: <Truck className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />,
+      text: CLAIMS.shipping || "Pan-India Safe Transit on all orders",
+    },
+    {
+      icon: <MessageCircle className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />,
+      text: "Direct WhatsApp Orders & Instant Stock Confirmation",
+    },
+    {
+      icon: <ShieldCheck className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />,
+      text: CLAIMS.warranty || "1-Year Hardware Warranty on LED & switches",
+    },
+  ];
 
-  // Track scroll for deeper dark backdrop
+  // Rotate announcement for mobile
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setAnnouncementIdx((prev) => (prev + 1) % announcements.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [announcements.length]);
+
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 15);
+      setScrolled(window.scrollY > 20);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "unset";
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
     return () => {
       document.body.style.overflow = "unset";
     };
   }, [open]);
 
-  const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/shop", label: "Shop" },
-    { href: "/about", label: "About" },
-    { href: "/contact", label: "Contact" },
-  ];
+  // Keep search bar in sync with URL
+  useEffect(() => {
+    if (!location.pathname.startsWith("/shop")) {
+      setSearchQuery("");
+    }
+  }, [location.pathname]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+      setOpen(false);
     }
   };
 
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    if (location.pathname.startsWith("/shop") || val.trim()) {
+      navigate(`/shop?q=${encodeURIComponent(val.trim())}`, { replace: true });
+    }
+  };
+
+  const categoryNav = [
+    { label: "All Products", href: "/shop" },
+    { label: "LED Torches", href: "/shop?category=LED+Torch" },
+    { label: "Search Lights", href: "/shop?category=Search+Light" },
+    { label: "Rechargeable", href: "/shop?category=Rechargeable" },
+    { label: "About GunLite", href: "/about" },
+    { label: "Contact & Support", href: "/contact" },
+  ];
+
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-colors duration-300 ${
-          scrolled
-            ? "bg-[#020617]/90 backdrop-blur-md border-b border-white/[0.08] shadow-lg shadow-black/40"
-            : "bg-[#020617]/75 backdrop-blur-sm border-b border-white/[0.05]"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* ── Brand Logo ── */}
-          <Link
-            to="/"
-            className="flex items-center gap-2 group transition-opacity hover:opacity-90 shrink-0"
-            aria-label="GunLite Home"
-          >
-            <picture>
-              <source srcSet="/images/logo.webp" type="image/webp" />
-              <img
-                src="/images/logo.png"
-                alt="GunLite Professional Search Lights"
-                width={124}
-                height={32}
-                className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
-              />
-            </picture>
-          </Link>
-
-          {/* ── Desktop Navigation ── */}
-          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-slate-300">
-            {navLinks.map((item) => {
-              const isActive =
-                item.href === "/"
-                  ? location.pathname === "/"
-                  : location.pathname.startsWith(item.href);
-
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`relative py-2 transition-colors duration-200 font-display text-sm tracking-wider ${
-                    isActive
-                      ? "text-white"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {item.label}
-                  {/* Subtle Cyan Underline */}
-                  <span
-                    className={`absolute bottom-0 left-0 right-0 h-[2px] rounded-full transition-all duration-300 ${
-                      isActive
-                        ? "bg-[#00e5ff] shadow-[0_0_8px_#00e5ff]"
-                        : "bg-transparent hover:bg-[#00e5ff]/50"
-                    }`}
-                  />
+      <header className="fixed top-0 z-50 w-full font-['Inter']">
+        
+        {/* ── 1. Top Announcement Bar (Thin, Dark) ── */}
+        <div className="bg-[#14161A] text-[#94A3B8] border-b border-[#232730] text-[11px] py-1.5 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            {/* Desktop View: Multi-column strip */}
+            <div className="hidden md:flex items-center justify-between">
+              <div className="flex items-center gap-8">
+                <span className="flex items-center gap-1.5 text-[#F8FAFC]">
+                  <Truck className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+                  <span>{CLAIMS.shipping || "Pan-India Safe Transit"}</span>
+                </span>
+                <span className="text-[#384050]">|</span>
+                <span className="flex items-center gap-1.5">
+                  <MessageCircle className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+                  <span>Direct WhatsApp Ordering: {COMPANY.phone}</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1.5 text-[#F8FAFC]">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+                  <span>{CLAIMS.warranty || "1-Year Hardware Warranty"}</span>
+                </span>
+                <span className="text-[#384050]">|</span>
+                <Link to="/contact" className="hover:text-[var(--accent)] transition-colors">
+                  Wholesale Enquiry
                 </Link>
-              );
-            })}
-          </nav>
+              </div>
+            </div>
 
-          {/* ── Action Group: Expanding Search & Cart ── */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            {/* Desktop Expanding Search */}
-            <div className="hidden sm:flex items-center relative">
-              <form
-                onSubmit={handleSearchSubmit}
-                className="flex items-center"
-              >
-                <div
-                  className={`flex items-center rounded-full transition-all duration-300 ease-out border ${
-                    searchExpanded || searchQuery
-                      ? "w-60 md:w-72 bg-[#090e1a] border-[#00e5ff]/50 shadow-[0_0_15px_-3px_rgba(0,229,255,0.25)] px-3 py-1.5"
-                      : "w-9 h-9 bg-transparent border-transparent justify-center"
-                  }`}
-                >
+            {/* Mobile View: Rotating Single Announcement */}
+            <div className="md:hidden flex items-center justify-center text-center">
+              <div className="flex items-center gap-2 transition-opacity duration-300">
+                {announcements[announcementIdx].icon}
+                <span className="truncate font-medium text-[#F8FAFC]">
+                  {announcements[announcementIdx].text}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 2. Main Store Header (White Background, Wide Search) ── */}
+        <div
+          className={`border-b border-[var(--border-subtle)] bg-white transition-all duration-200 ${
+            scrolled ? "shadow-sm" : ""
+          }`}
+        >
+          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            
+            {/* Logo */}
+            <Link to="/" className="flex shrink-0 items-center gap-2" aria-label="GunLite Home">
+              <picture>
+                <source srcSet="/images/logo.webp" type="image/webp" />
+                <img
+                  src="/images/logo.png"
+                  alt="GunLite Logo"
+                  width={130}
+                  height={34}
+                  className="h-8 sm:h-9 w-auto object-contain"
+                />
+              </picture>
+            </Link>
+
+            {/* Wide Search Bar - Center (Desktop & Tablet) */}
+            <div className="hidden sm:flex flex-1 max-w-2xl mx-2 lg:mx-6">
+              <form onSubmit={handleSearchSubmit} className="relative w-full">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  placeholder="Search LED searchlights, rechargeable torches, lumens, specs..."
+                  className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] py-2.5 pl-10 pr-9 text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-colors focus:border-[var(--accent)] focus:bg-white focus:outline-none shadow-xs"
+                />
+                {searchQuery && (
                   <button
                     type="button"
                     onClick={() => {
-                      setSearchExpanded(true);
-                      setTimeout(() => searchInputRef.current?.focus(), 100);
+                      setSearchQuery("");
+                      navigate("/shop", { replace: true });
                     }}
-                    aria-label="Search"
-                    className="text-slate-400 hover:text-[#00e5ff] transition-colors p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    aria-label="Clear search"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <X className="h-4 w-4" />
                   </button>
-
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onFocus={() => setSearchExpanded(true)}
-                    onBlur={() => {
-                      if (!searchQuery) setSearchExpanded(false);
-                    }}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      navigate(`/shop?q=${encodeURIComponent(e.target.value.trim())}`, { replace: true });
-                    }}
-                    placeholder="Search torches, specs..."
-                    className={`bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none ml-2 transition-all duration-300 ${
-                      searchExpanded || searchQuery ? "w-full opacity-100" : "w-0 opacity-0 pointer-events-none"
-                    }`}
-                  />
-
-                  {(searchExpanded || searchQuery) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery("");
-                        setSearchExpanded(false);
-                        if (location.pathname.startsWith("/shop")) {
-                          navigate("/shop");
-                        }
-                      }}
-                      className="text-slate-400 hover:text-white p-1 transition-colors"
-                      aria-label="Clear search"
-                    >
-                      <X className="w-3.5 h-3.5 text-slate-400 hover:text-[#00e5ff]" />
-                    </button>
-                  )}
-                </div>
+                )}
               </form>
             </div>
 
-            {/* Cart Button */}
-            <button
-              onClick={openCart}
-              aria-label={`Open cart with ${cartCount} items`}
-              className="relative p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.04] transition-colors duration-200"
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              {cartCount > 0 && (
-                <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#00e5ff] px-1 text-[10px] font-bold font-display text-[#020617] shadow-[0_0_8px_#00e5ff]">
-                  {cartCount > 99 ? "99+" : cartCount}
-                </span>
-              )}
-            </button>
-
-            {/* Mobile Hamburger Button */}
-            <button
-              onClick={() => setOpen(true)}
-              aria-label="Open mobile menu"
-              className="md:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/[0.04] transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* ── Mobile Full-Height Slide-In Panel ── */}
-      {open && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-300"
-            onClick={() => setOpen(false)}
-            aria-hidden="true"
-          />
-
-          {/* Panel */}
-          <div className="fixed inset-y-0 right-0 w-[280px] sm:w-[320px] bg-[#090e1a] border-l border-white/[0.08] shadow-2xl flex flex-col justify-between p-6">
-            <div>
-              {/* Header */}
-              <div className="flex items-center justify-between pb-6 border-b border-white/[0.08]">
-                <span className="font-display text-lg font-bold tracking-wider uppercase text-white flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-[#00e5ff] shadow-[0_0_6px_#00e5ff]" />
-                  GunLite
-                </span>
-                <button
-                  onClick={() => setOpen(false)}
-                  aria-label="Close menu"
-                  className="p-1.5 text-slate-400 hover:text-white transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Mobile Search */}
-              <form onSubmit={handleSearchSubmit} className="mt-5">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      navigate(`/shop?q=${encodeURIComponent(e.target.value.trim())}`, { replace: true });
-                    }}
-                    placeholder="Search torches..."
-                    className="w-full bg-[#020617] border border-white/[0.12] rounded-lg px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00e5ff]"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">
-                    <Search className="w-3.5 h-3.5 text-[#00e5ff]" />
-                  </span>
-                </div>
-              </form>
-
-              {/* Navigation Links */}
-              <nav className="mt-6 flex flex-col gap-1">
-                {navLinks.map((item) => {
-                  const isActive =
-                    item.href === "/"
-                      ? location.pathname === "/"
-                      : location.pathname.startsWith(item.href);
-
-                  return (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      onClick={() => setOpen(false)}
-                      className={`flex items-center justify-between px-3.5 py-3 rounded-lg font-display text-sm font-semibold tracking-wider uppercase transition-colors ${
-                        isActive
-                          ? "bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/30"
-                          : "text-slate-300 hover:bg-white/[0.04] hover:text-white"
-                      }`}
-                    >
-                      {item.label}
-                      {isActive && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#00e5ff]" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-
-            {/* Footer in Drawer */}
-            <div className="pt-6 border-t border-white/[0.08] space-y-3">
+            {/* Right Action Icons & CTAs */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              
+              {/* WhatsApp Quick Order Desk */}
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-green-500 transition-colors"
+                aria-label="WhatsApp Order Desk"
+                className="hidden lg:flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] hover:border-[var(--accent)] hover:bg-white px-3.5 py-2 text-xs font-semibold text-[var(--text-primary)] transition-all shadow-xs"
               >
-                <MessageCircle className="w-4 h-4 text-white" />
-                <span>WhatsApp Orders</span>
+                <MessageCircle className="h-4 w-4 text-[var(--accent)]" />
+                <div className="text-left leading-tight">
+                  <p className="text-[10px] text-[var(--text-muted)]">Order Desk</p>
+                  <p className="font-bold">WhatsApp</p>
+                </div>
               </a>
-              <p className="text-[11px] text-slate-500 text-center">
-                © {new Date().getFullYear()} {COMPANY.name}
-              </p>
+
+              {/* Account / Support Help Icon */}
+              <Link
+                to="/contact"
+                aria-label="Customer Support & Contact"
+                className="hidden sm:flex items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-white p-2.5 text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-2)] transition-colors"
+                title="Support & Wholesale Enquiry"
+              >
+                <User className="h-5 w-5 text-[var(--text-secondary)]" />
+              </Link>
+
+              {/* Cart Drawer Trigger with Badge */}
+              <button
+                onClick={openCart}
+                aria-label={`Open shopping cart with ${cartCount} items`}
+                className="relative flex items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-white p-2.5 text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-2)] transition-colors"
+              >
+                <ShoppingBag className="h-5 w-5 text-[var(--text-primary)]" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[10px] font-bold text-white shadow-xs">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Mobile Hamburger Toggle */}
+              <button
+                onClick={() => setOpen(!open)}
+                aria-label={open ? "Close menu" : "Open menu"}
+                aria-expanded={open}
+                className="flex items-center justify-center rounded-xl border border-[var(--border-subtle)] p-2 text-[var(--text-primary)] sm:hidden hover:bg-[var(--bg-surface-2)] transition-colors"
+              >
+                {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
             </div>
           </div>
+
+          {/* Mobile Search Bar (Directly below header on small mobile screens) */}
+          <div className="px-4 pb-3 sm:hidden">
+            <form onSubmit={handleSearchSubmit} className="relative w-full">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search torch models & specs..."
+                className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] py-2 pl-9 pr-8 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    navigate("/shop", { replace: true });
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </form>
+          </div>
         </div>
-      )}
+
+        {/* ── 3. Category Navigation Row (All Products, Categories from Shop, About, Contact) ── */}
+        <nav className="hidden sm:block border-b border-[var(--border-subtle)] bg-[var(--bg-canvas)] py-2 px-4 sm:px-6 lg:px-8 shadow-2xs">
+          <div className="mx-auto flex max-w-7xl items-center justify-between text-xs font-semibold">
+            <div className="flex items-center gap-6 overflow-x-auto py-0.5">
+              {categoryNav.map((item) => {
+                const isActive =
+                  item.href === "/shop"
+                    ? location.pathname === "/shop" && !location.search
+                    : item.href.includes("?")
+                    ? location.search.includes(item.href.split("?")[1])
+                    : location.pathname === item.href;
+
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.href}
+                    className={`whitespace-nowrap transition-colors py-1 ${
+                      isActive
+                        ? "text-[var(--accent)] font-bold border-b-2 border-[var(--accent)]"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="hidden lg:flex items-center gap-4 text-[11px] text-[var(--text-muted)] font-medium">
+              <span>GST Registered: <strong className="text-[var(--text-primary)] font-mono">{COMPANY.gst}</strong></span>
+              <span>•</span>
+              <span className="text-[var(--accent)] font-semibold">Fast Dispatch</span>
+            </div>
+          </div>
+        </nav>
+
+        {/* ── 4. Mobile Menu Drawer ── */}
+        {open && (
+          <div className="border-b border-[var(--border-subtle)] bg-white px-4 py-6 sm:hidden shadow-xl animate-in fade-in slide-in-from-top-2 duration-200 max-h-[85vh] overflow-y-auto">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-3">
+              Store Catalogue
+            </p>
+            <nav className="space-y-1.5 mb-6">
+              {categoryNav.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors border border-transparent hover:border-[var(--border-subtle)]"
+                >
+                  <span>{item.label}</span>
+                  <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+                </Link>
+              ))}
+            </nav>
+
+            <div className="pt-4 border-t border-[var(--border-subtle)] space-y-3">
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-4 py-3 text-xs font-semibold text-white shadow-xs hover:bg-[var(--accent-hover)] transition-colors"
+              >
+                <MessageCircle className="h-4 w-4 text-white" />
+                <span>Order on WhatsApp ({COMPANY.phone})</span>
+              </a>
+
+              <div className="rounded-xl bg-[var(--bg-surface-2)] p-3 text-[11px] text-[var(--text-muted)] text-center">
+                <p className="font-semibold text-[var(--text-primary)]">Jerone Enterprises</p>
+                <p>Coimbatore, Tamil Nadu • Pan-India Delivery</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </header>
     </>
   );
 }
