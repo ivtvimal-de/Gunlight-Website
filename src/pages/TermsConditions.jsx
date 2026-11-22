@@ -13,7 +13,7 @@ export default function TermsConditions() {
         path="/terms"
         type="website"
       />
-      <main className="min-h-screen bg-[#fafaf8] pt-32 sm:pt-36 pb-20 text-[#4a5058]">
+      <main className="min-h-screen bg-[#fafaf8] py-8 sm:py-12 pb-20 text-[#4a5058]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           {/* Breadcrumb */}
           <div className="mb-6 flex flex-wrap items-center gap-2 text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">

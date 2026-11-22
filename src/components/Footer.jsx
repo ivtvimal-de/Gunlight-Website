@@ -5,11 +5,10 @@ import {
   MapPin,
   MessageCircle,
   Truck,
-  CreditCard,
   ShieldCheck,
   ExternalLink,
 } from "lucide-react";
-import { WHATSAPP_URL, COMPANY, CLAIMS } from "../config";
+import { WHATSAPP_URL, COMPANY } from "../config";
 
 export default function Footer() {
   return (
@@ -186,37 +185,15 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ── Payment and Shipping Note Banner ── */}
-      <div className="border-t border-[#232730] bg-[#1A1D24] py-4 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-4 text-xs text-[#8B97A8]">
-          <div className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-[var(--accent)] shrink-0" />
-            <span>
-              Direct Invoicing • WhatsApp Verification • Bank Transfer / UPI • Commercial Tax Invoices
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-[11px]">
-            <Truck className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
-            <span>Pan-India Surface &amp; Air Courier Transit</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Quiet Bottom Bar ── */}
+      {/* ── Bottom Bar ── */}
       <div className="border-t border-[#232730] bg-[#0D0F12] py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#8B97A8]">
+        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-3 text-[13px] text-[#8B97A8]">
           <p className="text-center sm:text-left">
             © {new Date().getFullYear()} {COMPANY.name}. All rights reserved. Brand: <strong>{COMPANY.brand}</strong>.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px]">
-            <Link to="/terms" className="hover:text-[var(--accent)] transition-colors">Terms of Service</Link>
-            <span>•</span>
-            <Link to="/privacy" className="hover:text-[var(--accent)] transition-colors">Privacy Policy</Link>
-            <span>•</span>
-            <Link to="/shipping" className="hover:text-[var(--accent)] transition-colors">Shipping Policy</Link>
-            <span>•</span>
-            <Link to="/returns" className="hover:text-[var(--accent)] transition-colors">Return &amp; Refund</Link>
-          </div>
+          <p className="text-center sm:text-right">
+            Developed by <span className="font-semibold text-[#F8FAFC]">Devozzz</span>
+          </p>
         </div>
       </div>
 

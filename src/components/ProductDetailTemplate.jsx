@@ -14,6 +14,7 @@ import {
 import { useCart } from "../context/CartContext";
 import { WHATSAPP_NUMBER, CLAIMS } from "../config";
 import SEO from "./SEO";
+import ProductCard from "./ProductCard";
 
 const ALL_CATALOGUE = [
   {
@@ -22,7 +23,8 @@ const ALL_CATALOGUE = [
     price: "₹2,499",
     img: "/images/eagle.webp",
     link: "/eagle",
-    badge: "50W LED",
+    categories: ["Search Light"],
+    specs: ["50W LED Chip", "Type-C Rechargeable"],
   },
   {
     id: "everest",
@@ -30,7 +32,8 @@ const ALL_CATALOGUE = [
     price: "₹1,999",
     img: "/images/everest.webp",
     link: "/everest",
-    badge: "55W LED",
+    categories: ["LED Torch"],
+    specs: ["55W LED", "10,000mAh Battery"],
   },
   {
     id: "tiger",
@@ -38,7 +41,8 @@ const ALL_CATALOGUE = [
     price: "₹1,499",
     img: "/images/tigerpro.webp",
     link: "/tiger",
-    badge: "500 LM",
+    categories: ["Rechargeable"],
+    specs: ["500 Lumens", "4000mAh Lithium"],
   },
   {
     id: "sniper",
@@ -46,7 +50,8 @@ const ALL_CATALOGUE = [
     price: "₹999",
     img: "/images/sniper.webp",
     link: "/sniper",
-    badge: "1000 LM",
+    categories: ["LED Torch"],
+    specs: ["1000 Lumens", "2× 18650 Battery"],
   },
 ];
 
@@ -95,7 +100,7 @@ export default function ProductDetailTemplate({
         image={images[0] || product.img}
       />
 
-      <main className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] pt-32 sm:pt-36 pb-24 md:pb-20">
+      <main className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] py-8 pb-24 md:pb-20">
         
         {/* Breadcrumb Bar */}
         <div className="border-b border-[var(--border-subtle)] bg-white">
@@ -366,34 +371,9 @@ export default function ProductDetailTemplate({
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {related.slice(0, 3).map((item) => (
-              <Link
-                key={item.id}
-                to={item.link}
-                className="group rounded-xl border border-[var(--border-subtle)] bg-white p-5 hover:border-[var(--accent)] hover:-translate-y-1 transition-all shadow-[0_4px_20px_rgba(20,22,26,0.06)] flex items-center gap-4"
-              >
-                <div className="h-20 w-20 shrink-0 bg-[var(--bg-surface-2)] rounded-lg p-2 flex items-center justify-center border border-[var(--border-subtle)]">
-                  <img
-                    src={item.img}
-                    alt={item.title}
-                    width={80}
-                    height={80}
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-                <div>
-                  <h3 className="font-['Outfit'] text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-[var(--text-primary)] font-bold mt-1">
-                    {item.price}
-                  </p>
-                  <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
-                    View Details →
-                  </span>
-                </div>
-              </Link>
+              <ProductCard key={item.id} product={item} />
             ))}
           </div>
         </div>

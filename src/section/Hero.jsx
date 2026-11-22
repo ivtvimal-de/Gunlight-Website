@@ -81,7 +81,7 @@ export default function Hero() {
 
   return (
     <section
-      className="relative bg-[var(--bg-canvas)] border-b border-[var(--border-subtle)] pt-32 sm:pt-36 lg:pt-36 pb-8 sm:pb-12 overflow-hidden"
+      className="relative bg-[var(--bg-canvas)] border-b border-[var(--border-subtle)] py-8 sm:py-12 overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       aria-label="Featured Store Products Slider"

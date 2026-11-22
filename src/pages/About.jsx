@@ -11,7 +11,7 @@ export default function About() {
         image="/images/abpage.webp"
         type="website"
       />
-      <main className="pt-32 sm:pt-36 bg-[#fafaf8] text-[#14161a] min-h-screen">
+      <main className="bg-[#fafaf8] text-[#14161a] min-h-screen">
         {/* INTRO SECTION */}
         <section className="py-16 border-b border-[#e6e6e1] bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, X, Flashlight, Check, ShoppingCart, MessageCircle } from "lucide-react";
+import { Search, X, Flashlight } from "lucide-react";
 import { useCart } from "../context/CartContext";
-import { WHATSAPP_NUMBER } from "../config";
 import SEO from "../components/SEO";
+import ProductCard from "../components/ProductCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -166,7 +166,7 @@ export default function Shop() {
         path="/shop"
         type="website"
       />
-      <main className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] pt-32 sm:pt-36">
+      <main className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)]">
         
         {/* ── Page Header ── */}
         <section className="relative border-b border-[var(--border-subtle)] bg-white py-14 sm:py-16">
@@ -184,8 +184,8 @@ export default function Shop() {
           </div>
         </section>
 
-        {/* ── Filter Bar ── */}
-        <section className="sticky top-28 sm:top-32 z-30 border-b border-[var(--border-subtle)] bg-[var(--bg-canvas)]/95 px-4 py-3 backdrop-blur-md">
+        {/* ── Filter Bar (Sticky below the 72px Navbar) ── */}
+        <section className="sticky top-[72px] z-30 border-b border-[var(--border-subtle)] bg-[var(--bg-canvas)]/95 px-4 py-3 backdrop-blur-md">
           <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto pb-1 px-4 sm:px-6 lg:px-8">
             {CATEGORY_LIST.map((cat) => (
               <button
@@ -241,112 +241,16 @@ export default function Shop() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-              {filtered.map((item, idx) => {
-                const isAdded = addedId === item.id;
-                const inCart = items.some((i) => i.id === item.id);
-                const waText = encodeURIComponent(
-                  `Hi GunLite, I would like to enquire about ${item.title} (${item.price}). Please share availability and details.`
-                );
-                const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
-
-                return (
-                  <div
-                    key={item.id}
-                    ref={(el) => { if (el) cardsRef.current[idx] = el; }}
-                    className="group relative flex flex-col justify-between rounded-2xl border border-[var(--border-subtle)] bg-white overflow-hidden transition-all duration-300 hover:border-[var(--border-strong)] hover:-translate-y-1 shadow-[0_4px_20px_rgba(20,22,26,0.06)] hover:shadow-[0_12px_30px_-4px_rgba(20,22,26,0.1)]"
-                  >
-                    <div>
-                      {/* Badge */}
-                      {item.badge && (
-                        <span className="absolute top-3 left-3 z-10 rounded-md bg-white border border-[var(--border-subtle)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)] shadow-xs">
-                          {item.badge}
-                        </span>
-                      )}
-
-                      {/* Image */}
-                      <Link to={item.link} className="block relative overflow-hidden bg-[var(--bg-surface-2)] p-6 flex items-center justify-center border-b border-[var(--border-subtle)]">
-                        <picture>
-                          <source srcSet={item.img} type="image/webp" />
-                          <img
-                            src={item.fallback || item.img}
-                            alt={`${item.title} - ${item.desc}`}
-                            width={300}
-                            height={176}
-                            loading="lazy"
-                            className="mx-auto h-44 w-full object-contain transition-transform duration-500 group-hover:scale-105"
-                          />
-                        </picture>
-                      </Link>
-
-                      {/* Info */}
-                      <div className="p-5">
-                        <Link to={item.link} className="block group-hover:text-[var(--accent)] transition-colors">
-                          <h3 className="font-['Outfit'] text-base font-bold text-[var(--text-primary)] mb-1.5">
-                            {item.title}
-                          </h3>
-                        </Link>
-                        <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-3 line-clamp-2">{item.desc}</p>
-                        
-                        {/* Spec Chips (hide any with [ ]) */}
-                        <div className="flex flex-wrap gap-1.5 mb-4">
-                          {item.specs
-                            .filter((spec) => !spec.includes("["))
-                            .map((spec) => (
-                              <span
-                                key={spec}
-                                className="rounded-md bg-[var(--bg-surface-2)] border border-[var(--border-subtle)] px-2 py-0.5 text-[11px] font-medium text-[var(--text-primary)]"
-                              >
-                                {spec}
-                              </span>
-                            ))}
-                        </div>
-
-                        {/* Price */}
-                        <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between">
-                          <span className="text-[11px] text-[var(--text-muted)] uppercase tracking-wider font-medium">Price</span>
-                          <span className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)]">{item.price}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Actions: Add to Cart & Enquire buttons */}
-                    <div className="p-5 pt-0 grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => handleAddToCart(item)}
-                        className={`w-full py-2.5 px-3 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-xs ${
-                          isAdded
-                            ? "bg-[#10B981] text-white"
-                            : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white"
-                        }`}
-                        aria-label={`Add ${item.title} to cart`}
-                      >
-                        {isAdded ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-white" />
-                            <span>Added</span>
-                          </>
-                        ) : (
-                          <>
-                            <ShoppingCart className="w-3.5 h-3.5 text-white" />
-                            <span>{inCart ? "Add More" : "Add to Cart"}</span>
-                          </>
-                        )}
-                      </button>
-
-                      <a
-                        href={waUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full py-2.5 px-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] hover:bg-[var(--bg-surface-3)] hover:border-[var(--accent)] hover:text-[var(--accent)] text-[var(--text-primary)] text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5 text-[var(--accent)]" />
-                        <span>Enquire</span>
-                      </a>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {filtered.map((item, idx) => (
+                <div
+                  key={item.id}
+                  ref={(el) => { if (el) cardsRef.current[idx] = el; }}
+                  className="h-full"
+                >
+                  <ProductCard product={item} />
+                </div>
+              ))}
             </div>
           )}
         </section>
