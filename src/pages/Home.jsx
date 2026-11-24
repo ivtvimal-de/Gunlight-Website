@@ -1,4 +1,5 @@
 import SEO from "../components/SEO";
+import BrandStrip from "../components/BrandStrip";
 import Hero from "../section/Hero";
 import ShopByCategory from "../section/ShopByCategory";
 import FeaturedProducts from "../section/FeaturedProducts";
@@ -17,6 +18,9 @@ export default function Home() {
         type="website"
       />
       <main>
+        {/* Brand Strip between Navbar and Hero */}
+        <BrandStrip />
+
         {/* 3. Hero banner slider with product image, headline, Shop Now CTA */}
         <Hero />
 

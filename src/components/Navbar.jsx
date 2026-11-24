@@ -31,6 +31,11 @@ export default function Navbar() {
     };
   }, [menuOpen]);
 
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname, location.search]);
+
   // Keep search bar in sync with URL
   useEffect(() => {
     if (!location.pathname.startsWith("/shop")) {
@@ -54,12 +59,9 @@ export default function Navbar() {
     }
   };
 
-  const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Shop", href: "/shop" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
-  ];
+  const searchParams = new URLSearchParams(location.search);
+  const hasBrandParam = Boolean(searchParams.get("brand"));
+  const isBrandsActive = location.pathname.startsWith("/brands") || hasBrandParam;
 
   return (
     <>
@@ -109,30 +111,70 @@ export default function Navbar() {
           </div>
 
           {/* Right Group: Nav Links, WhatsApp, Cart (Desktop: aligned right with 24px gaps) */}
-          <div className="hidden lg:flex items-center gap-6 ml-auto">
+          <div className="hidden md:flex items-center gap-6 ml-auto">
             
-            {/* 3. Nav links: Home, Shop, About, Contact (Uppercase 14px, medium weight, active 2px red underline) */}
-            <nav className="flex items-center gap-6">
-              {navLinks.map((link) => {
-                const isActive =
-                  link.href === "/"
-                    ? location.pathname === "/"
-                    : location.pathname.startsWith(link.href);
+            {/* Nav links: Home, Shop, BRANDS, About, Contact (plain links, uppercase 14px, weight 500) */}
+            <nav className="flex items-center gap-6" aria-label="Main Navigation">
+              
+              {/* Home Link */}
+              <Link
+                to="/"
+                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                  location.pathname === "/" && !hasBrandParam
+                    ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Home
+              </Link>
 
-                return (
-                  <Link
-                    key={link.label}
-                    to={link.href}
-                    className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors ${
-                      isActive
-                        ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
+              {/* Shop Link */}
+              <Link
+                to="/shop"
+                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                  location.pathname.startsWith("/shop") && !hasBrandParam
+                    ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Shop
+              </Link>
+
+              {/* BRANDS Link (plain link to /brands, red + 2px underline on /brands and when ?brand= is present) */}
+              <Link
+                to="/brands"
+                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                  isBrandsActive
+                    ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Brands
+              </Link>
+
+              {/* About Link */}
+              <Link
+                to="/about"
+                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                  location.pathname.startsWith("/about")
+                    ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                About
+              </Link>
+
+              {/* Contact Link */}
+              <Link
+                to="/contact"
+                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                  location.pathname.startsWith("/contact")
+                    ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                Contact
+              </Link>
             </nav>
 
             {/* 4. WhatsApp icon button (outline circle, 40px) */}
@@ -142,7 +184,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
               aria-label="Order on WhatsApp"
               title="Order on WhatsApp"
-              className="h-10 w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[var(--accent)] hover:border-[var(--accent)] hover:bg-[var(--bg-surface-2)] transition-colors shadow-2xs"
+              className="h-10 w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[var(--accent)] hover:border-[var(--accent)] hover:bg-[var(--bg-surface-2)] transition-colors shadow-2xs outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
             >
               <MessageCircle className="h-5 w-5 text-[var(--accent)]" />
             </a>
@@ -151,7 +193,7 @@ export default function Navbar() {
             <button
               onClick={openCart}
               aria-label="Open shopping cart"
-              className="relative h-10 w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-2)] transition-colors shadow-2xs"
+              className="relative h-10 w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-2)] transition-colors shadow-2xs outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
             >
               <ShoppingBag className="h-5 w-5 text-[var(--text-primary)]" />
               {cartCount > 0 && (
@@ -163,8 +205,8 @@ export default function Navbar() {
 
           </div>
 
-          {/* ── MOBILE ROW (Under 1024px): Search, WhatsApp, Cart, Menu ── */}
-          <div className="flex items-center gap-2 sm:gap-3 lg:hidden">
+          {/* ── MOBILE ROW (Under 768px): Search, WhatsApp, Cart, Menu ── */}
+          <div className="flex items-center gap-2 sm:gap-3 md:hidden">
             
             {/* Search Icon Button (opens menu with search focus) */}
             <button
@@ -221,7 +263,7 @@ export default function Navbar() {
 
       {/* ── MOBILE SLIDE-IN PANEL (DRAWER) ── */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden font-['Inter']">
+        <div className="fixed inset-0 z-50 md:hidden font-['Inter']">
           
           {/* Backdrop */}
           <div
@@ -275,30 +317,64 @@ export default function Navbar() {
               )}
             </form>
 
-            {/* Nav Links: Home, Shop, About, Contact (Uppercase 14px, medium weight) */}
+            {/* Nav Links: Home, Shop, Brands, About, Contact */}
             <nav className="flex flex-col space-y-1">
-              {navLinks.map((link) => {
-                const isActive =
-                  link.href === "/"
-                    ? location.pathname === "/"
-                    : location.pathname.startsWith(link.href);
+              <Link
+                to="/"
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center justify-between rounded-xl px-4 py-3 text-[14px] uppercase font-medium tracking-wider transition-colors ${
+                  location.pathname === "/" && !hasBrandParam
+                    ? "bg-[var(--accent-tint)] text-[var(--accent)] font-semibold border-l-4 border-[var(--accent)]"
+                    : "text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                }`}
+              >
+                <span>Home</span>
+                <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
+              </Link>
 
-                return (
-                  <Link
-                    key={link.label}
-                    to={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className={`flex items-center justify-between rounded-xl px-4 py-3 text-[14px] uppercase font-medium tracking-wider transition-colors ${
-                      isActive
-                        ? "bg-[var(--accent-tint)] text-[var(--accent)] font-semibold border-l-4 border-[var(--accent)]"
-                        : "text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
-                    }`}
-                  >
-                    <span>{link.label}</span>
-                    <ChevronRight className={`h-4 w-4 ${isActive ? "text-[var(--accent)]" : "text-[var(--text-muted)]"}`} />
-                  </Link>
-                );
-              })}
+              <Link
+                to="/shop"
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center justify-between rounded-xl px-4 py-3 text-[14px] uppercase font-medium tracking-wider transition-colors ${
+                  location.pathname.startsWith("/shop") && !hasBrandParam
+                    ? "bg-[var(--accent-tint)] text-[var(--accent)] font-semibold border-l-4 border-[var(--accent)]"
+                    : "text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                }`}
+              >
+                <span>Shop</span>
+                <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
+              </Link>
+
+              <Link
+                to="/brands"
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center justify-between rounded-xl px-4 py-3 text-[14px] uppercase font-medium tracking-wider transition-colors ${
+                  isBrandsActive
+                    ? "bg-[var(--accent-tint)] text-[var(--accent)] font-semibold border-l-4 border-[var(--accent)]"
+                    : "text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                }`}
+              >
+                <span>Brands</span>
+                <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
+              </Link>
+
+              <Link
+                to="/about"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-between rounded-xl px-4 py-3 text-[14px] uppercase font-medium tracking-wider text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+              >
+                <span>About</span>
+                <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
+              </Link>
+
+              <Link
+                to="/contact"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-between rounded-xl px-4 py-3 text-[14px] uppercase font-medium tracking-wider text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+              >
+                <span>Contact</span>
+                <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
+              </Link>
             </nav>
 
             {/* Bottom Actions: WhatsApp Order */}

@@ -29,6 +29,26 @@ export const COMPANY = {
 };
 
 /**
+ * Brand Directory
+ * The main brand (GunLite) and demo entries.
+ * Easily edit or delete demo entries as needed.
+ */
+export const BRANDS = [
+  {
+    slug: "gunlite",
+    name: "Our Brands",
+    logo: "/images/logo.png",
+    logoWebp: "/images/logo.webp",
+  },
+  // ── Demo entries (safe to edit or delete) ──
+  { slug: "philips", name: "Philips", demo: true },
+  { slug: "eveready", name: "Eveready", demo: true },
+  { slug: "wipro", name: "Wipro", demo: true },
+  { slug: "bajaj", name: "Bajaj", demo: true },
+  { slug: "mi", name: "Mi", demo: true },
+];
+
+/**
  * Key Product Specifications
  * Real verified values to fill in (uses [VALUE] placeholders where unconfirmed).
  */
