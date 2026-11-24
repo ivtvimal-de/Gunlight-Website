@@ -55,11 +55,11 @@ export const STORE_PRODUCTS = [
 
 export default function FeaturedProducts() {
   return (
-    <section className="py-16 sm:py-20 bg-white border-b border-[var(--border-subtle)]">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-20 bg-white border-b border-[var(--border-subtle)]">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
@@ -83,8 +83,8 @@ export default function FeaturedProducts() {
           </Link>
         </div>
 
-        {/* 4-Column Product Grid (2 columns on mobile, gap 24px desktop / 16px mobile) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* 4-Column Product Grid (2 columns on mobile with 12px gap / 4 columns on desktop with 24px gap) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {STORE_PRODUCTS.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

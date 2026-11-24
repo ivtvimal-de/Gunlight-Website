@@ -79,7 +79,7 @@ export default function Brands() {
       />
 
       <main className="min-h-screen bg-[#FAFAF8] text-[#14161A] font-['Inter']">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-6 sm:py-10">
           
           {/* 1. Compact Header: breadcrumb "Home / Brands", H1 "Brands" (Outfit bold, 32px) */}
           <nav aria-label="Breadcrumb" className="mb-2">
@@ -167,7 +167,7 @@ export default function Brands() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {GUNLITE_PRODUCTS.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

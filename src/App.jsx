@@ -4,7 +4,6 @@ import { CartProvider } from "./context/CartContext";
 
 import CartDrawer from "./components/CartDrawer";
 import Navbar from "./components/Navbar";
-import BottomTabBar from "./components/BottomTabBar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -24,7 +23,7 @@ function App() {
   return (
     <CartProvider>
       <Router>
-        <div className="min-h-screen flex flex-col justify-between pb-[calc(60px+env(safe-area-inset-bottom))] md:pb-0">
+        <div className="min-h-screen flex flex-col justify-between">
           <div>
             <Navbar />
             <CartDrawer />
@@ -50,9 +49,6 @@ function App() {
 
           <Footer />
         </div>
-
-        {/* Sticky Mobile Bottom Tab Bar (60px high, white, 1px top border) */}
-        <BottomTabBar />
       </Router>
     </CartProvider>
   );

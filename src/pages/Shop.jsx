@@ -372,7 +372,7 @@ export default function Shop() {
         </section>
 
         {/* ── Product Grid or Empty State ── */}
-        <section ref={gridRef} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <section ref={gridRef} className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-10 sm:py-16">
           {isDemoBrand ? (
             <div className="flex flex-col items-center justify-center gap-4 py-20 sm:py-24 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-[#E6E6E1] shadow-xs">
@@ -408,7 +408,7 @@ export default function Shop() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {filtered.map((item, idx) => (
                 <div
                   key={item.id}
