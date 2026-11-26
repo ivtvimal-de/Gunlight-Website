@@ -87,7 +87,7 @@ export default function ProductCard({ product }) {
         
         {/* Category & optional badge */}
         <div className="flex items-center justify-between gap-1.5">
-          <span className="text-[10px] sm:text-[11px] uppercase font-semibold tracking-[0.06em] text-[#6B727C] leading-none truncate">
+          <span className="text-[10px] uppercase font-semibold tracking-[0.08em] text-[#8B97A8] leading-none truncate">
             {category}
           </span>
           {product.badge && (
@@ -100,80 +100,78 @@ export default function ProductCard({ product }) {
         {/* Name */}
         <Link
           to={product.link}
-          className="font-['Outfit'] font-bold text-[15px] sm:text-[17px] text-[#14161A] hover:text-[var(--accent)] transition-colors truncate block mt-1.5 leading-tight"
+          className="font-['Outfit'] font-bold text-[15px] sm:text-[17px] text-[#14161A] hover:text-[var(--accent)] transition-colors truncate block mt-1 leading-tight"
           title={displayName}
         >
           {displayName}
         </Link>
 
-        {/* Concise Spec Line */}
-        <p className="text-[12px] sm:text-[13px] text-[#4A5058] font-normal leading-snug mt-1 truncate">
-          {specLine}
-        </p>
+        {/* Crisp Spec Chip */}
+        <div className="mt-1.5">
+          <span className="inline-block max-w-full truncate rounded-md bg-[#F4F4F1] px-2 py-0.5 text-[11px] font-medium text-[#4A5058] leading-snug">
+            {specLine}
+          </span>
+        </div>
 
-        {/* Bottom Block (Price + Single-Line CTA Buttons) */}
-        <div className="mt-auto pt-3 flex flex-col">
+        {/* Bottom Block: Price + WhatsApp quick icon, then full-width matte dark Add to Cart */}
+        <div className="mt-auto pt-3 flex flex-col gap-2.5">
           
-          <div className="pt-2.5 border-t border-[#F1F1ED] flex items-baseline justify-between gap-2 mb-2.5">
+          <div className="flex items-center justify-between gap-2">
             {hasValidPrice ? (
               <span className="font-['Outfit'] font-bold text-[17px] sm:text-[19px] text-[#14161A] leading-none tabular-nums">
                 {product.price}
               </span>
             ) : (
-              <span className="text-[12.5px] font-semibold text-[var(--accent)] leading-none">
-                Get price on WhatsApp
+              <span className="text-[12px] font-semibold text-[var(--accent)] leading-none">
+                Price on WhatsApp
               </span>
-            )}
-          </div>
-
-          {/* Buttons: strictly single-line text on all screen widths */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {hasValidPrice ? (
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                className={`flex-1 h-9 sm:h-10 min-w-0 inline-flex items-center justify-center gap-1.5 rounded-xl px-2.5 sm:px-3 text-[12.5px] sm:text-[13.5px] font-semibold whitespace-nowrap transition-all ${
-                  isAdded
-                    ? "bg-emerald-600 text-white shadow-xs"
-                    : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-[0_2px_8px_rgba(217,15,37,0.22)]"
-                }`}
-                aria-label={`Add ${displayName} to Cart`}
-              >
-                {isAdded ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                    <span>Added</span>
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                    <span className="sm:hidden">Add</span>
-                    <span className="hidden sm:inline">Add to Cart</span>
-                  </>
-                )}
-              </button>
-            ) : (
-              <a
-                href={whatsappEnquiryUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 h-9 sm:h-10 min-w-0 inline-flex items-center justify-center gap-1 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-[12.5px] sm:text-[13px] font-semibold whitespace-nowrap shadow-xs transition-colors px-2"
-              >
-                <span>Enquire</span>
-              </a>
             )}
 
             <a
               href={whatsappEnquiryUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 inline-flex items-center justify-center rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] text-[var(--accent)] hover:border-[var(--accent)] hover:bg-[var(--accent-tint)] transition-colors"
+              className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 inline-flex items-center justify-center rounded-lg border border-[#E6E6E1] bg-[#FAFAF8] text-[#4A5058] hover:border-[var(--accent)] hover:bg-[var(--accent-tint)] hover:text-[var(--accent)] transition-colors"
               title="Enquire on WhatsApp"
               aria-label="Enquire on WhatsApp"
             >
-              <MessageCircle className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[var(--accent)] shrink-0" />
+              <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             </a>
           </div>
+
+          {hasValidPrice ? (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className={`w-full h-9 sm:h-10 inline-flex items-center justify-center gap-1.5 rounded-xl px-2.5 text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-all ${
+                isAdded
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "bg-[#14161A] hover:bg-[var(--accent)] text-white shadow-2xs"
+              }`}
+              aria-label={`Add ${displayName} to Cart`}
+            >
+              {isAdded ? (
+                <>
+                  <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                  <span>Added to Cart</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                  <span>Add to Cart</span>
+                </>
+              )}
+            </button>
+          ) : (
+            <a
+              href={whatsappEnquiryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full h-9 sm:h-10 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#14161A] hover:bg-[var(--accent)] text-white text-[12px] sm:text-[13px] font-semibold whitespace-nowrap transition-colors px-2.5"
+            >
+              <span>Enquire Now</span>
+            </a>
+          )}
 
         </div>
 

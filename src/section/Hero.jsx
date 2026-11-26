@@ -189,9 +189,16 @@ export default function Hero() {
             <h2 className="text-white font-['Outfit'] font-bold text-[20px] leading-tight tracking-tight truncate">
               {activeSlide.name}
             </h2>
-            <p className="text-[#9CA3AF] text-[12.5px] mt-0.5 leading-snug truncate">
-              {activeSlide.spec}
-            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {activeSlide.spec.split(" · ").map((chip, idx) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center rounded-md bg-white/[0.07] border border-white/10 px-2 py-0.5 text-[11px] font-medium text-white/80"
+                >
+                  {chip}
+                </span>
+              ))}
+            </div>
 
             <div className="mt-3.5 pt-3 border-t border-white/[0.08] flex items-center justify-between gap-3">
               <div className="flex flex-col">
