@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   ShieldCheck,
@@ -10,6 +10,9 @@ import {
   Minus,
   ArrowRight,
   ZoomIn,
+  ZoomOut,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { WHATSAPP_NUMBER, CLAIMS } from "../config";
@@ -63,13 +66,55 @@ export default function ProductDetailTemplate({
   seoDescription,
   seoPath,
 }) {
-  const [activeImg, setActiveImg] = useState(images[0] || product.img);
+  const galleryImages = images.length > 0 ? images : [product.img];
+  const [activeIdx, setActiveIdx] = useState(0);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
+  const touchStartX = useRef(null);
+  const touchEndX = useRef(null);
+
+  useEffect(() => {
+    setActiveIdx(0);
+    setQty(1);
+    setIsZoomed(false);
+  }, [product.id]);
+
+  const activeImg = galleryImages[activeIdx] || galleryImages[0];
 
   const { addItem, openCart, items } = useCart();
   const inCart = items.find((i) => i.id === product.id);
+
+  const handlePrevImg = () => {
+    setIsZoomed(false);
+    setActiveIdx((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+  };
+
+  const handleNextImg = () => {
+    setIsZoomed(false);
+    setActiveIdx((prev) => (prev + 1) % galleryImages.length);
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = null;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current === null || touchEndX.current === null || galleryImages.length <= 1) return;
+    const distance = touchStartX.current - touchEndX.current;
+    if (distance > 40) {
+      handleNextImg();
+    } else if (distance < -40) {
+      handlePrevImg();
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
 
   const handleAddToCart = () => {
     addItem({ ...product, quantity: qty });
@@ -97,14 +142,14 @@ export default function ProductDetailTemplate({
         description={seoDescription || product.desc}
         path={seoPath || `/${product.id}`}
         type="product"
-        image={images[0] || product.img}
+        image={galleryImages[0]}
       />
 
-      <main className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] py-8 pb-24 md:pb-20">
+      <main className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] pb-24 md:pb-16">
         
         {/* Breadcrumb Bar */}
         <div className="border-b border-[var(--border-subtle)] bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <nav className="flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]">
               <Link to="/" className="hover:text-[var(--text-primary)] transition-colors">Home</Link>
               <span>/</span>
@@ -116,64 +161,140 @@ export default function ProductDetailTemplate({
         </div>
 
         {/* ── Main Product Section (Gallery + Sticky Buy Box) ── */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-10 lg:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
             
-            {/* ── LEFT: Product Gallery with Zoom ── */}
-            <div className="lg:col-span-7 space-y-4">
+            {/* ── LEFT: Edge-to-Edge Studio Gallery ── */}
+            <div className="lg:col-span-7 space-y-3">
               
-              {/* Main Image Stage */}
+              {/* Main Image Stage: Pure 3:2 dark studio card with zero nested borders */}
               <div
-                className="relative rounded-2xl border border-[var(--border-subtle)] bg-white p-6 sm:p-10 flex items-center justify-center overflow-hidden min-h-[340px] sm:min-h-[440px] shadow-[0_4px_20px_rgba(20,22,26,0.06)] cursor-zoom-in"
-                onClick={() => setIsZoomed(!isZoomed)}
+                className={`relative w-full aspect-[3/2] rounded-2xl overflow-hidden bg-[#14161A] ring-1 ring-black/10 shadow-[0_12px_32px_rgba(20,22,26,0.12)] select-none group ${
+                  isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
+                }`}
+                onClick={() => setIsZoomed((prev) => !prev)}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               >
-                <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-md bg-[var(--bg-surface-2)] border border-[var(--border-subtle)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                  <ZoomIn className="w-3.5 h-3.5 text-[var(--accent)]" />
-                  <span>{isZoomed ? "Reset" : "Click to Zoom"}</span>
-                </div>
+                <picture className="block w-full h-full">
+                  <source srcSet={activeImg} type="image/webp" />
+                  <img
+                    src={activeImg}
+                    alt={`${product.title} - View ${activeIdx + 1}`}
+                    width={1536}
+                    height={1024}
+                    fetchPriority="high"
+                    className={`w-full h-full object-contain transition-transform duration-300 ease-out ${
+                      isZoomed ? "scale-150" : "scale-100"
+                    }`}
+                  />
+                </picture>
 
-                <div className="w-full bg-[var(--bg-surface-2)] rounded-xl p-6 flex items-center justify-center">
-                  <picture className="w-full flex items-center justify-center">
-                    <source srcSet={activeImg} type="image/webp" />
-                    <img
-                      src={activeImg}
-                      alt={`${product.title} - High power torch view`}
-                      width={600}
-                      height={500}
-                      fetchPriority="high"
-                      className={`max-h-[300px] sm:max-h-[380px] w-auto object-contain transition-transform duration-300 ${
-                        isZoomed ? "scale-150" : "scale-100"
-                      }`}
-                    />
-                  </picture>
-                </div>
+                {/* Desktop Prev / Next Arrow Controls */}
+                {galleryImages.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePrevImg();
+                      }}
+                      aria-label="Previous image"
+                      className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white opacity-0 group-hover:opacity-100 hover:bg-black/75 transition-all"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNextImg();
+                      }}
+                      aria-label="Next image"
+                      className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white opacity-0 group-hover:opacity-100 hover:bg-black/75 transition-all"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
               </div>
 
-              {/* Thumbnails Row */}
-              {images.length > 1 && (
-                <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                  {images.map((img, idx) => {
-                    const isActive = activeImg === img;
+              {/* Clean Utility Row below Photo (Counter + Dots + Zoom Toggle) */}
+              <div className="flex items-center justify-between gap-3 px-0.5">
+                <div className="flex items-center gap-2.5">
+                  {galleryImages.length > 1 && (
+                    <>
+                      <span className="font-mono text-[11px] font-semibold text-[#4A5058] tabular-nums">
+                        {String(activeIdx + 1).padStart(2, "0")} / {String(galleryImages.length).padStart(2, "0")}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {galleryImages.map((_, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setActiveIdx(idx);
+                              setIsZoomed(false);
+                            }}
+                            aria-label={`Go to image ${idx + 1}`}
+                            className={`h-1.5 rounded-full transition-all ${
+                              activeIdx === idx
+                                ? "w-5 bg-[var(--accent)]"
+                                : "w-1.5 bg-[#CFCFC8] hover:bg-[#8B97A8]"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsZoomed((prev) => !prev)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#E6E6E1] bg-white px-3 py-1 text-[11px] font-medium text-[#4A5058] shadow-2xs hover:border-[#CFCFC8] hover:text-[#14161A] transition-colors"
+                >
+                  {isZoomed ? (
+                    <>
+                      <ZoomOut className="w-3.5 h-3.5 text-[var(--accent)]" />
+                      <span>Reset Zoom</span>
+                    </>
+                  ) : (
+                    <>
+                      <ZoomIn className="w-3.5 h-3.5 text-[var(--accent)]" />
+                      <span>Tap to Zoom</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Sleek 3:2 Thumbnail Strip (zero grey borders, hidden scrollbar) */}
+              {galleryImages.length > 1 && (
+                <div className="flex items-center gap-2.5 overflow-x-auto py-1 px-0.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {galleryImages.map((img, idx) => {
+                    const isActive = activeIdx === idx;
                     return (
                       <button
                         key={idx}
+                        type="button"
                         onClick={() => {
-                          setActiveImg(img);
+                          setActiveIdx(idx);
                           setIsZoomed(false);
                         }}
-                        className={`h-20 w-20 shrink-0 rounded-xl border p-2 bg-[var(--bg-surface-2)] transition-all overflow-hidden flex items-center justify-center ${
+                        className={`w-[74px] sm:w-[92px] aspect-[3/2] shrink-0 rounded-xl overflow-hidden bg-[#14161A] transition-all duration-200 ${
                           isActive
-                            ? "border-[var(--accent)] shadow-xs"
-                            : "border-[var(--border-subtle)] opacity-70 hover:opacity-100"
+                            ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--bg-canvas)] opacity-100 shadow-sm"
+                            : "ring-1 ring-black/10 opacity-60 hover:opacity-95"
                         }`}
                         aria-label={`View angle ${idx + 1}`}
                       >
                         <img
                           src={img}
                           alt=""
-                          width={64}
-                          height={64}
-                          className="h-full w-full object-contain"
+                          width={192}
+                          height={128}
+                          className="h-full w-full object-cover"
                         />
                       </button>
                     );
@@ -181,31 +302,41 @@ export default function ProductDetailTemplate({
                 </div>
               )}
 
-              {/* Trust Strip */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-[var(--border-subtle)]">
-                <div className="flex items-center gap-3 p-3.5 rounded-xl border border-[var(--border-subtle)] bg-white shadow-xs">
-                  <ShieldCheck className="w-5 h-5 text-[var(--accent)] shrink-0" />
-                  <div>
-                    <p className="text-xs font-semibold text-[var(--text-primary)]">
+              {/* Compact 3-Column Trust Strip */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-3.5 pt-3 sm:pt-5 border-t border-[var(--border-subtle)]">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl border border-[var(--border-subtle)] bg-white shadow-2xs">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-tint)]">
+                    <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] leading-tight">
                       {CLAIMS.warranty || "1-Year Warranty"}
                     </p>
-                    <p className="text-[11px] text-[var(--text-muted)]">Official Guarantee</p>
+                    <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-0.5">Official Guarantee</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3.5 rounded-xl border border-[var(--border-subtle)] bg-white shadow-xs">
-                  <Truck className="w-5 h-5 text-[var(--accent)] shrink-0" />
-                  <div>
-                    <p className="text-xs font-semibold text-[var(--text-primary)]">Pan-India Shipping</p>
-                    <p className="text-[11px] text-[var(--text-muted)]">Dispatched in 24-48h</p>
+                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl border border-[var(--border-subtle)] bg-white shadow-2xs">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-tint)]">
+                    <Truck className="w-4 h-4 text-[var(--accent)]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] leading-tight">
+                      Pan-India Shipping
+                    </p>
+                    <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-0.5">Dispatched in 24-48h</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3.5 rounded-xl border border-[var(--border-subtle)] bg-white shadow-xs">
-                  <MessageCircle className="w-5 h-5 text-[var(--accent)] shrink-0" />
-                  <div>
-                    <p className="text-xs font-semibold text-[var(--text-primary)]">Direct WhatsApp</p>
-                    <p className="text-[11px] text-[var(--text-muted)]">Instant Confirmation</p>
+                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-3 p-2.5 sm:p-3.5 rounded-xl border border-[var(--border-subtle)] bg-white shadow-2xs">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-tint)]">
+                    <MessageCircle className="w-4 h-4 text-[var(--accent)]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] leading-tight">
+                      Direct WhatsApp
+                    </p>
+                    <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-0.5">Instant Confirmation</p>
                   </div>
                 </div>
               </div>
@@ -215,7 +346,7 @@ export default function ProductDetailTemplate({
             {/* ── RIGHT: Sticky Buy Box ── */}
             <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
               
-              <div className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 sm:p-8 space-y-6 shadow-[0_4px_20px_rgba(20,22,26,0.06)]">
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-white p-4 sm:p-8 space-y-4 sm:space-y-6 shadow-[0_4px_20px_rgba(20,22,26,0.05)]">
                 
                 {/* Title & Badge */}
                 <div>
@@ -327,9 +458,9 @@ export default function ProductDetailTemplate({
         </div>
 
         {/* ── Specifications Table ── */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 sm:p-10 shadow-[0_4px_20px_rgba(20,22,26,0.06)]">
-            <h2 className="font-['Outfit'] text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-white p-4 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(20,22,26,0.05)]">
+            <h2 className="font-['Outfit'] text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-4 sm:mb-6 flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
               Technical Specifications
             </h2>
@@ -341,7 +472,7 @@ export default function ProductDetailTemplate({
                 return (
                   <div
                     key={idx}
-                    className="py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm"
+                    className="py-3 sm:py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 text-[13px] sm:text-sm"
                   >
                     <span className="font-medium text-[var(--text-muted)]">
                       {label || `Specification ${idx + 1}`}
@@ -357,8 +488,8 @@ export default function ProductDetailTemplate({
         </div>
 
         {/* ── Related Products ── */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex items-center justify-between mb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+          <div className="flex items-center justify-between mb-5 sm:mb-8">
             <h2 className="font-['Outfit'] text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
               Other Models You May Like
             </h2>
@@ -371,31 +502,33 @@ export default function ProductDetailTemplate({
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {related.slice(0, 3).map((item) => (
-              <ProductCard key={item.id} product={item} />
+              <div key={item.id} className="w-[46%] min-w-[162px] shrink-0 snap-start md:w-auto md:min-w-0">
+                <ProductCard product={item} />
+              </div>
             ))}
           </div>
         </div>
 
         {/* ── Mobile Sticky Add-to-Cart Bar ── */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[var(--border-subtle)] p-3.5 flex items-center justify-between gap-4 md:hidden shadow-lg">
-          <div>
-            <span className="block text-[11px] text-[var(--text-muted)] truncate max-w-[130px]">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[var(--border-subtle)] px-4 pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 md:hidden shadow-[0_-4px_20px_rgba(20,22,26,0.08)]">
+          <div className="min-w-0">
+            <span className="block text-[11px] text-[var(--text-muted)] truncate">
               {product.title}
             </span>
-            <span className="font-['Outfit'] text-base font-bold text-[var(--text-primary)]">
+            <span className="font-['Outfit'] text-base font-bold text-[var(--text-primary)] tabular-nums">
               {product.price}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleAddToCart}
-              className={`py-2 px-4 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs ${
+              className={`h-10 px-4 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 whitespace-nowrap shadow-xs ${
                 added
-                  ? "bg-[#10B981] text-white"
-                  : "bg-[var(--accent)] text-white"
+                  ? "bg-emerald-600 text-white"
+                  : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white"
               }`}
             >
               {added ? <Check className="w-3.5 h-3.5 text-white" /> : <ShoppingCart className="w-3.5 h-3.5 text-white" />}
@@ -406,10 +539,10 @@ export default function ProductDetailTemplate({
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2 px-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs font-semibold"
+              className="h-10 w-10 rounded-xl border border-[var(--border-subtle)] bg-[#FAFAF8] flex items-center justify-center text-[var(--accent)]"
               aria-label="Enquire on WhatsApp"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-[var(--accent)]" />
+              <MessageCircle className="w-4 h-4 text-[var(--accent)]" />
             </a>
           </div>
         </div>

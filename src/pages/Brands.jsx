@@ -79,7 +79,7 @@ export default function Brands() {
       />
 
       <main className="min-h-screen bg-[#FAFAF8] text-[#14161A] font-['Inter']">
-        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-6 sm:py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
           
           {/* 1. Compact Header: breadcrumb "Home / Brands", H1 "Brands" (Outfit bold, 32px) */}
           <nav aria-label="Breadcrumb" className="mb-2">
@@ -98,54 +98,55 @@ export default function Brands() {
             </ol>
           </nav>
 
-          <h1 className="font-['Outfit'] text-[32px] font-bold text-[#14161A] tracking-tight mb-8 sm:mb-10">
+          <h1 className="font-['Outfit'] text-[28px] sm:text-[32px] font-bold text-[#14161A] tracking-tight mb-6 sm:mb-10">
             Brands
           </h1>
 
-          {/* 2. FEATURE CARD for GunLite: full-width card, 24px radius, dark #14161A background, padding 40px, 2 columns on desktop */}
+          {/* 2. FEATURE CARD for GunLite */}
           <section className="mb-10 sm:mb-16">
-            <div className="rounded-[24px] bg-[#14161A] p-6 sm:p-10 text-white shadow-xl">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="rounded-2xl sm:rounded-[24px] bg-[#14161A] p-5 sm:p-10 text-white shadow-xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
                 
                 {/* Left Column: Logo in white chip, tagline, product count, and red CTA button */}
                 <div className="flex flex-col justify-center">
-                  <div className="inline-flex items-center justify-center rounded-xl bg-white px-3.5 py-2 w-fit mb-5 shadow-xs">
+                  <div className="inline-flex items-center justify-center rounded-xl bg-white px-3.5 py-2 w-fit mb-4 sm:mb-5 shadow-xs">
                     <img
                       src={mainBrand.logo || "/images/logo.png"}
                       alt="GunLite"
-                      className="h-8 w-auto object-contain"
+                      className="h-7 sm:h-8 w-auto object-contain"
                     />
                   </div>
 
-                  <p className="text-base sm:text-lg text-[#E6E6E1] leading-relaxed mb-4 max-w-md">
+                  <p className="text-sm sm:text-lg text-[#E6E6E1] leading-relaxed mb-3 sm:mb-4 max-w-md">
                     Professional LED torches and search lights from Coimbatore.
                   </p>
 
-                  <div className="text-xs text-[#A0A6AF] font-medium mb-6">
+                  <div className="text-xs text-[#A0A6AF] font-medium mb-5 sm:mb-6">
                     {GUNLITE_PRODUCTS.length} products available
                   </div>
 
                   <Link
                     to="/shop?brand=gunlite"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3.5 text-sm font-semibold transition-colors w-fit shadow-xs"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-5 sm:px-6 h-11 text-sm font-semibold transition-colors w-fit shadow-xs"
                   >
                     <span>Shop all products</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
 
-                {/* Right Column: Soft product image rounded 16px, object-cover */}
-                <div className="relative aspect-4/3 sm:aspect-16/10 w-full overflow-hidden rounded-[16px] bg-[#1D2127] border border-white/10">
-                  <picture>
+                {/* Right Column: Full 3:2 product image rounded 16px, zero cropping */}
+                <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[16px] bg-[#1D2127] border border-white/10">
+                  <picture className="block w-full h-full">
                     <source srcSet="/images/eaglemain.webp" type="image/webp" />
                     <img
                       src="/images/eaglemain.png"
                       alt="GunLite Professional Search Light"
+                      width={1536}
+                      height={1024}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
                   </picture>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
                 </div>
 
               </div>
