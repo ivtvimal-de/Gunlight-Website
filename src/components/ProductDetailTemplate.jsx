@@ -93,7 +93,9 @@ export default function ProductDetailTemplate({
   const hasValidPrice = basePriceNum > 0;
   const activeWarrantyFee = withWarranty ? WARRANTY_OPTION.fee : 0;
   const unitPriceNum = hasValidPrice ? basePriceNum + activeWarrantyFee : 0;
+  const totalPriceNum = hasValidPrice ? unitPriceNum * qty : 0;
   const displayUnitPrice = unitPriceNum > 0 ? formatPrice(unitPriceNum) : product.price;
+  const displayTotalPrice = totalPriceNum > 0 ? formatPrice(totalPriceNum) : product.price;
 
   const handlePrevImg = () => {
     setIsZoomed(false);
@@ -142,7 +144,7 @@ export default function ProductDetailTemplate({
   const waText = encodeURIComponent(
     `Hi GunLite, I am interested in ordering ${product.title}${
       withWarranty ? ` with ${WARRANTY_OPTION.label} (+₹${WARRANTY_OPTION.fee})` : ""
-    } (${displayUnitPrice}, Qty: ${qty}). Please share delivery timeline and payment details.`
+    } (${displayUnitPrice} × ${qty}${qty > 1 || withWarranty ? ` = Total: ${displayTotalPrice}` : ""}). Please share delivery timeline and payment details.`
   );
   const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
 
@@ -472,6 +474,30 @@ export default function ProductDetailTemplate({
                   </div>
                 </div>
 
+                {/* Price Tally Breakdown (shown clearly when warranty or qty > 1 is selected) */}
+                {hasValidPrice && (withWarranty || qty > 1) && (
+                  <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3.5 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between text-[var(--text-secondary)]">
+                      <span>Product ({product.price} × {qty})</span>
+                      <span className="font-medium tabular-nums">
+                        {formatPrice(basePriceNum * qty)}
+                      </span>
+                    </div>
+                    {withWarranty && (
+                      <div className="flex items-center justify-between text-[var(--accent)]">
+                        <span>{WARRANTY_OPTION.label} (+₹{WARRANTY_OPTION.fee} × {qty})</span>
+                        <span className="font-semibold tabular-nums">
+                          +{formatPrice(activeWarrantyFee * qty)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="pt-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between font-['Outfit'] text-sm font-bold text-[var(--text-primary)]">
+                      <span>Total Amount</span>
+                      <span className="tabular-nums">{displayTotalPrice}</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Action Buttons */}
                 <div className="space-y-3 pt-2">
                   <button
@@ -580,10 +606,10 @@ export default function ProductDetailTemplate({
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[var(--border-subtle)] px-4 pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 md:hidden shadow-[0_-4px_20px_rgba(20,22,26,0.08)]">
           <div className="min-w-0">
             <span className="block text-[11px] text-[var(--text-muted)] truncate">
-              {product.title}{withWarranty ? " · +1-Yr Warranty" : ""}
+              {product.title}{qty > 1 ? ` × ${qty}` : ""}{withWarranty ? " · +1-Yr Warranty" : ""}
             </span>
             <span className="font-['Outfit'] text-base font-bold text-[var(--text-primary)] tabular-nums">
-              {displayUnitPrice}
+              {displayTotalPrice}
             </span>
           </div>
 

@@ -13,7 +13,7 @@ import { Flashlight, AlertTriangle, MessageCircle, X, Check } from "lucide-react
 import { useCart, formatPrice } from "../context/CartContext";
 import { WHATSAPP_NUMBER, WARRANTY_OPTION } from "../config";
 
-function buildWhatsAppMessage(items, cartTotal) {
+function buildWhatsAppMessage(items, cartTotal, productsSubtotal, warrantyTotal) {
   const lines = items.map((item, i) => {
     const lineTotal = item.priceNum > 0
       ? formatPrice(item.priceNum * item.quantity)
@@ -26,6 +26,12 @@ function buildWhatsAppMessage(items, cartTotal) {
 
   const hasOnRequest = items.some((i) => i.priceNum === 0);
 
+  const summaryLines = [];
+  if (warrantyTotal > 0 && productsSubtotal > 0) {
+    summaryLines.push(`Products Subtotal: ${formatPrice(productsSubtotal)}`);
+    summaryLines.push(`${WARRANTY_OPTION.label}: +${formatPrice(warrantyTotal)}`);
+  }
+
   const totalLine = cartTotal > 0
     ? `*Order Total: ${formatPrice(cartTotal)}*${hasOnRequest ? " _(+ items on request)_" : ""}`
     : `*Total: To be quoted (items are on request)*`;
@@ -35,6 +41,7 @@ function buildWhatsAppMessage(items, cartTotal) {
     ``,
     ...lines,
     ``,
+    ...summaryLines,
     totalLine,
     ``,
     `Please reply with:`,
@@ -60,8 +67,19 @@ export default function CartDrawer() {
     closeCart,
   } = useCart();
 
+  // Compute tallied product subtotal and warranty add-on total
+  const warrantyCount = items.reduce(
+    (sum, item) => sum + (item.hasWarranty ? item.quantity : 0),
+    0
+  );
+  const warrantyTotal = items.reduce((sum, item) => {
+    if (!item.hasWarranty || item.priceNum <= 0) return sum;
+    return sum + (item.warrantyFee ?? WARRANTY_OPTION.fee) * item.quantity;
+  }, 0);
+  const productsSubtotal = Math.max(0, cartTotal - warrantyTotal);
+
   const handleSendWhatsApp = () => {
-    const message = buildWhatsAppMessage(items, cartTotal);
+    const message = buildWhatsAppMessage(items, cartTotal, productsSubtotal, warrantyTotal);
     window.open(
       `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
       "_blank",
@@ -223,12 +241,30 @@ export default function CartDrawer() {
 
             {/* ── Footer: totals + actions ── */}
             <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-canvas)] px-5 py-5 space-y-4">
-              {/* Subtotal */}
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-[var(--text-muted)]">Subtotal ({cartCount} item{cartCount !== 1 ? "s" : ""})</span>
-                <span className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)]">
-                  {cartTotalStr ?? "To be quoted"}
-                </span>
+              {/* Tallied Breakdown */}
+              <div className="space-y-1.5">
+                {warrantyTotal > 0 && (
+                  <>
+                    <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
+                      <span>Products Subtotal ({cartCount} item{cartCount !== 1 ? "s" : ""})</span>
+                      <span className="font-medium tabular-nums">{formatPrice(productsSubtotal)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-[var(--accent)]">
+                      <span>{WARRANTY_OPTION.label} (×{warrantyCount})</span>
+                      <span className="font-semibold tabular-nums">+{formatPrice(warrantyTotal)}</span>
+                    </div>
+                    <div className="my-1.5 border-t border-[var(--border-subtle)]" />
+                  </>
+                )}
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-semibold text-[var(--text-primary)]">
+                    {warrantyTotal > 0 ? "Total Amount" : `Subtotal (${cartCount} item${cartCount !== 1 ? "s" : ""})`}
+                  </span>
+                  <span className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)] tabular-nums">
+                    {cartTotalStr ?? "To be quoted"}
+                  </span>
+                </div>
               </div>
 
               {/* On-request notice */}
