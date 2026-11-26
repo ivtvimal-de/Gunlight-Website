@@ -128,56 +128,56 @@ export default function Hero() {
     <section className="bg-[#FAFAF8] overflow-hidden" aria-label="Hero Showcase">
       
       {/* ─────────────────────────────────────────────────────────────
-          1. MOBILE HERO BANNER (under 768px / lg:hidden)
-          App-like fashion store pattern:
+          1. MOBILE HERO BANNER (under 1024px / lg:hidden)
           - Full width with 16px side margin (px-4)
           - 16px radius (rounded-2xl)
-          - Aspect-ratio 4/5
+          - 3:2 image frame matching the 1536x1024 photos so 100% of each photo is visible without cropping
           - Slider of 4 products with fade & touch swipe
-          - Dark gradient overlay at bottom
-          - Product name, real spec line, price & red "Shop Now" button (40px)
-          - Dots overlaid at bottom center (white dot active)
+          - Dedicated dark info bar below the photo (never covering the product)
+          - Product name, spec line, price, red "Shop Now" button & dots
          ───────────────────────────────────────────────────────────── */}
       <div className="lg:hidden px-4 pt-3 pb-4">
         <div
-          className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#F4F4F1] shadow-[0_4px_16px_rgba(20,22,26,0.08)] select-none"
+          className="w-full rounded-2xl overflow-hidden bg-[#14161A] shadow-[0_4px_16px_rgba(20,22,26,0.08)] select-none"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Photos with fade transition */}
-          {HERO_SLIDES.map((slide, idx) => {
-            const isActive = current === idx;
-            return (
-              <div
-                key={slide.id}
-                className={`absolute inset-0 transition-opacity duration-700 ease-in-out motion-reduce:transition-none ${
-                  isActive ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
-                }`}
-                aria-hidden={!isActive}
-              >
-                <picture>
-                  <source srcSet={slide.imgWebp} type="image/webp" />
-                  <img
-                    src={slide.imgPng}
-                    alt={slide.alt}
-                    width={1200}
-                    height={1500}
-                    fetchPriority={idx === 0 ? "high" : "auto"}
-                    loading={idx === 0 ? "eager" : "lazy"}
-                    className="w-full h-full object-cover object-center"
-                  />
-                </picture>
-              </div>
-            );
-          })}
+          {/* Full-frame 3:2 product photo area (no cropping, no text overlapping the image) */}
+          <div className="relative w-full aspect-[3/2] bg-[#14161A]">
+            {HERO_SLIDES.map((slide, idx) => {
+              const isActive = current === idx;
+              return (
+                <div
+                  key={slide.id}
+                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out motion-reduce:transition-none ${
+                    isActive ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                  aria-hidden={!isActive}
+                >
+                  <picture className="block w-full h-full">
+                    <source srcSet={slide.imgWebp} type="image/webp" />
+                    <img
+                      src={slide.imgPng}
+                      alt={slide.alt}
+                      width={1536}
+                      height={1024}
+                      fetchPriority={idx === 0 ? "high" : "auto"}
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      className="w-full h-full object-contain object-center"
+                    />
+                  </picture>
+                </div>
+              );
+            })}
+          </div>
 
-          {/* Dark gradient overlay at bottom with product info & Shop Now CTA */}
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-20 pb-7 px-4 z-20 flex flex-col justify-end">
+          {/* Product info, Shop Now CTA & slide dots below the photo */}
+          <div className="bg-[#14161A] border-t border-white/10 px-4 pt-3.5 pb-3.5 flex flex-col">
             <h2 className="text-white font-['Outfit'] font-bold text-lg leading-tight truncate">
               {activeSlide.name}
             </h2>
-            <p className="text-white/80 text-xs mt-1 leading-snug truncate">
+            <p className="text-white/75 text-xs mt-1 leading-snug truncate">
               {activeSlide.spec}
             </p>
             <div className="mt-3 flex items-center justify-between gap-3">
@@ -192,24 +192,23 @@ export default function Hero() {
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-          </div>
 
-          {/* Dots overlaid at bottom center (active white dot) */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 pointer-events-auto">
-            {HERO_SLIDES.map((s, index) => (
-              <button
-                key={s.id}
-                onClick={() => setCurrent(index)}
-                aria-label={`Go to slide ${index + 1}: ${s.name}`}
-                className={`transition-all rounded-full ${
-                  current === index
-                    ? "w-5 h-1.5 bg-white"
-                    : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"
-                }`}
-              />
-            ))}
+            {/* Dots centered at bottom */}
+            <div className="mt-3 flex items-center justify-center gap-1.5">
+              {HERO_SLIDES.map((s, index) => (
+                <button
+                  key={s.id}
+                  onClick={() => setCurrent(index)}
+                  aria-label={`Go to slide ${index + 1}: ${s.name}`}
+                  className={`transition-all rounded-full ${
+                    current === index
+                      ? "w-5 h-1.5 bg-white"
+                      : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
-
         </div>
       </div>
 
