@@ -71,6 +71,7 @@ export async function getPublicProducts(req, res, next) {
     const {
       search = "",
       category = "",
+      brand = "",
       featured,
       inStock,
       page = 1,
@@ -85,6 +86,10 @@ export async function getPublicProducts(req, res, next) {
     }
     if (inStock === "true") {
       filter.stockQuantity = { $gt: 0 };
+    }
+    if (brand && brand !== "All") {
+      const cleanBrand = String(brand).trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.brand = new RegExp(`^${cleanBrand}$`, "i");
     }
 
     if (category && category !== "All") {
@@ -186,6 +191,7 @@ export async function getAdminProducts(req, res, next) {
     const {
       search = "",
       category = "",
+      brand = "",
       status = "",
       stock = "",
       featured = "",
@@ -201,6 +207,10 @@ export async function getAdminProducts(req, res, next) {
     }
     if (featured === "true") filter.isFeatured = true;
     if (featured === "false") filter.isFeatured = false;
+    if (brand && brand !== "All") {
+      const cleanBrand = String(brand).trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.brand = new RegExp(`^${cleanBrand}$`, "i");
+    }
 
     if (stock === "out_of_stock") {
       filter.stockQuantity = { $lte: 0 };
@@ -229,6 +239,7 @@ export async function getAdminProducts(req, res, next) {
       const searchCond = [
         { name: regex },
         { sku: regex },
+        { brand: regex },
         { shortSpec: regex },
         { description: regex },
       ];

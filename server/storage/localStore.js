@@ -11,6 +11,7 @@ export const LOCAL_DB_FILE = path.resolve(__dirname, "..", "data", "gunlite-loca
 const EMPTY_DB = {
   admins: [],
   categories: [],
+  brands: [],
   products: [],
   activities: [],
 };
@@ -32,6 +33,7 @@ async function readDb() {
     return {
       admins: Array.isArray(parsed.admins) ? parsed.admins : [],
       categories: Array.isArray(parsed.categories) ? parsed.categories : [],
+      brands: Array.isArray(parsed.brands) ? parsed.brands : [],
       products: Array.isArray(parsed.products) ? parsed.products : [],
       activities: Array.isArray(parsed.activities) ? parsed.activities : [],
     };
@@ -41,6 +43,16 @@ async function readDb() {
       return clone(EMPTY_DB);
     }
     throw err;
+  }
+}
+
+export async function hasLocalBrandsKey() {
+  try {
+    const raw = await fs.readFile(LOCAL_DB_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed.brands);
+  } catch {
+    return false;
   }
 }
 
@@ -490,6 +502,35 @@ export const LocalCategory = createCollectionModel("categories", {
     if (doc.name) doc.name = String(doc.name).trim();
     if (doc.slug) doc.slug = String(doc.slug).toLowerCase().trim();
     if (doc.isActive === undefined) doc.isActive = true;
+    if (doc.displayOrder === undefined) doc.displayOrder = 0;
+  },
+  checkUnique(doc, list, selfId) {
+    if (
+      list.some(
+        (i) =>
+          String(i._id) !== String(selfId) &&
+          i.name.toLowerCase() === String(doc.name).toLowerCase()
+      )
+    ) {
+      throw makeDuplicateError("name");
+    }
+    if (
+      list.some(
+        (i) => String(i._id) !== String(selfId) && i.slug === doc.slug
+      )
+    ) {
+      throw makeDuplicateError("slug");
+    }
+  },
+});
+
+export const LocalBrand = createCollectionModel("brands", {
+  prepare(doc) {
+    if (doc.name) doc.name = String(doc.name).trim();
+    if (doc.slug) doc.slug = String(doc.slug).toLowerCase().trim();
+    if (doc.isActive === undefined) doc.isActive = true;
+    if (doc.isFlagship === undefined) doc.isFlagship = false;
+    if (doc.isComingSoon === undefined) doc.isComingSoon = false;
     if (doc.displayOrder === undefined) doc.displayOrder = 0;
   },
   checkUnique(doc, list, selfId) {

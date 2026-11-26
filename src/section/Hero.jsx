@@ -55,9 +55,23 @@ export default function Hero() {
     alt: `${p.title} - GunLite Illumination`,
   }));
 
+  const FALLBACK_HERO_SLIDE = {
+    id: "default",
+    name: "GunLite Torches",
+    spec: "Professional LED Illumination",
+    price: "₹999",
+    link: "/shop",
+    imgWebp: "/images/eaglemain.webp",
+    imgPng: "/images/eaglemain.webp",
+    alt: "GunLite High-Power LED Torches",
+  };
+
+  const renderedSlides =
+    HERO_SLIDES.length > 0 ? HERO_SLIDES : [FALLBACK_HERO_SLIDE];
+
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const slideCount = Math.max(1, HERO_SLIDES.length);
+  const slideCount = renderedSlides.length;
   const safeCurrent = current % slideCount;
 
   const touchStartX = useRef(null);
@@ -108,16 +122,7 @@ export default function Hero() {
     touchEndX.current = null;
   };
 
-  const activeSlide = HERO_SLIDES[safeCurrent] || {
-    id: "default",
-    name: "GunLite Torches",
-    spec: "Professional LED Illumination",
-    price: "₹999",
-    link: "/shop",
-    imgWebp: "/images/eaglemain.webp",
-    imgPng: "/images/eaglemain.png",
-    alt: "GunLite High-Power LED Torches",
-  };
+  const activeSlide = renderedSlides[safeCurrent] || FALLBACK_HERO_SLIDE;
 
   return (
     <section className="bg-[#FAFAF8] overflow-hidden" aria-label="Hero Showcase">
@@ -136,7 +141,7 @@ export default function Hero() {
         >
           {/* Full-frame 3:2 product photo area with seamless bottom edge blend */}
           <div className="relative w-full aspect-[3/2] bg-[#16181D] overflow-hidden">
-            {HERO_SLIDES.map((slide, idx) => {
+            {renderedSlides.map((slide, idx) => {
               const isActive = safeCurrent === idx;
               return (
                 <div
@@ -313,7 +318,7 @@ export default function Hero() {
               <div className="relative w-full aspect-[4/3] rounded-[24px] overflow-hidden border border-[#E6E6E1] bg-[#F4F4F1] shadow-[0_8px_30px_rgba(20,22,26,0.06)]">
                 
                 {/* Product Photos (Cross-fade transition) */}
-                {HERO_SLIDES.map((slide, idx) => {
+                {renderedSlides.map((slide, idx) => {
                   const isActive = safeCurrent === idx;
                   return (
                     <div
@@ -323,7 +328,7 @@ export default function Hero() {
                       }`}
                       aria-hidden={!isActive}
                     >
-                      <picture>
+                      <picture className="block w-full h-full">
                         <source srcSet={slide.imgWebp} type="image/webp" />
                         <img
                           src={slide.imgPng}

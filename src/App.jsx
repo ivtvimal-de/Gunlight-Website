@@ -29,6 +29,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminCategories from "./pages/admin/AdminCategories";
+import AdminBrands from "./pages/admin/AdminBrands";
 
 function AppRoutesShell() {
   const location = useLocation();
@@ -59,6 +60,14 @@ function AppRoutesShell() {
           element={
             <ProtectedRoute>
               <AdminCategories />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/brands"
+          element={
+            <ProtectedRoute>
+              <AdminBrands />
             </ProtectedRoute>
           }
         />

@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Layers,
+  Award,
   Plus,
   RefreshCw,
   ArrowRight,
@@ -61,10 +62,13 @@ export default function AdminDashboard() {
     inStockHealthy: 0,
     featuredProducts: 0,
     totalCategories: 0,
+    totalBrands: 0,
+    activeBrands: 0,
     totalStockUnits: 0,
   };
 
   const categoryBreakdown = data?.categoryBreakdown || [];
+  const brandBreakdown = data?.brandBreakdown || [];
   const stockDistribution = data?.stockDistribution || [];
   const recentProducts = data?.recentProducts || [];
   const recentActivities = data?.recentActivities || [];
@@ -78,21 +82,21 @@ export default function AdminDashboard() {
     {
       label: "Total Products",
       value: stats.totalProducts,
-      sub: `${stats.featuredProducts} featured · ${stats.totalStockUnits} total units`,
+      sub: `${stats.featuredProducts} featured · ${stats.totalStockUnits} units`,
       icon: Package,
       accent: "bg-[#14161A] text-white",
     },
     {
       label: "Active Products",
       value: stats.activeProducts,
-      sub: `${stats.inactiveProducts} inactive hidden from store`,
+      sub: `${stats.inactiveProducts} inactive hidden`,
       icon: CheckCircle2,
       accent: "bg-emerald-50 text-emerald-600 border border-emerald-200",
     },
     {
       label: "Out-of-Stock",
       value: stats.outOfStockProducts,
-      sub: `${stats.lowStockProducts} low-stock (1–5 units)`,
+      sub: `${stats.lowStockProducts} low-stock (1–5)`,
       icon: AlertTriangle,
       accent:
         stats.outOfStockProducts > 0
@@ -100,11 +104,18 @@ export default function AdminDashboard() {
           : "bg-[#F4F4F1] text-[#6B727C] border border-[#E6E6E1]",
     },
     {
-      label: "Total Categories",
+      label: "Categories",
       value: stats.totalCategories,
-      sub: "Active hardware collections",
+      sub: "Active hardware groups",
       icon: Layers,
       accent: "bg-[var(--accent-tint)] text-[var(--accent)] border border-[var(--accent)]/20",
+    },
+    {
+      label: "Brands",
+      value: stats.totalBrands,
+      sub: `${stats.activeBrands} live · ${Math.max(0, stats.totalBrands - stats.activeBrands)} coming soon`,
+      icon: Award,
+      accent: "bg-amber-50 text-amber-600 border border-amber-200",
     },
   ];
 
@@ -135,9 +146,9 @@ export default function AdminDashboard() {
       }
     >
       {/* 1. Statistics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
         {loading && !data
-          ? Array.from({ length: 4 }).map((_, i) => (
+          ? Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
                 className="h-28 rounded-2xl bg-white border border-[#E6E6E1] animate-pulse"
@@ -220,6 +231,40 @@ export default function AdminDashboard() {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {brandBreakdown.length > 0 && (
+            <div className="mt-5 pt-4 border-t border-[#F1F1ED]">
+              <div className="flex items-center justify-between gap-2 mb-2.5">
+                <h3 className="font-['Outfit'] text-xs font-bold uppercase tracking-wider text-[#6B727C]">
+                  Brands Directory
+                </h3>
+                <Link
+                  to="/admin/brands"
+                  className="text-xs font-semibold text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+                >
+                  <span>Manage Brands</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {brandBreakdown.map((b) => (
+                  <span
+                    key={b._id}
+                    className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium ${
+                      b.isComingSoon
+                        ? "border-[#E6E6E1] bg-[#FAFAF8] text-[#6B727C]"
+                        : "border-[#14161A]/15 bg-[#14161A] text-white"
+                    }`}
+                  >
+                    <span>{b.name}</span>
+                    <span className="opacity-70 text-[10px] tabular-nums">
+                      {b.isComingSoon && b.count === 0 ? "Soon" : `${b.count}`}
+                    </span>
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>

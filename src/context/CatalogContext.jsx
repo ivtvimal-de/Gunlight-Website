@@ -2,7 +2,9 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 import { api } from "../services/api";
 import {
   adaptProduct,
+  adaptBrand,
   FALLBACK_CATEGORIES,
+  FALLBACK_BRANDS,
   FALLBACK_PRODUCTS,
 } from "../utils/productAdapter";
 
@@ -11,15 +13,17 @@ const CatalogContext = createContext(null);
 export function CatalogProvider({ children }) {
   const [products, setProducts] = useState(FALLBACK_PRODUCTS);
   const [categories, setCategories] = useState(FALLBACK_CATEGORIES);
+  const [brands, setBrands] = useState(FALLBACK_BRANDS);
   const [loading, setLoading] = useState(true);
   const [isLive, setIsLive] = useState(false);
 
   const refreshCatalog = useCallback(async () => {
     try {
       setLoading(true);
-      const [prodRes, catRes] = await Promise.all([
+      const [prodRes, catRes, brandRes] = await Promise.all([
         api.getPublicProducts({ limit: 100 }),
         api.getPublicCategories(),
+        api.getPublicBrands(),
       ]);
 
       if (Array.isArray(prodRes?.products)) {
@@ -27,6 +31,9 @@ export function CatalogProvider({ children }) {
       }
       if (Array.isArray(catRes?.categories)) {
         setCategories(catRes.categories);
+      }
+      if (Array.isArray(brandRes?.brands)) {
+        setBrands(brandRes.brands.map(adaptBrand));
       }
       setIsLive(true);
     } catch {
@@ -62,6 +69,7 @@ export function CatalogProvider({ children }) {
       value={{
         products,
         categories,
+        brands,
         loading,
         isLive,
         refreshCatalog,

@@ -96,6 +96,7 @@ export const api = {
   getPublicProducts: (params) => request("/api/products", { params }),
   getPublicProductById: (idOrSlug) => request(`/api/products/${encodeURIComponent(idOrSlug)}`),
   getPublicCategories: () => request("/api/categories"),
+  getPublicBrands: () => request("/api/brands"),
 
   // Admin auth
   adminLogin: (credentials) =>
@@ -124,6 +125,18 @@ export const api = {
     request(`/api/admin/categories/${id}`, { method: "PUT", body: payload }),
   deleteAdminCategory: (id, reassignTo) =>
     request(`/api/admin/categories/${id}`, {
+      method: "DELETE",
+      params: reassignTo ? { reassignTo } : undefined,
+    }),
+
+  // Admin brands
+  getAdminBrands: () => request("/api/admin/brands"),
+  createAdminBrand: (payload) =>
+    request("/api/admin/brands", { method: "POST", body: payload }),
+  updateAdminBrand: (id, payload) =>
+    request(`/api/admin/brands/${id}`, { method: "PUT", body: payload }),
+  deleteAdminBrand: (id, reassignTo) =>
+    request(`/api/admin/brands/${id}`, {
       method: "DELETE",
       params: reassignTo ? { reassignTo } : undefined,
     }),

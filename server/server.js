@@ -11,6 +11,8 @@ import productRoutes from "./routes/productRoutes.js";
 import adminProductRoutes from "./routes/adminProductRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import adminCategoryRoutes from "./routes/adminCategoryRoutes.js";
+import brandRoutes from "./routes/brandRoutes.js";
+import adminBrandRoutes from "./routes/adminBrandRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -70,8 +72,10 @@ app.get("/api/health", (req, res) => {
 // Public & Admin API routes
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/brands", brandRoutes);
 app.use("/api/admin/products", adminProductRoutes);
 app.use("/api/admin/categories", adminCategoryRoutes);
+app.use("/api/admin/brands", adminBrandRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use(notFound);

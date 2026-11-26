@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Package,
   Layers,
+  Award,
   LogOut,
   ExternalLink,
   Menu,
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: Layers },
+  { to: "/admin/brands", label: "Brands", icon: Award },
 ];
 
 export default function AdminLayout({ title = "Dashboard", subtitle = "", actions = null, children }) {

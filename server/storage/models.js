@@ -1,10 +1,12 @@
 import MongooseAdmin from "../models/Admin.js";
 import MongooseCategory from "../models/Category.js";
+import MongooseBrand from "../models/Brand.js";
 import MongooseProduct from "../models/Product.js";
 import MongooseAdminActivity from "../models/AdminActivity.js";
 import {
   LocalAdmin,
   LocalCategory,
+  LocalBrand,
   LocalProduct,
   LocalAdminActivity,
 } from "./localStore.js";
@@ -33,6 +35,9 @@ export const Admin = createModelProxy(() =>
 );
 export const Category = createModelProxy(() =>
   isLocalStoreMode() ? LocalCategory : MongooseCategory
+);
+export const Brand = createModelProxy(() =>
+  isLocalStoreMode() ? LocalBrand : MongooseBrand
 );
 export const Product = createModelProxy(() =>
   isLocalStoreMode() ? LocalProduct : MongooseProduct

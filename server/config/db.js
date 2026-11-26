@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { isLocalStoreMode } from "../storage/models.js";
-import { initLocalStore } from "../storage/localStore.js";
+import { initLocalStore, hasLocalBrandsKey } from "../storage/localStore.js";
+import { ensureLocalSeedIfEmpty } from "../utils/seedInitialData.js";
 
 /**
  * Connect to MongoDB Atlas / local MongoDB, or initialize local persistent JSON storage
@@ -8,7 +9,9 @@ import { initLocalStore } from "../storage/localStore.js";
  */
 export async function connectDB() {
   if (isLocalStoreMode()) {
+    const hadBrandsKey = await hasLocalBrandsKey();
     await initLocalStore();
+    await ensureLocalSeedIfEmpty({ seedMissingBrandsKey: !hadBrandsKey });
     return null;
   }
 

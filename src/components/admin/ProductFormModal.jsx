@@ -33,6 +33,7 @@ export default function ProductFormModal({
   open,
   initialProduct = null,
   categories = [],
+  brands = [],
   onClose,
   onSaved,
 }) {
@@ -504,6 +505,29 @@ export default function ProductFormModal({
                 {categories.map((cat) => (
                   <option key={cat._id} value={cat._id}>
                     {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Brand *
+              </label>
+              <select
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+              >
+                {Array.from(
+                  new Set([
+                    "GunLite",
+                    ...brands.map((b) => b.name).filter(Boolean),
+                    ...(brand ? [brand] : []),
+                  ])
+                ).map((brandName) => (
+                  <option key={brandName} value={brandName}>
+                    {brandName}
                   </option>
                 ))}
               </select>

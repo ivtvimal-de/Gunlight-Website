@@ -25,10 +25,12 @@ export default function AdminProducts() {
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [brandFilter, setBrandFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("");
   const [stockFilter, setStockFilter] = useState("");
   const [page, setPage] = useState(1);
@@ -42,26 +44,29 @@ export default function AdminProducts() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [prodRes, catRes] = await Promise.all([
+      const [prodRes, catRes, brandRes] = await Promise.all([
         api.getAdminProducts({
           search: search.trim(),
           category: categoryFilter !== "All" ? categoryFilter : "",
+          brand: brandFilter !== "All" ? brandFilter : "",
           status: statusFilter,
           stock: stockFilter,
           page,
           limit: 12,
         }),
         api.getAdminCategories(),
+        api.getAdminBrands(),
       ]);
       setProducts(prodRes?.products || []);
       setPagination(prodRes?.pagination || { total: 0, page: 1, pages: 1 });
       setCategories(catRes?.categories || []);
+      setBrands(brandRes?.brands || []);
     } catch (err) {
       toast.error(err.message || "Failed to load products.");
     } finally {
       setLoading(false);
     }
-  }, [search, categoryFilter, statusFilter, stockFilter, page, toast]);
+  }, [search, categoryFilter, brandFilter, statusFilter, stockFilter, page, toast]);
 
   useEffect(() => {
     loadData();
@@ -130,7 +135,7 @@ export default function AdminProducts() {
     >
       {/* Filters Bar */}
       <div className="rounded-2xl bg-white border border-[#E6E6E1] p-4 mb-5 shadow-[0_2px_10px_rgba(20,22,26,0.03)]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           <div className="lg:col-span-2 relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B97A8]" />
             <input
@@ -140,7 +145,7 @@ export default function AdminProducts() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              placeholder="Search by product name, SKU, or spec..."
+              placeholder="Search by product name, SKU, or brand..."
               className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] pl-9 pr-3 text-xs sm:text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
             />
           </div>
@@ -157,6 +162,22 @@ export default function AdminProducts() {
             {categories.map((c) => (
               <option key={c._id} value={c._id}>
                 {c.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={brandFilter}
+            onChange={(e) => {
+              setBrandFilter(e.target.value);
+              setPage(1);
+            }}
+            className="h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3 text-xs font-medium text-[#14161A] focus:border-[var(--accent)] focus:outline-none"
+          >
+            <option value="All">All Brands</option>
+            {brands.map((b) => (
+              <option key={b._id} value={b.name}>
+                {b.name}
               </option>
             ))}
           </select>
@@ -252,7 +273,7 @@ export default function AdminProducts() {
                                 {product.name}
                               </p>
                               <p className="font-mono text-[11px] text-[#6B727C]">
-                                {product.sku}
+                                {product.sku} · {product.brand || "GunLite"}
                               </p>
                             </div>
                           </div>
@@ -496,6 +517,7 @@ export default function AdminProducts() {
         open={modalOpen}
         initialProduct={editingProduct}
         categories={categories}
+        brands={brands}
         onClose={() => setModalOpen(false)}
         onSaved={() => {
           loadData();

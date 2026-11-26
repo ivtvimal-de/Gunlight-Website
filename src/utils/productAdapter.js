@@ -8,13 +8,67 @@ const DEDICATED_SLUG_ROUTES = {
   sniper: "/sniper",
 };
 
-function resolveMediaUrl(url) {
+export function resolveMediaUrl(url) {
   if (!url || typeof url !== "string") return "";
   if (url.startsWith("/uploads/") && API_BASE_URL) {
     return `${API_BASE_URL}${url}`;
   }
   return url;
 }
+
+export function adaptBrand(doc) {
+  if (!doc) return null;
+  const slug = String(doc.slug || "").toLowerCase().trim();
+  const logoUrl = resolveMediaUrl(
+    typeof doc.logo === "string" ? doc.logo : doc.logo?.url || ""
+  );
+  const bannerUrl = resolveMediaUrl(
+    typeof doc.bannerImage === "string"
+      ? doc.bannerImage
+      : doc.bannerImage?.url || doc.previewBanner || ""
+  );
+
+  return {
+    ...doc,
+    _id: doc._id || slug,
+    slug,
+    name: doc.name || slug,
+    tagline: doc.tagline || "",
+    description: doc.description || "",
+    logo: logoUrl,
+    logoWebp: resolveMediaUrl(doc.logoWebp || "") || logoUrl,
+    bannerImage: bannerUrl,
+    isFlagship: Boolean(doc.isFlagship || slug === "gunlite"),
+    isComingSoon: Boolean(doc.isComingSoon ?? doc.demo),
+    demo: Boolean(doc.isComingSoon ?? doc.demo),
+    isActive: doc.isActive !== false,
+    productCount: Number(doc.productCount || 0),
+  };
+}
+
+export const FALLBACK_BRANDS = [
+  {
+    _id: "brand-gunlite",
+    name: "GunLite",
+    slug: "gunlite",
+    tagline: "Professional LED torches and search lights from Coimbatore.",
+    description:
+      "Flagship high-power rechargeable LED torches and portable searchlights engineered by Jerone Enterprises.",
+    logo: { url: "/images/logo.png", publicId: "" },
+    logoWebp: "/images/logo.webp",
+    bannerImage: { url: "/images/eaglemain.webp", publicId: "" },
+    isFlagship: true,
+    isComingSoon: false,
+    isActive: true,
+    displayOrder: 1,
+    productCount: 4,
+  },
+  { _id: "brand-philips", name: "Philips", slug: "philips", isComingSoon: true, isActive: true, displayOrder: 2 },
+  { _id: "brand-eveready", name: "Eveready", slug: "eveready", isComingSoon: true, isActive: true, displayOrder: 3 },
+  { _id: "brand-wipro", name: "Wipro", slug: "wipro", isComingSoon: true, isActive: true, displayOrder: 4 },
+  { _id: "brand-bajaj", name: "Bajaj", slug: "bajaj", isComingSoon: true, isActive: true, displayOrder: 5 },
+  { _id: "brand-mi", name: "Mi", slug: "mi", isComingSoon: true, isActive: true, displayOrder: 6 },
+].map(adaptBrand);
 
 /**
  * Convert a backend MongoDB Product document into the unified frontend shape.

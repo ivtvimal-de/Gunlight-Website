@@ -25,6 +25,9 @@ const adminActivitySchema = new mongoose.Schema(
         "CREATE_CATEGORY",
         "UPDATE_CATEGORY",
         "DELETE_CATEGORY",
+        "CREATE_BRAND",
+        "UPDATE_BRAND",
+        "DELETE_BRAND",
         "UPLOAD_IMAGE",
         "DELETE_IMAGE",
       ],
@@ -32,7 +35,7 @@ const adminActivitySchema = new mongoose.Schema(
     entityType: {
       type: String,
       required: true,
-      enum: ["auth", "product", "category", "media"],
+      enum: ["auth", "product", "category", "brand", "media"],
     },
     entityId: {
       type: String,

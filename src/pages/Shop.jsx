@@ -6,12 +6,32 @@ import { Search, X, Flashlight, Package, Sparkles } from "lucide-react";
 import { useCatalog } from "../context/CatalogContext";
 import SEO from "../components/SEO";
 import ProductCard from "../components/ProductCard";
-import { BRANDS } from "../config";
 
 gsap.registerPlugin(ScrollTrigger);
 
+function matchesProductBrand(product, brandObj) {
+  if (!brandObj) return true;
+  const pb = String(product?.brand || "").trim().toLowerCase();
+  const slugLower = String(brandObj.slug || "").trim().toLowerCase();
+  const nameLower = String(brandObj.name || "").trim().toLowerCase();
+
+  if (!pb) {
+    return slugLower === "gunlite" || Boolean(brandObj.isFlagship);
+  }
+  return pb === slugLower || pb === nameLower;
+}
+
 export default function Shop() {
-  const { products: ALL_PRODUCTS, categories: apiCategories, loading } = useCatalog();
+  const {
+    products: ALL_PRODUCTS,
+    categories: apiCategories,
+    brands: apiBrands,
+    loading,
+  } = useCatalog();
+  const BRANDS_LIST = useMemo(
+    () => apiBrands.filter((b) => b.isActive !== false),
+    [apiBrands]
+  );
   const CATEGORY_LIST = useMemo(
     () => ["All", ...apiCategories.map((c) => c.name)],
     [apiCategories]
@@ -22,31 +42,33 @@ export default function Shop() {
   const urlCategory = searchParams.get("category");
   const urlBrand = searchParams.get("brand");
 
-  // Check if URL brand param or search query matches a known brand
+  // Check if URL brand param or search query matches a managed brand
   const matchedBrandObj = useMemo(() => {
     // 1. Direct ?brand= URL parameter
     if (urlBrand) {
+      const needle = urlBrand.toLowerCase();
       return (
-        BRANDS.find((b) => b.slug.toLowerCase() === urlBrand.toLowerCase()) || {
-          slug: urlBrand.toLowerCase(),
+        BRANDS_LIST.find(
+          (b) =>
+            b.slug.toLowerCase() === needle || b.name.toLowerCase() === needle
+        ) || {
+          slug: needle,
           name: urlBrand,
-          demo: urlBrand.toLowerCase() !== "gunlite",
+          isComingSoon: needle !== "gunlite",
         }
       );
     }
-    // 2. Search query matching a brand name (e.g. "philips", "wipro", "eveready", "bajaj", "mi", "gunlite")
+    // 2. Search query matching a brand name
     const q = urlQuery.trim().toLowerCase();
     if (!q) return null;
     return (
-      BRANDS.find((b) => {
+      BRANDS_LIST.find((b) => {
         const slug = b.slug.toLowerCase();
         const name = b.name.toLowerCase();
         return q === slug || q === name || q.includes(slug) || q.includes(name);
       }) || null
     );
-  }, [urlBrand, urlQuery]);
-
-  const isDemoBrand = Boolean(matchedBrandObj && matchedBrandObj.demo);
+  }, [urlBrand, urlQuery, BRANDS_LIST]);
 
   const matchedUrlCategory = useMemo(() => {
     if (!urlCategory) return "All";
@@ -98,14 +120,17 @@ export default function Shop() {
     return () => ctx.revert();
   }, []);
 
-  // Filter products based on category AND search query (Brand name & Category-wise support)
+  // Filter products based on brand, category AND search query
   const filtered = useMemo(() => {
-    if (isDemoBrand) return [];
-
     const q = urlQuery.trim().toLowerCase();
     const qClean = q.replace(/[\s\-_]+/g, "");
 
     return ALL_PRODUCTS.filter((product) => {
+      // 0. URL Brand Filter
+      if (urlBrand && !matchesProductBrand(product, matchedBrandObj)) {
+        return false;
+      }
+
       // 1. Category Tab Filter
       const matchesCategoryTab =
         activeCategory === "All" ||
@@ -115,14 +140,12 @@ export default function Shop() {
 
       if (!matchesCategoryTab) return false;
 
-      // 2. If no search query, matches category tab!
+      // 2. If no search query, matches category & brand tabs!
       if (!q) return true;
 
-      // 3. Brand Search (e.g. "gunlite", "our brands")
+      // 3. Brand Search
       if (
-        q === "gunlite" ||
-        q === "our brands" ||
-        q.includes("gunlite") ||
+        (matchedBrandObj && matchesProductBrand(product, matchedBrandObj)) ||
         (product.brand && product.brand.toLowerCase().includes(q))
       ) {
         return true;
@@ -173,7 +196,7 @@ export default function Shop() {
         synonymMatch
       );
     });
-  }, [ALL_PRODUCTS, activeCategory, urlQuery, isDemoBrand]);
+  }, [ALL_PRODUCTS, activeCategory, urlQuery, urlBrand, matchedBrandObj]);
 
   // Animate cards whenever filtered list changes
   useEffect(() => {
@@ -314,7 +337,7 @@ export default function Shop() {
             )}
 
             <span className="ml-auto shrink-0 text-xs text-[var(--text-muted)]">
-              {isDemoBrand ? 0 : filtered.length} of {isDemoBrand ? 0 : ALL_PRODUCTS.length} products
+              {filtered.length} of {ALL_PRODUCTS.length} products
             </span>
           </div>
         </section>
@@ -330,7 +353,7 @@ export default function Shop() {
                 />
               ))}
             </div>
-          ) : isDemoBrand ? (
+      ) : (matchedBrandObj?.isComingSoon || matchedBrandObj?.demo) && filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 py-20 sm:py-24 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-[#E6E6E1] shadow-xs">
                 <Package className="w-8 h-8 text-[var(--accent)]" />
@@ -413,11 +436,14 @@ export default function Shop() {
 
               {/* Brand List */}
               <div className="space-y-2">
-                {BRANDS.map((b) => {
+                {BRANDS_LIST.map((b) => {
                   const isSelected =
                     (urlBrand && urlBrand.toLowerCase() === b.slug.toLowerCase()) ||
                     (!urlBrand && b.slug === "gunlite");
                   const initial = b.name.charAt(0).toUpperCase();
+                  const count = ALL_PRODUCTS.filter((p) =>
+                    matchesProductBrand(p, b)
+                  ).length;
 
                   return (
                     <button
@@ -438,11 +464,11 @@ export default function Shop() {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        {b.slug === "gunlite" ? (
+                        {b.logo ? (
                           <div className="h-10 w-10 rounded-full bg-white border border-[#E6E6E1] p-1 flex items-center justify-center shrink-0">
                             <img
-                              src={b.logo || "/images/logo.png"}
-                              alt="GunLite"
+                              src={b.logo}
+                              alt={b.name}
                               className="h-6 w-auto object-contain"
                             />
                           </div>
@@ -456,7 +482,9 @@ export default function Shop() {
                             {b.name}
                           </div>
                           <div className="text-[11px] text-[#6B727C]">
-                            {b.slug === "gunlite" ? "Our Flagship Brand • 4 products" : "Partner Brand • Coming soon"}
+                            {b.isComingSoon && count === 0
+                              ? "Partner Brand • Coming soon"
+                              : `${b.isFlagship ? "Flagship Brand" : "Active Brand"} • ${count} product${count !== 1 ? "s" : ""}`}
                           </div>
                         </div>
                       </div>

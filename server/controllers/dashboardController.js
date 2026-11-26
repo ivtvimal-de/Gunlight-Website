@@ -1,8 +1,8 @@
-import { Product, Category, AdminActivity } from "../storage/models.js";
+import { Product, Category, Brand, AdminActivity } from "../storage/models.js";
 
 /**
  * GET /api/admin/dashboard
- * Returns store statistics, category/stock charts data, recent products, and recent admin activities.
+ * Returns store statistics, category/brand/stock charts data, recent products, and recent admin activities.
  */
 export async function getDashboardStats(req, res, next) {
   try {
@@ -14,8 +14,11 @@ export async function getDashboardStats(req, res, next) {
       lowStockProducts,
       featuredProducts,
       totalCategories,
+      totalBrands,
+      activeBrands,
       allProductsForTotals,
       categories,
+      brands,
       recentProducts,
       recentActivities,
     ] = await Promise.all([
@@ -26,8 +29,11 @@ export async function getDashboardStats(req, res, next) {
       Product.countDocuments({ stockQuantity: { $gt: 0, $lte: 5 } }),
       Product.countDocuments({ isFeatured: true }),
       Category.countDocuments(),
-      Product.find().select("category categories stockQuantity status").lean(),
+      Brand.countDocuments(),
+      Brand.countDocuments({ isActive: true, isComingSoon: false }),
+      Product.find().select("category categories brand stockQuantity status").lean(),
       Category.find().sort({ displayOrder: 1, name: 1 }).lean(),
+      Brand.find().sort({ displayOrder: 1, name: 1 }).lean(),
       Product.find()
         .populate("category", "name slug")
         .sort({ createdAt: -1 })
@@ -68,6 +74,25 @@ export async function getDashboardStats(req, res, next) {
       };
     });
 
+    const brandBreakdown = brands.map((b) => {
+      const nameLower = String(b.name || "").trim().toLowerCase();
+      const slugLower = String(b.slug || "").trim().toLowerCase();
+      const matched = allProductsForTotals.filter((p) => {
+        const pb = String(p.brand || "").trim().toLowerCase();
+        if (!pb) return slugLower === "gunlite" || Boolean(b.isFlagship);
+        return pb === nameLower || pb === slugLower;
+      });
+      return {
+        _id: b._id,
+        name: b.name,
+        slug: b.slug,
+        isComingSoon: Boolean(b.isComingSoon),
+        count: matched.length,
+        activeCount: matched.filter((m) => m.status === "active").length,
+        totalStock: matched.reduce((s, m) => s + (Number(m.stockQuantity) || 0), 0),
+      };
+    });
+
     res.status(200).json({
       success: true,
       stats: {
@@ -79,9 +104,12 @@ export async function getDashboardStats(req, res, next) {
         inStockHealthy,
         featuredProducts,
         totalCategories,
+        totalBrands,
+        activeBrands,
         totalStockUnits,
       },
       categoryBreakdown,
+      brandBreakdown,
       stockDistribution: [
         { label: "In Stock (>5)", value: inStockHealthy, color: "#10B981" },
         { label: "Low Stock (1-5)", value: lowStockProducts, color: "#F59E0B" },
