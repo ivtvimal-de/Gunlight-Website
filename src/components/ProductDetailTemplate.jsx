@@ -380,19 +380,12 @@ export default function ProductDetailTemplate({
                   </h1>
                 </div>
 
-                {/* Price Display */}
-                <div className="pb-5 border-b border-[var(--border-subtle)]">
-                  <div className="flex items-baseline gap-3">
-                    <span className="font-['Outfit'] text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tabular-nums">
-                      {displayUnitPrice}
-                    </span>
-                    <span className="text-xs text-[var(--text-muted)]">Inclusive of all taxes</span>
-                  </div>
-                  {withWarranty && (
-                    <p className="mt-1 text-xs font-medium text-[var(--accent)]">
-                      Includes {product.price} + ₹{WARRANTY_OPTION.fee} ({WARRANTY_OPTION.label})
-                    </p>
-                  )}
+                {/* Price Display (always shows base product price; tallied total appears below) */}
+                <div className="flex items-baseline gap-3 pb-5 border-b border-[var(--border-subtle)]">
+                  <span className="font-['Outfit'] text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tabular-nums">
+                    {product.price}
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)]">Inclusive of all taxes</span>
                 </div>
 
                 {/* Description */}

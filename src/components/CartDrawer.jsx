@@ -9,7 +9,7 @@
  *  - Empty-cart state
  */
 
-import { Flashlight, AlertTriangle, MessageCircle, X, Check } from "lucide-react";
+import { Flashlight, AlertTriangle, MessageCircle, X, Trash2 } from "lucide-react";
 import { useCart, formatPrice } from "../context/CartContext";
 import { WHATSAPP_NUMBER, WARRANTY_OPTION } from "../config";
 
@@ -57,7 +57,6 @@ export default function CartDrawer() {
   const {
     items,
     removeItem,
-    toggleWarranty,
     updateQuantity,
     clearCart,
     cartCount,
@@ -170,34 +169,15 @@ export default function CartDrawer() {
                     <div className="flex flex-1 flex-col gap-1 min-w-0">
                       <p className="truncate font-['Outfit'] text-sm font-bold text-[var(--text-primary)]">{item.title}</p>
                       <p className="text-xs text-[var(--text-muted)]">
-                        {item.price}
-                        {item.hasWarranty ? ` (incl. ₹${item.warrantyFee ?? WARRANTY_OPTION.fee} warranty)` : ""}
+                        {item.hasWarranty && item.basePriceNum > 0
+                          ? formatPrice(item.basePriceNum)
+                          : item.price}
                       </p>
 
-                      {/* Optional 1-Year Warranty toggle inside cart */}
-                      {item.priceNum > 0 && (
-                        <button
-                          type="button"
-                          role="checkbox"
-                          aria-checked={Boolean(item.hasWarranty)}
-                          onClick={() => toggleWarranty(item.id, WARRANTY_OPTION.fee)}
-                          className={`mt-0.5 inline-flex items-center gap-1.5 w-fit rounded-md border px-2 py-1 text-[11px] font-medium transition-colors ${
-                            item.hasWarranty
-                              ? "border-[var(--accent)]/40 bg-[var(--accent-tint)] text-[var(--accent)]"
-                              : "border-[var(--border-subtle)] bg-[var(--bg-canvas)] text-[var(--text-secondary)] hover:border-[var(--border-strong)]"
-                          }`}
-                        >
-                          <span
-                            className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] border ${
-                              item.hasWarranty
-                                ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                                : "border-[#B8B8B0] bg-white"
-                            }`}
-                          >
-                            {item.hasWarranty && <Check className="h-2.5 w-2.5 stroke-[3]" />}
-                          </span>
-                          <span>{WARRANTY_OPTION.label} (+₹{WARRANTY_OPTION.fee})</span>
-                        </button>
+                      {item.hasWarranty && (
+                        <span className="inline-flex items-center w-fit rounded-md bg-[var(--accent-tint)] px-2 py-0.5 text-[10.5px] font-semibold text-[var(--accent)]">
+                          {WARRANTY_OPTION.label} (+₹{item.warrantyFee ?? WARRANTY_OPTION.fee})
+                        </span>
                       )}
 
                       {/* Quantity stepper */}
@@ -223,15 +203,16 @@ export default function CartDrawer() {
                       </div>
                     </div>
 
-                    {/* Line total + Remove */}
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <p className="font-['Outfit'] text-sm font-bold text-[var(--accent)]">{lineTotal}</p>
+                    {/* Line total + Remove Icon */}
+                    <div className="flex flex-col items-end justify-between gap-1 shrink-0">
+                      <p className="font-['Outfit'] text-sm font-bold text-[var(--accent)] tabular-nums">{lineTotal}</p>
                       <button
                         onClick={() => removeItem(item.id)}
                         aria-label={`Remove ${item.title}`}
-                        className="mt-auto text-xs text-[var(--text-muted)] hover:text-red-500 hover:underline transition-colors"
+                        title={`Remove ${item.title}`}
+                        className="h-7 w-7 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 transition-colors"
                       >
-                        Remove
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </li>
