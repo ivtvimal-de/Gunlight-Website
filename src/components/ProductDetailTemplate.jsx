@@ -15,48 +15,10 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useCart, parsePriceNum, formatPrice } from "../context/CartContext";
+import { useCatalog } from "../context/CatalogContext";
 import { WHATSAPP_NUMBER, CLAIMS, WARRANTY_OPTION } from "../config";
 import SEO from "./SEO";
 import ProductCard from "./ProductCard";
-
-const ALL_CATALOGUE = [
-  {
-    id: "eagle",
-    title: "Eagle 3.1 GunLite",
-    price: "₹2,499",
-    img: "/images/eagle.webp",
-    link: "/eagle",
-    categories: ["Search Light"],
-    specs: ["50W LED Chip", "Type-C Rechargeable"],
-  },
-  {
-    id: "everest",
-    title: "Everest LED GunLite",
-    price: "₹1,999",
-    img: "/images/everest.webp",
-    link: "/everest",
-    categories: ["LED Torch"],
-    specs: ["55W LED", "10,000mAh Battery"],
-  },
-  {
-    id: "tiger",
-    title: "Tiger Pro-1 GunLite",
-    price: "₹1,499",
-    img: "/images/tigerpro.webp",
-    link: "/tiger",
-    categories: ["Rechargeable"],
-    specs: ["500 Lumens", "4000mAh Lithium"],
-  },
-  {
-    id: "sniper",
-    title: "Sniper X2 GunLite",
-    price: "₹999",
-    img: "/images/sniper.webp",
-    link: "/sniper",
-    categories: ["LED Torch"],
-    specs: ["1000 Lumens", "2× 18650 Battery"],
-  },
-];
 
 export default function ProductDetailTemplate({
   product,
@@ -66,7 +28,13 @@ export default function ProductDetailTemplate({
   seoDescription,
   seoPath,
 }) {
-  const galleryImages = images.length > 0 ? images : [product.img];
+  const { products: catalogProducts } = useCatalog();
+  const galleryImages =
+    images.length > 0
+      ? images
+      : product.galleryImages?.length > 0
+      ? product.galleryImages
+      : [product.img];
   const [activeIdx, setActiveIdx] = useState(0);
   const [qty, setQty] = useState(1);
   const [withWarranty, setWithWarranty] = useState(false);
@@ -89,9 +57,17 @@ export default function ProductDetailTemplate({
     .filter((i) => (i.baseId || i.id) === product.id)
     .reduce((sum, i) => sum + i.quantity, 0);
 
+  const warrantyEnabled = product.warrantyEnabled !== false;
+  const warrantyFeeValue = Number(product.warrantyPrice ?? WARRANTY_OPTION.fee);
+  const warrantyLabelText = product.warrantyLabel || WARRANTY_OPTION.label;
+
   const basePriceNum = product.priceNum ?? parsePriceNum(product.price);
   const hasValidPrice = basePriceNum > 0;
-  const activeWarrantyFee = withWarranty ? WARRANTY_OPTION.fee : 0;
+  const isOutOfStock = Boolean(
+    product.outOfStock ||
+      (product.stockQuantity !== undefined && Number(product.stockQuantity) <= 0)
+  );
+  const activeWarrantyFee = warrantyEnabled && withWarranty ? warrantyFeeValue : 0;
   const unitPriceNum = hasValidPrice ? basePriceNum + activeWarrantyFee : 0;
   const totalPriceNum = hasValidPrice ? unitPriceNum * qty : 0;
   const displayUnitPrice = unitPriceNum > 0 ? formatPrice(unitPriceNum) : product.price;
@@ -129,11 +105,12 @@ export default function ProductDetailTemplate({
   };
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
     addItem({
       ...product,
       baseId: product.id,
       basePriceNum,
-      hasWarranty: withWarranty,
+      hasWarranty: warrantyEnabled && withWarranty,
       warrantyFee: activeWarrantyFee,
       quantity: qty,
     });
@@ -143,8 +120,8 @@ export default function ProductDetailTemplate({
 
   const waText = encodeURIComponent(
     `Hi GunLite, I am interested in ordering ${product.title}${
-      withWarranty ? ` with ${WARRANTY_OPTION.label} (+₹${WARRANTY_OPTION.fee})` : ""
-    } (${displayUnitPrice} × ${qty}${qty > 1 || withWarranty ? ` = Total: ${displayTotalPrice}` : ""}). Please share delivery timeline and payment details.`
+      warrantyEnabled && withWarranty ? ` with ${warrantyLabelText} (+₹${warrantyFeeValue})` : ""
+    } (${displayUnitPrice} × ${qty}${qty > 1 || (warrantyEnabled && withWarranty) ? ` = Total: ${displayTotalPrice}` : ""}). Please share delivery timeline and payment details.`
   );
   const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
 
@@ -154,7 +131,7 @@ export default function ProductDetailTemplate({
     return !val.includes("[") && !val.includes("]");
   });
 
-  const related = ALL_CATALOGUE.filter((p) => p.id !== product.id);
+  const related = catalogProducts.filter((p) => p.id !== product.id);
 
   return (
     <>
@@ -371,20 +348,50 @@ export default function ProductDetailTemplate({
                 
                 {/* Title & Badge */}
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--accent-tint)] px-3 py-1 text-xs font-medium text-[var(--accent)] mb-3">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-                    In Stock &amp; Ready for Dispatch
+                  <div
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium mb-3 ${
+                      isOutOfStock
+                        ? "border-red-200 bg-red-50 text-red-600"
+                        : product.stockQuantity !== undefined && Number(product.stockQuantity) <= 5
+                        ? "border-amber-200 bg-amber-50 text-amber-700"
+                        : "border-[var(--border-subtle)] bg-[var(--accent-tint)] text-[var(--accent)]"
+                    }`}
+                  >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        isOutOfStock
+                          ? "bg-red-500"
+                          : product.stockQuantity !== undefined && Number(product.stockQuantity) <= 5
+                          ? "bg-amber-500"
+                          : "bg-[var(--accent)]"
+                      }`}
+                    />
+                    {isOutOfStock
+                      ? "Out of Stock"
+                      : product.stockQuantity !== undefined && Number(product.stockQuantity) <= 5
+                      ? `Low Stock · Only ${product.stockQuantity} left`
+                      : "In Stock & Ready for Dispatch"}
                   </div>
                   <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
                     {product.title}
                   </h1>
+                  {product.sku && (
+                    <p className="mt-1 font-mono text-[11px] text-[var(--text-muted)]">
+                      SKU: {product.sku}
+                    </p>
+                  )}
                 </div>
 
                 {/* Price Display (always shows base product price; tallied total appears below) */}
-                <div className="flex items-baseline gap-3 pb-5 border-b border-[var(--border-subtle)]">
+                <div className="flex flex-wrap items-baseline gap-2.5 pb-5 border-b border-[var(--border-subtle)]">
                   <span className="font-['Outfit'] text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tabular-nums">
                     {product.price}
                   </span>
+                  {product.hasDiscount && product.regularPrice && (
+                    <span className="text-base text-[var(--text-muted)] line-through tabular-nums">
+                      {product.regularPrice}
+                    </span>
+                  )}
                   <span className="text-xs text-[var(--text-muted)]">Inclusive of all taxes</span>
                 </div>
 
@@ -393,8 +400,8 @@ export default function ProductDetailTemplate({
                   {product.desc}
                 </p>
 
-                {/* Optional 1-Year Warranty Add-On Tick Box (+₹500) */}
-                {hasValidPrice && (
+                {/* Optional 1-Year Warranty Add-On Tick Box */}
+                {hasValidPrice && warrantyEnabled && warrantyFeeValue > 0 && (
                   <button
                     type="button"
                     role="checkbox"
@@ -418,7 +425,7 @@ export default function ProductDetailTemplate({
                       </span>
                       <div className="min-w-0">
                         <span className="block text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
-                          Add {WARRANTY_OPTION.label}
+                          Add {warrantyLabelText}
                         </span>
                         <span className="block text-[11px] text-[var(--text-muted)] mt-0.5 leading-snug">
                           Optional · {WARRANTY_OPTION.detail}
@@ -427,7 +434,7 @@ export default function ProductDetailTemplate({
                     </div>
 
                     <span className="shrink-0 font-['Outfit'] text-sm font-bold text-[var(--accent)] tabular-nums">
-                      +₹{WARRANTY_OPTION.fee}
+                      +₹{warrantyFeeValue}
                     </span>
                   </button>
                 )}
@@ -441,7 +448,7 @@ export default function ProductDetailTemplate({
                     <div className="inline-flex items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)]">
                       <button
                         onClick={() => setQty((q) => Math.max(1, q - 1))}
-                        disabled={qty <= 1}
+                        disabled={qty <= 1 || isOutOfStock}
                         className="p-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-30 transition-colors"
                         aria-label="Decrease quantity"
                       >
@@ -452,7 +459,8 @@ export default function ProductDetailTemplate({
                       </span>
                       <button
                         onClick={() => setQty((q) => q + 1)}
-                        className="p-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                        disabled={isOutOfStock}
+                        className="p-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-30 transition-colors"
                         aria-label="Increase quantity"
                       >
                         <Plus className="w-4 h-4" />
@@ -468,7 +476,7 @@ export default function ProductDetailTemplate({
                 </div>
 
                 {/* Price Tally Breakdown (shown clearly when warranty or qty > 1 is selected) */}
-                {hasValidPrice && (withWarranty || qty > 1) && (
+                {hasValidPrice && ((warrantyEnabled && withWarranty) || qty > 1) && (
                   <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3.5 space-y-1.5 text-xs">
                     <div className="flex items-center justify-between text-[var(--text-secondary)]">
                       <span>Product ({product.price} × {qty})</span>
@@ -476,9 +484,9 @@ export default function ProductDetailTemplate({
                         {formatPrice(basePriceNum * qty)}
                       </span>
                     </div>
-                    {withWarranty && (
+                    {warrantyEnabled && withWarranty && (
                       <div className="flex items-center justify-between text-[var(--accent)]">
-                        <span>{WARRANTY_OPTION.label} (+₹{WARRANTY_OPTION.fee} × {qty})</span>
+                        <span>{warrantyLabelText} (+₹{warrantyFeeValue} × {qty})</span>
                         <span className="font-semibold tabular-nums">
                           +{formatPrice(activeWarrantyFee * qty)}
                         </span>
@@ -495,13 +503,18 @@ export default function ProductDetailTemplate({
                 <div className="space-y-3 pt-2">
                   <button
                     onClick={handleAddToCart}
+                    disabled={isOutOfStock}
                     className={`w-full py-3.5 px-6 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-xs ${
-                      added
+                      isOutOfStock
+                        ? "bg-[#E6E6E1] text-[#6B727C] cursor-not-allowed"
+                        : added
                         ? "bg-[#10B981] text-white"
                         : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white"
                     }`}
                   >
-                    {added ? (
+                    {isOutOfStock ? (
+                      <span>Currently Out of Stock</span>
+                    ) : added ? (
                       <>
                         <Check className="w-4 h-4 text-white" />
                         <span>Added to Cart!</span>
@@ -609,14 +622,23 @@ export default function ProductDetailTemplate({
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleAddToCart}
+              disabled={isOutOfStock}
               className={`h-10 px-4 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 whitespace-nowrap shadow-xs ${
-                added
+                isOutOfStock
+                  ? "bg-[#E6E6E1] text-[#6B727C] cursor-not-allowed"
+                  : added
                   ? "bg-emerald-600 text-white"
                   : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white"
               }`}
             >
-              {added ? <Check className="w-3.5 h-3.5 text-white" /> : <ShoppingCart className="w-3.5 h-3.5 text-white" />}
-              <span>{added ? "Added" : "Add to Cart"}</span>
+              {isOutOfStock ? (
+                <span>Out of Stock</span>
+              ) : (
+                <>
+                  {added ? <Check className="w-3.5 h-3.5 text-white" /> : <ShoppingCart className="w-3.5 h-3.5 text-white" />}
+                  <span>{added ? "Added" : "Add to Cart"}</span>
+                </>
+              )}
             </button>
 
             <a

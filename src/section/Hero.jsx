@@ -8,49 +8,7 @@ import {
   Headphones,
 } from "lucide-react";
 import { CLAIMS, WHATSAPP_URL } from "../config";
-
-const HERO_SLIDES = [
-  {
-    id: "eagle",
-    name: "Eagle 3.1",
-    spec: "50W LED · Type-C Fast Charging",
-    price: "₹2,499",
-    link: "/eagle",
-    imgWebp: "/images/eaglemain.webp",
-    imgPng: "/images/eaglemain.png",
-    alt: "Eagle 3.1 50W High-Power LED Search Light",
-  },
-  {
-    id: "everest",
-    name: "Everest LED",
-    spec: "55W LED · 10,000mAh Battery Bank",
-    price: "₹1,999",
-    link: "/everest",
-    imgWebp: "/images/evmain.webp",
-    imgPng: "/images/evmain.png",
-    alt: "Everest LED 55W Heavy-Duty Search Light",
-  },
-  {
-    id: "tiger",
-    name: "Tiger Pro-1",
-    spec: "500 Lumens · 4000mAh Lithium",
-    price: "₹1,499",
-    link: "/tiger",
-    imgWebp: "/images/timain.webp",
-    imgPng: "/images/timain.png",
-    alt: "Tiger Pro-1 CREE LED Tactical Flashlight",
-  },
-  {
-    id: "sniper",
-    name: "Sniper X2",
-    spec: "1000 Lumens · Zoom Flood/Focus",
-    price: "₹999",
-    link: "/sniper",
-    imgWebp: "/images/simain.webp",
-    imgPng: "/images/simain.png",
-    alt: "Sniper X2 Dual 18650 Tactical Zoom Torch",
-  },
-];
+import { useCatalog } from "../context/CatalogContext";
 
 const TRUST_STRIP_ITEMS = [
   {
@@ -76,12 +34,40 @@ const TRUST_STRIP_ITEMS = [
 ];
 
 export default function Hero() {
+  const { products } = useCatalog();
+
+  const heroProducts = (() => {
+    const featured = products.filter((p) => p.isFeatured);
+    const pool = featured.length > 0 ? featured : products;
+    return pool.slice(0, 5);
+  })();
+
+  const HERO_SLIDES = heroProducts.map((p) => ({
+    id: p.id,
+    name: (p.title || "").replace(/\s*GunLite\s*/gi, "").trim() || p.title,
+    spec:
+      p.shortSpec ||
+      (p.specs?.[0]?.value ? `${p.specs[0].value}` : "High-Power LED"),
+    price: p.price,
+    link: p.link,
+    imgWebp: p.heroImg || p.imgWebp || p.img,
+    imgPng: p.heroImg || p.imgPng || p.img,
+    alt: `${p.title} - GunLite Illumination`,
+  }));
+
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const slideCount = HERO_SLIDES.length;
+  const slideCount = Math.max(1, HERO_SLIDES.length);
+  const safeCurrent = current % slideCount;
 
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
+
+  useEffect(() => {
+    if (current >= slideCount) {
+      setCurrent(0);
+    }
+  }, [current, slideCount]);
 
   useEffect(() => {
     // Respect prefers-reduced-motion
@@ -90,7 +76,7 @@ export default function Hero() {
       if (mediaQuery.matches) return;
     }
 
-    if (isPaused) return;
+    if (isPaused || slideCount <= 1) return;
 
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slideCount);
@@ -122,7 +108,16 @@ export default function Hero() {
     touchEndX.current = null;
   };
 
-  const activeSlide = HERO_SLIDES[current];
+  const activeSlide = HERO_SLIDES[safeCurrent] || {
+    id: "default",
+    name: "GunLite Torches",
+    spec: "Professional LED Illumination",
+    price: "₹999",
+    link: "/shop",
+    imgWebp: "/images/eaglemain.webp",
+    imgPng: "/images/eaglemain.png",
+    alt: "GunLite High-Power LED Torches",
+  };
 
   return (
     <section className="bg-[#FAFAF8] overflow-hidden" aria-label="Hero Showcase">
@@ -142,7 +137,7 @@ export default function Hero() {
           {/* Full-frame 3:2 product photo area with seamless bottom edge blend */}
           <div className="relative w-full aspect-[3/2] bg-[#16181D] overflow-hidden">
             {HERO_SLIDES.map((slide, idx) => {
-              const isActive = current === idx;
+              const isActive = safeCurrent === idx;
               return (
                 <div
                   key={slide.id}
@@ -182,7 +177,7 @@ export default function Hero() {
                 Featured Hardware
               </span>
               <span className="font-mono text-[10px] font-medium text-white/45 tabular-nums">
-                0{current + 1} / 0{slideCount}
+                0{safeCurrent + 1} / 0{slideCount}
               </span>
             </div>
 
@@ -227,7 +222,7 @@ export default function Hero() {
                   onClick={() => setCurrent(index)}
                   aria-label={`Go to slide ${index + 1}: ${s.name}`}
                   className={`transition-all rounded-full ${
-                    current === index
+                    safeCurrent === index
                       ? "w-6 h-1 bg-white"
                       : "w-1.5 h-1 bg-white/25 hover:bg-white/60"
                   }`}
@@ -319,7 +314,7 @@ export default function Hero() {
                 
                 {/* Product Photos (Cross-fade transition) */}
                 {HERO_SLIDES.map((slide, idx) => {
-                  const isActive = current === idx;
+                  const isActive = safeCurrent === idx;
                   return (
                     <div
                       key={slide.id}
@@ -376,7 +371,7 @@ export default function Hero() {
                     onClick={() => setCurrent(index)}
                     aria-label={`Go to slide ${index + 1}: ${s.name}`}
                     className={`h-2 transition-all rounded-full ${
-                      current === index
+                      safeCurrent === index
                         ? "w-8 bg-[var(--accent)]"
                         : "w-2 bg-[#D5D5CF] hover:bg-[#8B97A8]"
                     }`}

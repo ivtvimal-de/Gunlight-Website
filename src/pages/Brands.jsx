@@ -3,69 +3,14 @@ import { Link } from "react-router-dom";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import SEO from "../components/SEO";
 import ProductCard from "../components/ProductCard";
+import { useCatalog } from "../context/CatalogContext";
 import { BRANDS } from "../config";
 
-// Real 4 GunLite products from product data
-const GUNLITE_PRODUCTS = [
-  {
-    id: "eagle",
-    img: "/images/eagle.webp",
-    fallback: "/images/eagle.png",
-    title: "Eagle 3.1 GunLite",
-    brand: "GunLite",
-    desc: "Long range high-power search light with rugged build.",
-    price: "₹2,499",
-    priceNum: 2499,
-    link: "/eagle",
-    badge: "Best Seller",
-    categories: ["Search Light", "Rechargeable", "LED Torch"],
-    specs: ["50W LED Chip", "Type-C Rechargeable", "SOS Emergency"],
-  },
-  {
-    id: "everest",
-    img: "/images/everest.webp",
-    fallback: "/images/everest.png",
-    title: "Everest LED GunLite",
-    brand: "GunLite",
-    desc: "Professional-grade LED torch with ultra-bright beam.",
-    price: "₹1,999",
-    priceNum: 1999,
-    link: "/everest",
-    badge: "New",
-    categories: ["LED Torch", "Search Light", "Rechargeable"],
-    specs: ["55W LED", "10000mAh Power Bank", "Tri-Light Output"],
-  },
-  {
-    id: "tiger",
-    img: "/images/tigerpro.webp",
-    fallback: "/images/tigerpro.png",
-    title: "Tiger Pro-1 GunLite",
-    brand: "GunLite",
-    desc: "Rechargeable emergency torch for home and industrial use.",
-    price: "₹1,499",
-    priceNum: 1499,
-    link: "/tiger",
-    badge: null,
-    categories: ["Rechargeable", "LED Torch"],
-    specs: ["500 Lumens", "4000mAh Lithium", "CREE LED"],
-  },
-  {
-    id: "sniper",
-    img: "/images/sniper.webp",
-    fallback: "/images/sniper.png",
-    title: "Sniper X2 GunLite",
-    brand: "GunLite",
-    desc: "Compact high-power torch with adjustable zoom function.",
-    price: "₹999",
-    priceNum: 999,
-    link: "/sniper",
-    badge: null,
-    categories: ["LED Torch", "Rechargeable"],
-    specs: ["1000 Lumens", "2× 18650 Battery", "Zoom Flood/Focus"],
-  },
-];
-
 export default function Brands() {
+  const { products } = useCatalog();
+  const GUNLITE_PRODUCTS = products.filter(
+    (p) => !p.brand || p.brand.toLowerCase() === "gunlite"
+  );
   const mainBrand = BRANDS.find((b) => b.slug === "gunlite") || BRANDS[0];
   const demoBrands = BRANDS.filter((b) => b.slug !== "gunlite");
 

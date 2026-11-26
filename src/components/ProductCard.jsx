@@ -15,8 +15,11 @@ export default function ProductCard({ product }) {
     !product.price.includes("[") &&
     product.price !== "On Request";
 
+  const isOutOfStock = Boolean(product.outOfStock || product.stockQuantity <= 0);
+
   const handleAddToCart = (e) => {
     e.preventDefault();
+    if (isOutOfStock) return;
     addItem({
       ...product,
       baseId: product.id,
@@ -37,18 +40,24 @@ export default function ProductCard({ product }) {
   // 1. Category line: uppercase 11px, letter-spacing 0.06em, weight 600, color #8B97A8 (muted)
   const category =
     (product.categories && product.categories[0]) ||
+    product.category?.name ||
     product.category ||
     "LED Torch";
 
   // 3. ONE concise key spec line so it fits cleanly on 2-column mobile without wrapping
   const getShortSpec = () => {
+    if (product.shortSpec) return product.shortSpec;
     if (product.id === "eagle") return "50W LED · Type-C";
     if (product.id === "everest") return "55W LED · 10,000mAh";
     if (product.id === "tiger") return "500 Lm · 4000mAh";
     if (product.id === "sniper") return "1000 Lm · Zoom";
 
     if (product.specs && product.specs.length > 0) {
-      const first = product.specs[0]
+      const firstRaw =
+        typeof product.specs[0] === "string"
+          ? product.specs[0]
+          : product.specs[0].value || product.specs[0].label || "";
+      const first = firstRaw
         .replace(/\s*Chip\s*/i, "")
         .replace(/\s*Rechargeable\s*/i, "")
         .replace(/\s*Emergency\s*/i, "")
@@ -134,9 +143,16 @@ export default function ProductCard({ product }) {
             
             <div className="flex items-center justify-between gap-2">
               {hasValidPrice ? (
-                <span className="font-['Outfit'] font-bold text-[17px] sm:text-[19px] text-white leading-none tabular-nums">
-                  {product.price}
-                </span>
+                <div className="flex items-baseline gap-1.5 min-w-0">
+                  <span className="font-['Outfit'] font-bold text-[17px] sm:text-[19px] text-white leading-none tabular-nums">
+                    {product.price}
+                  </span>
+                  {product.hasDiscount && product.regularPrice && (
+                    <span className="text-[11px] text-white/45 line-through tabular-nums truncate">
+                      {product.regularPrice}
+                    </span>
+                  )}
+                </div>
               ) : (
                 <span className="text-[12px] font-semibold text-[#FF6B7A] leading-none">
                   Price on WhatsApp
@@ -155,7 +171,15 @@ export default function ProductCard({ product }) {
               </a>
             </div>
 
-            {hasValidPrice ? (
+            {isOutOfStock ? (
+              <button
+                type="button"
+                disabled
+                className="w-full h-9 sm:h-10 inline-flex items-center justify-center rounded-xl px-2.5 text-[12px] sm:text-[13px] font-semibold bg-white/10 text-white/50 border border-white/10 cursor-not-allowed whitespace-nowrap"
+              >
+                Out of Stock
+              </button>
+            ) : hasValidPrice ? (
               <button
                 type="button"
                 onClick={handleAddToCart}

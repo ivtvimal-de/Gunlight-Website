@@ -7,8 +7,12 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { WHATSAPP_URL, COMPANY } from "../config";
+import { useCatalog } from "../context/CatalogContext";
 
 export default function Footer() {
+  const { products } = useCatalog();
+  const shopLinks = products.slice(0, 5);
+
   return (
     <footer className="bg-[#14161A] text-[#94A3B8] border-t border-[#232730] font-['Inter'] relative">
       
@@ -42,26 +46,13 @@ export default function Footer() {
               Shop
             </h4>
             <ul className="space-y-2 text-[14px] leading-[1.4] text-[#94A3B8]">
-              <li>
-                <Link to="/eagle" className="hover:text-[var(--accent)] transition-colors">
-                  Eagle 3.1
-                </Link>
-              </li>
-              <li>
-                <Link to="/everest" className="hover:text-[var(--accent)] transition-colors">
-                  Everest LED
-                </Link>
-              </li>
-              <li>
-                <Link to="/tiger" className="hover:text-[var(--accent)] transition-colors">
-                  Tiger Pro-1
-                </Link>
-              </li>
-              <li>
-                <Link to="/sniper" className="hover:text-[var(--accent)] transition-colors">
-                  Sniper X2
-                </Link>
-              </li>
+              {shopLinks.map((item) => (
+                <li key={item.id}>
+                  <Link to={item.link} className="hover:text-[var(--accent)] transition-colors">
+                    {(item.title || "").replace(/\s*GunLite\s*/gi, "").trim() || item.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

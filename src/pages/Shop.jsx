@@ -3,76 +3,20 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, X, Flashlight, Package, Sparkles } from "lucide-react";
-import { useCart } from "../context/CartContext";
+import { useCatalog } from "../context/CatalogContext";
 import SEO from "../components/SEO";
 import ProductCard from "../components/ProductCard";
 import { BRANDS } from "../config";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ── Product catalogue ────────────────────────────────────────────────────────
-const ALL_PRODUCTS = [
-  {
-    id: "eagle",
-    img: "/images/eagle.webp",
-    fallback: "/images/eagle.png",
-    title: "Eagle 3.1 GunLite",
-    brand: "GunLite",
-    desc: "Long range high-power search light with rugged build.",
-    price: "₹2,499",
-    priceNum: 2499,
-    link: "/eagle",
-    badge: "Best Seller",
-    categories: ["Search Light", "Rechargeable", "LED Torch"],
-    specs: ["50W LED Chip", "Type-C Rechargeable", "SOS Emergency"],
-  },
-  {
-    id: "everest",
-    img: "/images/everest.webp",
-    fallback: "/images/everest.png",
-    title: "Everest LED GunLite",
-    brand: "GunLite",
-    desc: "Professional-grade LED torch with ultra-bright beam.",
-    price: "₹1,999",
-    priceNum: 1999,
-    link: "/everest",
-    badge: "New",
-    categories: ["LED Torch", "Search Light", "Rechargeable"],
-    specs: ["55W LED", "10000mAh Power Bank", "Tri-Light Output"],
-  },
-  {
-    id: "tiger",
-    img: "/images/tigerpro.webp",
-    fallback: "/images/tigerpro.png",
-    title: "Tiger Pro-1 GunLite",
-    brand: "GunLite",
-    desc: "Rechargeable emergency torch for home and industrial use.",
-    price: "₹1,499",
-    priceNum: 1499,
-    link: "/tiger",
-    badge: null,
-    categories: ["Rechargeable", "LED Torch"],
-    specs: ["500 Lumens", "4000mAh Lithium", "CREE LED"],
-  },
-  {
-    id: "sniper",
-    img: "/images/sniper.webp",
-    fallback: "/images/sniper.png",
-    title: "Sniper X2 GunLite",
-    brand: "GunLite",
-    desc: "Compact high-power torch with adjustable zoom function.",
-    price: "₹999",
-    priceNum: 999,
-    link: "/sniper",
-    badge: null,
-    categories: ["LED Torch", "Rechargeable"],
-    specs: ["1000 Lumens", "2× 18650 Battery", "Zoom Flood/Focus"],
-  },
-];
-
-const CATEGORY_LIST = ["All", "LED Torch", "Search Light", "Rechargeable"];
-
 export default function Shop() {
+  const { products: ALL_PRODUCTS, categories: apiCategories, loading } = useCatalog();
+  const CATEGORY_LIST = useMemo(
+    () => ["All", ...apiCategories.map((c) => c.name)],
+    [apiCategories]
+  );
+
   const [searchParams, setSearchParams] = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
   const urlCategory = searchParams.get("category");
@@ -104,12 +48,15 @@ export default function Shop() {
 
   const isDemoBrand = Boolean(matchedBrandObj && matchedBrandObj.demo);
 
-  const [activeCategory, setActiveCategory] = useState(
-    urlCategory && CATEGORY_LIST.includes(urlCategory) ? urlCategory : "All"
-  );
-  const [addedId, setAddedId] = useState(null);
+  const matchedUrlCategory = useMemo(() => {
+    if (!urlCategory) return "All";
+    const found = CATEGORY_LIST.find(
+      (c) => c.toLowerCase() === urlCategory.toLowerCase()
+    );
+    return found || urlCategory;
+  }, [urlCategory, CATEGORY_LIST]);
 
-  const { addItem, items } = useCart();
+  const [activeCategory, setActiveCategory] = useState(matchedUrlCategory);
 
   const heroRef = useRef(null);
   const gridRef = useRef(null);
@@ -119,12 +66,12 @@ export default function Shop() {
 
   // Sync state if category in URL changes
   useEffect(() => {
-    if (urlCategory && CATEGORY_LIST.includes(urlCategory)) {
-      setActiveCategory(urlCategory);
+    if (urlCategory) {
+      setActiveCategory(matchedUrlCategory);
     } else if (!urlCategory && !urlQuery) {
       setActiveCategory("All");
     }
-  }, [urlCategory, urlQuery]);
+  }, [urlCategory, urlQuery, matchedUrlCategory]);
 
   // Open brand sheet if opened from navigation state or URL hash
   useEffect(() => {
@@ -181,15 +128,20 @@ export default function Shop() {
         return true;
       }
 
-      // 4. Product Title & Description Match
-      const titleMatch = product.title.toLowerCase().includes(q);
-      const descMatch = product.desc.toLowerCase().includes(q);
+      // 4. Product Title, Description, ShortSpec & SKU Match
+      const titleMatch = (product.title || "").toLowerCase().includes(q);
+      const descMatch = (product.desc || "").toLowerCase().includes(q);
+      const skuMatch = (product.sku || "").toLowerCase().includes(q);
+      const shortSpecMatch = (product.shortSpec || "").toLowerCase().includes(q);
 
-      // 5. Specs Match (e.g. "50w", "55w", "10000mah", "cree", "zoom", "type-c")
-      const specsMatch = product.specs.some((s) => s.toLowerCase().includes(q));
+      // 5. Specs Match (handles both string specs and { label, value } objects from MongoDB)
+      const specsMatch = (product.specs || []).some((s) => {
+        const text = typeof s === "string" ? s : `${s.label || ""} ${s.value || ""}`;
+        return text.toLowerCase().includes(q);
+      });
 
       // 6. Category-wise Search Match (e.g. "search light", "searchlight", "led torch", "torch", "rechargeable")
-      const categoryMatch = product.categories.some((c) => {
+      const categoryMatch = (product.categories || []).some((c) => {
         const cLower = c.toLowerCase();
         const cClean = cLower.replace(/[\s\-_]+/g, "");
         return (
@@ -203,23 +155,25 @@ export default function Shop() {
       // Flexible Category Search Synonyms
       const synonymMatch =
         (q.includes("torch") &&
-          product.categories.some(
+          (product.categories || []).some(
             (c) => c.toLowerCase().includes("torch") || c.toLowerCase().includes("light")
           )) ||
         ((q.includes("search") || q.includes("searchlight") || q.includes("patrol")) &&
-          product.categories.some((c) => c.toLowerCase().includes("search"))) ||
+          (product.categories || []).some((c) => c.toLowerCase().includes("search"))) ||
         ((q.includes("recharge") || q.includes("battery") || q.includes("cell")) &&
-          product.categories.some((c) => c.toLowerCase().includes("recharge")));
+          (product.categories || []).some((c) => c.toLowerCase().includes("recharge")));
 
       return (
         titleMatch ||
         descMatch ||
+        skuMatch ||
+        shortSpecMatch ||
         specsMatch ||
         categoryMatch ||
         synonymMatch
       );
     });
-  }, [activeCategory, urlQuery, isDemoBrand]);
+  }, [ALL_PRODUCTS, activeCategory, urlQuery, isDemoBrand]);
 
   // Animate cards whenever filtered list changes
   useEffect(() => {
@@ -271,12 +225,6 @@ export default function Shop() {
       newParams.category = activeCategory;
     }
     setSearchParams(newParams);
-  };
-
-  const handleAddToCart = (product) => {
-    addItem({ ...product, quantity: 1 });
-    setAddedId(product.id);
-    setTimeout(() => setAddedId(null), 1800);
   };
 
   return (
@@ -373,7 +321,16 @@ export default function Shop() {
 
         {/* ── Product Grid or Empty State ── */}
         <section ref={gridRef} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
-          {isDemoBrand ? (
+          {loading && ALL_PRODUCTS.length === 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-72 rounded-2xl bg-[#111317]/10 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : isDemoBrand ? (
             <div className="flex flex-col items-center justify-center gap-4 py-20 sm:py-24 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-[#E6E6E1] shadow-xs">
                 <Package className="w-8 h-8 text-[var(--accent)]" />

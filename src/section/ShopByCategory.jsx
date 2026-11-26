@@ -1,58 +1,50 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Layers } from "lucide-react";
-
-// Real catalog data to accurately calculate dynamic product counts
-const ALL_PRODUCTS = [
-  { id: "eagle", categories: ["Search Light"], img: "/images/eagle.webp" },
-  { id: "everest", categories: ["LED Torch", "Rechargeable"], img: "/images/everest.webp" },
-  { id: "tiger", categories: ["Rechargeable"], img: "/images/tigerpro.webp" },
-  { id: "sniper", categories: ["LED Torch"], img: "/images/sniper.webp" },
-];
-
-const getModelCount = (categoryName) => {
-  if (categoryName === "All") return `${ALL_PRODUCTS.length} Models`;
-  const count = ALL_PRODUCTS.filter((p) => p.categories.includes(categoryName)).length;
-  return `${count} ${count === 1 ? "Model" : "Models"}`;
-};
-
-const CATEGORIES = [
-  {
-    name: "LED Torches",
-    link: "/shop?category=LED+Torch",
-    desc: "Handheld high-beam",
-    img: "/images/everest.webp",
-    count: getModelCount("LED Torch"),
-  },
-  {
-    name: "Search Lights",
-    link: "/shop?category=Search+Light",
-    desc: "Long-range optics",
-    img: "/images/eagle.webp",
-    count: getModelCount("Search Light"),
-  },
-  {
-    name: "Rechargeable Lights",
-    link: "/shop?category=Rechargeable",
-    desc: "Lithium backup power",
-    img: "/images/tigerpro.webp",
-    count: getModelCount("Rechargeable"),
-  },
-  {
-    name: "All Models",
-    link: "/shop",
-    desc: "Complete lineup",
-    isCollage: true,
-    collageImages: [
-      "/images/eagle.webp",
-      "/images/everest.webp",
-      "/images/tigerpro.webp",
-      "/images/sniper.webp",
-    ],
-    count: getModelCount("All"),
-  },
-];
+import { useCatalog } from "../context/CatalogContext";
 
 export default function ShopByCategory() {
+  const { categories, products } = useCatalog();
+
+  const categoryTiles = categories.map((cat) => {
+    const count =
+      typeof cat.productCount === "number"
+        ? cat.productCount
+        : products.filter((p) =>
+            (p.categories || []).some(
+              (cName) => cName.toLowerCase() === cat.name.toLowerCase()
+            )
+          ).length;
+
+    const matchingProductImg =
+      products.find((p) =>
+        (p.categories || []).some(
+          (cName) => cName.toLowerCase() === cat.name.toLowerCase()
+        )
+      )?.img || "/images/eagle.webp";
+
+    return {
+      name: cat.name,
+      link: `/shop?category=${encodeURIComponent(cat.name)}`,
+      desc: cat.description || "Professional illumination",
+      img: cat.previewImage || cat.image?.url || matchingProductImg,
+      count: `${count} ${count === 1 ? "Model" : "Models"}`,
+    };
+  });
+
+  const collageImages = products.slice(0, 4).map((p) => p.img);
+
+  const CATEGORIES = [
+    ...categoryTiles,
+    {
+      name: "All Models",
+      link: "/shop",
+      desc: "Complete lineup",
+      isCollage: collageImages.length >= 2,
+      collageImages,
+      img: collageImages[0] || "/images/eagle.webp",
+      count: `${products.length} ${products.length === 1 ? "Model" : "Models"}`,
+    },
+  ];
   return (
     <section className="py-9 sm:py-14 bg-[var(--bg-canvas)] border-b border-[var(--border-subtle)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
