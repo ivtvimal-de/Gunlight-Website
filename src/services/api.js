@@ -1,3 +1,9 @@
+import {
+  isDemoModeEnabled,
+  handleDemoRequest,
+  uploadImagesDemo,
+} from "./demoStore";
+
 const RAW_API_URL = import.meta.env.VITE_API_URL || "";
 export const API_BASE_URL = RAW_API_URL.replace(/\/$/, "");
 
@@ -15,33 +21,56 @@ function buildUrl(path, params) {
 }
 
 async function request(path, { method = "GET", body, params, headers = {} } = {}) {
+  if (isDemoModeEnabled() && path.startsWith("/api/")) {
+    return handleDemoRequest(path, { method, body, params });
+  }
+
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
 
-  const response = await fetch(buildUrl(path, params), {
-    method,
-    credentials: "include",
-    headers: isFormData
-      ? headers
-      : {
-          "Content-Type": "application/json",
-          ...headers,
-        },
-    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
-  });
+  let response;
+  try {
+    response = await fetch(buildUrl(path, params), {
+      method,
+      credentials: "include",
+      headers: isFormData
+        ? headers
+        : {
+            "Content-Type": "application/json",
+            ...headers,
+          },
+      body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
+    });
+  } catch (networkErr) {
+    const err = new Error(networkErr?.message || "Unable to reach backend server.");
+    err.isBackendUnavailable = true;
+    throw err;
+  }
 
   let data = null;
   const contentType = response.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
+  const isJson = contentType.includes("application/json");
+  if (isJson) {
     data = await response.json();
   } else {
     const text = await response.text();
     data = { message: text || response.statusText };
   }
 
-  if (!response.ok) {
-    const err = new Error(data?.message || `Request failed (${response.status})`);
+  const backendMissing =
+    response.status === 404 ||
+    response.status === 405 ||
+    response.status >= 502 ||
+    !isJson;
+
+  if (!response.ok || !isJson) {
+    const err = new Error(
+      !isJson && response.ok
+        ? "Backend API server is not connected."
+        : data?.message || `Request failed (${response.status})`
+    );
     err.status = response.status;
     err.data = data;
+    err.isBackendUnavailable = backendMissing;
     throw err;
   }
 
@@ -52,6 +81,10 @@ async function request(path, { method = "GET", body, params, headers = {} } = {}
  * Upload 1..10 image files to Cloudinary via backend with real progress tracking.
  */
 export function uploadImagesWithProgress(files, folder = "gunlite/products", onProgress) {
+  if (isDemoModeEnabled()) {
+    return uploadImagesDemo(files, onProgress);
+  }
+
   return new Promise((resolve, reject) => {
     const formData = new FormData();
     formData.append("folder", folder);

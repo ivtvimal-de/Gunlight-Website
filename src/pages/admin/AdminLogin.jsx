@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { Lock, Mail, Eye, EyeOff, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, ArrowLeft, ShieldCheck, Sparkles } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useCatalog } from "../../context/CatalogContext";
 import { useToast } from "../../context/ToastContext";
 
 export default function AdminLogin() {
-  const { isAuthenticated, authLoading, login } = useAuth();
+  const { isAuthenticated, authLoading, login, enterDemoMode } = useAuth();
+  const { refreshCatalog } = useCatalog();
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,6 +26,13 @@ export default function AdminLogin() {
     }
   }, [authLoading, isAuthenticated, navigate, redirectTo]);
 
+  const handleOpenSampleMode = async () => {
+    enterDemoMode(email.trim() || undefined);
+    await refreshCatalog();
+    toast.success("Opened Admin Panel in Sample UI Preview Mode.");
+    navigate(redirectTo, { replace: true });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
@@ -35,8 +44,13 @@ export default function AdminLogin() {
 
     try {
       setSubmitting(true);
-      await login(email.trim(), password);
-      toast.success("Welcome back to GunLite Admin.");
+      const res = await login(email.trim(), password);
+      if (res?.demo) {
+        await refreshCatalog();
+        toast.info("Backend not connected — opened Admin Panel in Sample Preview Mode.");
+      } else {
+        toast.success("Welcome back to GunLite Admin.");
+      }
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setErrorMsg(err.message || "Invalid email or password.");
@@ -129,9 +143,20 @@ export default function AdminLogin() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-[#F1F1ED] flex items-center justify-center gap-2 text-[11px] text-[#6B727C]">
-            <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />
-            <span>Protected with HTTP-only JWT authentication</span>
+          <div className="mt-4 pt-4 border-t border-[#F1F1ED] space-y-3">
+            <button
+              type="button"
+              onClick={handleOpenSampleMode}
+              className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] hover:bg-[#F4F4F1] text-xs font-semibold text-[#14161A] inline-flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
+              <span>Preview Admin UI (Sample Mode — No Backend)</span>
+            </button>
+
+            <div className="flex items-center justify-center gap-2 text-[11px] text-[#6B727C]">
+              <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />
+              <span>Protected with HTTP-only JWT authentication</span>
+            </div>
           </div>
         </div>
       </div>

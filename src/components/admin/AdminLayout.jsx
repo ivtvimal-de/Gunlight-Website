@@ -10,8 +10,10 @@ import {
   Menu,
   X,
   Shield,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useCatalog } from "../../context/CatalogContext";
 import { useToast } from "../../context/ToastContext";
 
 const NAV_ITEMS = [
@@ -24,7 +26,8 @@ const NAV_ITEMS = [
 export default function AdminLayout({ title = "Dashboard", subtitle = "", actions = null, children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const { admin, logout } = useAuth();
+  const { admin, isDemoMode, logout } = useAuth();
+  const { refreshCatalog } = useCatalog();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -32,6 +35,7 @@ export default function AdminLayout({ title = "Dashboard", subtitle = "", action
     try {
       setLoggingOut(true);
       await logout();
+      refreshCatalog();
       toast.success("Logged out of Admin Console.");
       navigate("/admin/login", { replace: true });
     } catch (err) {
@@ -180,6 +184,25 @@ export default function AdminLayout({ title = "Dashboard", subtitle = "", action
 
           {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
         </header>
+
+        {/* Sample UI Preview Notice Banner */}
+        {isDemoMode && (
+          <div className="bg-amber-50 border-b border-amber-200 px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-900">
+            <div className="flex items-center gap-2 min-w-0">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>
+                <strong>Sample UI Preview Mode:</strong> Backend API is not connected, so changes are saved temporarily in this browser session.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="font-semibold text-amber-800 hover:underline shrink-0"
+            >
+              Exit Preview
+            </button>
+          </div>
+        )}
 
         {/* Page Body */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1400px] w-full mx-auto">
