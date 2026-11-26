@@ -59,15 +59,15 @@ export default function FeaturedProducts() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex items-end justify-between gap-3 mb-6 sm:mb-9">
+        <div className="flex items-end justify-between gap-3 mb-5 sm:mb-9">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold text-[var(--accent)] uppercase tracking-[0.08em]">
                 <Zap className="w-3.5 h-3.5" />
                 Featured Collection
               </span>
             </div>
-            <h2 className="font-['Outfit'] text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] tracking-tight leading-tight">
+            <h2 className="font-['Outfit'] text-xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight leading-tight">
               Popular Illumination Hardware
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1 hidden sm:block">
