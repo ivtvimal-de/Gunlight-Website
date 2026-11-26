@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ArrowUpRight, Layers } from "lucide-react";
+import { ArrowRight, Layers } from "lucide-react";
 
 // Real catalog data to accurately calculate dynamic product counts
 const ALL_PRODUCTS = [
@@ -79,49 +79,18 @@ export default function ShopByCategory() {
           </Link>
         </div>
 
-        {/* Distinct Premium Category Setup:
-            - Mobile: Sleek dark obsidian horizontal split cards (text left, full 3:2 photo right)
-            - Tablet/Desktop: 2-col / 4-col obsidian showcase cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-5">
+        {/* Hero-Style Dark Obsidian Category Cards (Full 3:2 photo on top + smooth feather + category info below) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.name}
               to={cat.link}
-              className="group flex flex-row sm:flex-col items-center sm:items-stretch justify-between gap-3 sm:gap-0 rounded-2xl bg-[#14161A] border border-white/[0.08] p-2 pl-4 sm:p-2.5 shadow-[0_6px_20px_rgba(20,22,26,0.08)] hover:shadow-[0_14px_32px_rgba(20,22,26,0.16)] hover:border-white/20 transition-all duration-250 active:scale-[0.985] sm:active:scale-100 sm:hover:-translate-y-1"
+              className="group flex flex-col h-full rounded-2xl sm:rounded-[20px] overflow-hidden bg-[#111317] ring-1 ring-black/10 shadow-[0_8px_24px_rgba(20,22,26,0.12)] hover:shadow-[0_14px_32px_rgba(20,22,26,0.18)] transition-all duration-250 active:scale-[0.98] md:active:scale-100 md:hover:-translate-y-1"
             >
-              {/* Text Content (Left on mobile, Bottom on desktop) */}
-              <div className="flex-1 min-w-0 sm:order-2 sm:px-2 sm:pt-3.5 sm:pb-2 flex flex-col justify-between">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/55">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-                    <span>{cat.count}</span>
-                  </div>
-
-                  <h3 className="font-['Outfit'] font-bold text-[15.5px] min-[390px]:text-[17px] sm:text-[18px] text-white tracking-tight leading-snug mt-1 truncate group-hover:text-white">
-                    {cat.name}
-                  </h3>
-
-                  <p className="text-[11.5px] sm:text-xs text-[#9CA3AF] mt-0.5 leading-snug truncate">
-                    {cat.desc}
-                  </p>
-                </div>
-
-                <div className="mt-2 sm:mt-3.5 flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-white/85 group-hover:text-white transition-colors">
-                    <span>Explore</span>
-                    <ArrowRight className="w-3 h-3 text-[var(--accent)] transition-transform duration-250 group-hover:translate-x-0.5" />
-                  </span>
-
-                  <span className="hidden sm:flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.08] text-white/80 group-hover:bg-[var(--accent)] group-hover:text-white transition-colors">
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-              </div>
-
-              {/* Clean 3:2 Framed Image (Right on mobile, Top on desktop — zero cropping, zero overlap) */}
-              <div className="relative w-[124px] min-[390px]:w-[138px] sm:w-full aspect-[3/2] shrink-0 overflow-hidden rounded-xl bg-[#1D2026] ring-1 ring-white/10 sm:order-1">
+              {/* Top: Full 3:2 Photo with bottom feather blend (matching Hero card) */}
+              <div className="relative w-full aspect-[3/2] bg-[#16181D] overflow-hidden shrink-0">
                 {cat.isCollage ? (
-                  <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-[1.5px] bg-[#14161A] transition-transform duration-500 ease-out sm:group-hover:scale-104">
+                  <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-[1.5px] bg-[#111317] transition-transform duration-500 ease-out md:group-hover:scale-104">
                     {cat.collageImages.map((imgSrc, idx) => (
                       <div key={idx} className="relative h-full w-full overflow-hidden bg-[#1D2026]">
                         <img
@@ -142,9 +111,42 @@ export default function ShopByCategory() {
                     width={1536}
                     height={1024}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 ease-out sm:group-hover:scale-104"
+                    className="h-full w-full object-cover transition-transform duration-500 ease-out md:group-hover:scale-104"
                   />
                 )}
+
+                {/* Seamless bottom feather melting image into dark card footer */}
+                <div
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-[#111317] via-[#111317]/45 to-transparent z-10"
+                  aria-hidden="true"
+                />
+              </div>
+
+              {/* Bottom: Sleek Dark Editorial Footer (matching Hero card) */}
+              <div className="flex-1 flex flex-col justify-between bg-gradient-to-b from-[#111317] to-[#171A21] px-3 sm:px-4 pt-1.5 sm:pt-2 pb-3 sm:pb-4">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 text-[9.5px] sm:text-[10px] font-semibold uppercase tracking-[0.1em] text-white/55">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                    <span>{cat.count}</span>
+                  </span>
+
+                  <h3 className="font-['Outfit'] font-bold text-[14px] min-[390px]:text-[15.5px] sm:text-[17px] text-white tracking-tight leading-snug mt-1 truncate">
+                    {cat.name}
+                  </h3>
+
+                  <p className="text-[11px] sm:text-xs text-[#9CA3AF] mt-0.5 leading-snug truncate">
+                    {cat.desc}
+                  </p>
+                </div>
+
+                <div className="mt-2.5 sm:mt-3.5 pt-2 sm:pt-2.5 border-t border-white/[0.08] flex items-center justify-between gap-2">
+                  <span className="text-[11px] sm:text-xs font-semibold text-white/90 group-hover:text-white transition-colors">
+                    Shop now
+                  </span>
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[0_2px_8px_rgba(217,15,37,0.35)] transition-transform duration-250 group-hover:translate-x-0.5">
+                    <ArrowRight className="h-3 w-3" />
+                  </div>
+                </div>
               </div>
             </Link>
           ))}
