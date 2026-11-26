@@ -4,9 +4,9 @@ import { WHATSAPP_URL, COMPANY } from "../config";
 
 export default function DealerBanner() {
   return (
-    <section className="py-14 sm:py-18 bg-[var(--bg-canvas)] border-b border-[var(--border-subtle)]">
+    <section className="py-10 sm:py-18 bg-[var(--bg-canvas)] border-b border-[var(--border-subtle)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl border border-[#232730] bg-[#14161A] p-8 sm:p-12 text-[#94A3B8] shadow-lg overflow-hidden">
+        <div className="relative rounded-2xl sm:rounded-3xl border border-[#232730] bg-[#14161A] p-5 sm:p-12 text-[#94A3B8] shadow-lg overflow-hidden">
           
           {/* Subtle Ambient Red Tint */}
           <div className="pointer-events-none absolute right-0 bottom-0 h-64 w-64 rounded-full bg-[var(--accent)] opacity-10 blur-3xl" />

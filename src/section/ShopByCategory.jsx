@@ -20,7 +20,7 @@ const CATEGORIES = [
     name: "LED Torches",
     slug: "LED+Torch",
     link: "/shop?category=LED+Torch",
-    desc: "High-power handheld illumination",
+    desc: "High-power handheld beams",
     img: "/images/everest.webp",
     count: getProductCount("LED Torch"),
   },
@@ -28,7 +28,7 @@ const CATEGORIES = [
     name: "Search Lights",
     slug: "Search+Light",
     link: "/shop?category=Search+Light",
-    desc: "Extreme long-range focused beam",
+    desc: "Long-range focused optics",
     img: "/images/eagle.webp",
     count: getProductCount("Search Light"),
   },
@@ -44,7 +44,7 @@ const CATEGORIES = [
     name: "All Models",
     slug: "All",
     link: "/shop",
-    desc: "Complete hardware collection",
+    desc: "Complete GunLite lineup",
     isCollage: true,
     collageImages: [
       "/images/eagle.webp",
@@ -58,49 +58,50 @@ const CATEGORIES = [
 
 export default function ShopByCategory() {
   return (
-    <section className="py-14 sm:py-16 bg-[var(--bg-canvas)] border-b border-[var(--border-subtle)]">
+    <section className="py-10 sm:py-16 bg-[var(--bg-canvas)] border-b border-[var(--border-subtle)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+        <div className="flex items-end justify-between gap-3 mb-6 sm:mb-9">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
                 <Layers className="w-3.5 h-3.5" />
                 Hardware Categories
               </span>
             </div>
-            <h2 className="font-['Outfit'] text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+            <h2 className="font-['Outfit'] text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] tracking-tight leading-tight">
               Shop by Category
             </h2>
           </div>
           <Link
             to="/shop"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+            className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors pb-0.5"
           >
-            <span>View All Categories</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>View All</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        {/* 4-Card Category Grid (Aspect Ratio 4:5 on desktop and mobile) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        {/* 4-Card Category Grid: 3:2 full-frame photo on top + clean editorial card footer below */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.name}
               to={cat.link}
-              className="group relative flex flex-col aspect-[4/5] w-full overflow-hidden rounded-2xl bg-[#14161A] shadow-[0_4px_20px_rgba(20,22,26,0.06)] hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5"
+              className="group flex flex-col h-full overflow-hidden rounded-2xl bg-white border border-[#E6E6E1] shadow-[0_2px_12px_rgba(20,22,26,0.04)] hover:shadow-[0_10px_28px_rgba(20,22,26,0.09)] hover:border-[#D4D4CE] transition-all duration-250 active:scale-[0.98] md:active:scale-100 md:hover:-translate-y-1"
             >
-              {/* Image Layer: Full card coverage */}
-              <div className="absolute inset-0 h-full w-full overflow-hidden">
+              {/* Clean 3:2 Image Frame: Zero cropping, zero floating badge collisions */}
+              <div className="relative w-full aspect-[3/2] overflow-hidden bg-[#14161A] shrink-0">
                 {cat.isCollage ? (
-                  // 2x2 collage representing all models
-                  <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-0.5 bg-[#14161A] transition-transform duration-500 ease-out group-hover:scale-105">
+                  <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-[1.5px] bg-[#14161A] transition-transform duration-500 ease-out md:group-hover:scale-104">
                     {cat.collageImages.map((imgSrc, idx) => (
                       <div key={idx} className="relative h-full w-full overflow-hidden bg-[#1b1e24]">
                         <img
                           src={imgSrc}
                           alt={`GunLite Model ${idx + 1}`}
+                          width={1536}
+                          height={1024}
                           loading="lazy"
                           className="h-full w-full object-cover"
                         />
@@ -108,52 +109,38 @@ export default function ShopByCategory() {
                     ))}
                   </div>
                 ) : (
-                  // Single product image covering full tile
                   <img
                     src={cat.img}
                     alt={cat.name}
+                    width={1536}
+                    height={1024}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-500 ease-out md:group-hover:scale-104"
                   />
                 )}
+                <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/10" aria-hidden="true" />
               </div>
 
-              {/* Dark Gradient Overlay (transparent to rgba(20,22,26,0.85)) */}
-              <div
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgba(20, 22, 26, 0.88) 0%, rgba(20, 22, 26, 0.65) 35%, rgba(20, 22, 26, 0.2) 65%, rgba(20, 22, 26, 0) 100%)",
-                }}
-              />
-
-              {/* Real Product Count Chip */}
-              <div className="absolute top-3 sm:top-3.5 left-3 sm:left-3.5 z-10">
-                <span className="inline-block rounded-full bg-black/45 backdrop-blur-md px-2.5 py-1 text-[10px] sm:text-[11px] font-medium text-white/90 border border-white/10 shadow-xs">
-                  {cat.count}
-                </span>
-              </div>
-
-              {/* Bottom Text Content */}
-              <div className="relative z-10 mt-auto p-4 sm:p-5 flex flex-col justify-end">
-                <h3 className="font-['Outfit'] font-semibold text-base sm:text-lg lg:text-xl text-white tracking-tight leading-snug">
-                  {cat.name}
-                </h3>
-                <p className="text-[11px] sm:text-xs text-white/80 line-clamp-1 mt-1 font-normal">
-                  {cat.desc}
-                </p>
-
-                {/* "Shop now" + Circle Arrow Button */}
-                <div className="mt-3.5 sm:mt-4 flex items-center justify-between pt-1">
-                  <span className="text-xs font-semibold text-white tracking-wide">
-                    Shop now
-                  </span>
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-xs transition-colors duration-300 group-hover:bg-white group-hover:text-[var(--accent)]">
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+              {/* Clean Structured Card Footer */}
+              <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between bg-white">
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center rounded-md bg-[#F4F4F1] px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold text-[#4A5058]">
+                      {cat.count}
+                    </span>
+                    <div className="flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent-tint)] text-[var(--accent)] transition-colors duration-250 group-hover:bg-[var(--accent)] group-hover:text-white">
+                      <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform duration-250 group-hover:translate-x-0.5" />
+                    </div>
                   </div>
+
+                  <h3 className="font-['Outfit'] font-bold text-[14.5px] sm:text-[17px] text-[#14161A] tracking-tight leading-snug mt-2.5 group-hover:text-[var(--accent)] transition-colors">
+                    {cat.name}
+                  </h3>
+                  <p className="text-[11px] sm:text-xs text-[#6B727C] mt-0.5 leading-snug">
+                    {cat.desc}
+                  </p>
                 </div>
               </div>
-
             </Link>
           ))}
         </div>

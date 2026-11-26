@@ -129,22 +129,18 @@ export default function Hero() {
       
       {/* ─────────────────────────────────────────────────────────────
           1. MOBILE HERO BANNER (under 1024px / lg:hidden)
-          - Full width with 16px side margin (px-4)
-          - 16px radius (rounded-2xl)
-          - 3:2 image frame matching the 1536x1024 photos so 100% of each photo is visible without cropping
-          - Slider of 4 products with fade & touch swipe
-          - Dedicated dark info bar below the photo (never covering the product)
-          - Product name, spec line, price, red "Shop Now" button & dots
+          - Full-frame 3:2 photo (zero cropping) with seamless bottom feather
+          - Sleek flagship dark card with editorial slide counter, crisp specs, price & CTA
          ───────────────────────────────────────────────────────────── */}
-      <div className="lg:hidden px-4 pt-3 pb-4">
+      <div className="lg:hidden px-4 pt-3 pb-5">
         <div
-          className="w-full rounded-2xl overflow-hidden bg-[#14161A] shadow-[0_4px_16px_rgba(20,22,26,0.08)] select-none"
+          className="w-full rounded-[20px] overflow-hidden bg-[#111317] ring-1 ring-black/10 shadow-[0_12px_32px_rgba(20,22,26,0.14)] select-none"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Full-frame 3:2 product photo area (no cropping, no text overlapping the image) */}
-          <div className="relative w-full aspect-[3/2] bg-[#14161A]">
+          {/* Full-frame 3:2 product photo area with seamless bottom edge blend */}
+          <div className="relative w-full aspect-[3/2] bg-[#16181D] overflow-hidden">
             {HERO_SLIDES.map((slide, idx) => {
               const isActive = current === idx;
               return (
@@ -170,31 +166,54 @@ export default function Hero() {
                 </div>
               );
             })}
+
+            {/* Subtle 28px feather at the very bottom edge to melt photo into card footer */}
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-[#111317] via-[#111317]/45 to-transparent z-20"
+              aria-hidden="true"
+            />
           </div>
 
-          {/* Product info, Shop Now CTA & slide dots below the photo */}
-          <div className="bg-[#14161A] border-t border-white/10 px-4 pt-3.5 pb-3.5 flex flex-col">
-            <h2 className="text-white font-['Outfit'] font-bold text-lg leading-tight truncate">
+          {/* Sleek Dark Editorial Footer */}
+          <div className="bg-gradient-to-b from-[#111317] to-[#171A21] px-4 pt-2 pb-4 flex flex-col">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/60">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                Featured Hardware
+              </span>
+              <span className="font-mono text-[10px] font-medium text-white/45 tabular-nums">
+                0{current + 1} / 0{slideCount}
+              </span>
+            </div>
+
+            <h2 className="text-white font-['Outfit'] font-bold text-[20px] leading-tight tracking-tight truncate">
               {activeSlide.name}
             </h2>
-            <p className="text-white/75 text-xs mt-1 leading-snug truncate">
+            <p className="text-[#9CA3AF] text-[12.5px] mt-0.5 leading-snug truncate">
               {activeSlide.spec}
             </p>
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <span className="text-white font-['Outfit'] font-bold text-base sm:text-lg">
-                {activeSlide.price}
-              </span>
+
+            <div className="mt-3.5 pt-3 border-t border-white/[0.08] flex items-center justify-between gap-3">
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase tracking-wider text-white/45 font-medium leading-none">
+                  Price
+                </span>
+                <span className="text-white font-['Outfit'] font-bold text-[20px] leading-tight mt-0.5 tabular-nums">
+                  {activeSlide.price}
+                </span>
+              </div>
+
               <Link
                 to={activeSlide.link}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-5 h-10 text-xs font-semibold text-white shadow-sm transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-5 h-10 text-[13px] font-semibold text-white shadow-[0_4px_14px_rgba(217,15,37,0.35)] transition-all active:scale-[0.98]"
               >
                 <span>Shop Now</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            {/* Dots centered at bottom */}
-            <div className="mt-3 flex items-center justify-center gap-1.5">
+            {/* Minimal Progress Indicators */}
+            <div className="mt-3.5 flex items-center justify-center gap-1.5">
               {HERO_SLIDES.map((s, index) => (
                 <button
                   key={s.id}
@@ -202,8 +221,8 @@ export default function Hero() {
                   aria-label={`Go to slide ${index + 1}: ${s.name}`}
                   className={`transition-all rounded-full ${
                     current === index
-                      ? "w-5 h-1.5 bg-white"
-                      : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"
+                      ? "w-6 h-1 bg-white"
+                      : "w-1.5 h-1 bg-white/25 hover:bg-white/60"
                   }`}
                 />
               ))}

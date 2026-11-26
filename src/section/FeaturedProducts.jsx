@@ -55,36 +55,36 @@ export const STORE_PRODUCTS = [
 
 export default function FeaturedProducts() {
   return (
-    <section className="py-12 sm:py-20 bg-white border-b border-[var(--border-subtle)]">
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+    <section className="py-10 sm:py-16 bg-white border-b border-[var(--border-subtle)]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10">
+        <div className="flex items-end justify-between gap-3 mb-6 sm:mb-9">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
                 <Zap className="w-3.5 h-3.5" />
                 Featured Collection
               </span>
             </div>
-            <h2 className="font-['Outfit'] text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+            <h2 className="font-['Outfit'] text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--text-primary)] tracking-tight leading-tight">
               Popular Illumination Hardware
             </h2>
-            <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1">
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1 hidden sm:block">
               Tested, verified models ready for instant dispatch across India
             </p>
           </div>
           <Link
             to="/shop"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+            className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors pb-0.5"
           >
-            <span>Explore All Torches</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Explore All</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        {/* 4-Column Product Grid (2 columns on mobile with 12px gap / 4 columns on desktop with 24px gap) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        {/* 4-Column Product Grid (2 columns on mobile / 4 columns on desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
           {STORE_PRODUCTS.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
