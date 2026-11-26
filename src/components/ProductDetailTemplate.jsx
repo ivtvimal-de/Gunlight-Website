@@ -14,8 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useCart } from "../context/CartContext";
-import { WHATSAPP_NUMBER, CLAIMS } from "../config";
+import { useCart, parsePriceNum, formatPrice } from "../context/CartContext";
+import { WHATSAPP_NUMBER, CLAIMS, WARRANTY_OPTION } from "../config";
 import SEO from "./SEO";
 import ProductCard from "./ProductCard";
 
@@ -69,6 +69,7 @@ export default function ProductDetailTemplate({
   const galleryImages = images.length > 0 ? images : [product.img];
   const [activeIdx, setActiveIdx] = useState(0);
   const [qty, setQty] = useState(1);
+  const [withWarranty, setWithWarranty] = useState(false);
   const [added, setAdded] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const touchStartX = useRef(null);
@@ -77,13 +78,22 @@ export default function ProductDetailTemplate({
   useEffect(() => {
     setActiveIdx(0);
     setQty(1);
+    setWithWarranty(false);
     setIsZoomed(false);
   }, [product.id]);
 
   const activeImg = galleryImages[activeIdx] || galleryImages[0];
 
   const { addItem, openCart, items } = useCart();
-  const inCart = items.find((i) => i.id === product.id);
+  const inCartCount = items
+    .filter((i) => (i.baseId || i.id) === product.id)
+    .reduce((sum, i) => sum + i.quantity, 0);
+
+  const basePriceNum = product.priceNum ?? parsePriceNum(product.price);
+  const hasValidPrice = basePriceNum > 0;
+  const activeWarrantyFee = withWarranty ? WARRANTY_OPTION.fee : 0;
+  const unitPriceNum = hasValidPrice ? basePriceNum + activeWarrantyFee : 0;
+  const displayUnitPrice = unitPriceNum > 0 ? formatPrice(unitPriceNum) : product.price;
 
   const handlePrevImg = () => {
     setIsZoomed(false);
@@ -117,13 +127,22 @@ export default function ProductDetailTemplate({
   };
 
   const handleAddToCart = () => {
-    addItem({ ...product, quantity: qty });
+    addItem({
+      ...product,
+      baseId: product.id,
+      basePriceNum,
+      hasWarranty: withWarranty,
+      warrantyFee: activeWarrantyFee,
+      quantity: qty,
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
   const waText = encodeURIComponent(
-    `Hi GunLite, I am interested in ordering ${product.title} (${product.price}, Qty: ${qty}). Please share delivery timeline and payment details.`
+    `Hi GunLite, I am interested in ordering ${product.title}${
+      withWarranty ? ` with ${WARRANTY_OPTION.label} (+₹${WARRANTY_OPTION.fee})` : ""
+    } (${displayUnitPrice}, Qty: ${qty}). Please share delivery timeline and payment details.`
   );
   const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
 
@@ -360,11 +379,18 @@ export default function ProductDetailTemplate({
                 </div>
 
                 {/* Price Display */}
-                <div className="flex items-baseline gap-3 pb-6 border-b border-[var(--border-subtle)]">
-                  <span className="font-['Outfit'] text-3xl sm:text-4xl font-bold text-[var(--text-primary)]">
-                    {product.price}
-                  </span>
-                  <span className="text-xs text-[var(--text-muted)]">Inclusive of all taxes</span>
+                <div className="pb-5 border-b border-[var(--border-subtle)]">
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-['Outfit'] text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tabular-nums">
+                      {displayUnitPrice}
+                    </span>
+                    <span className="text-xs text-[var(--text-muted)]">Inclusive of all taxes</span>
+                  </div>
+                  {withWarranty && (
+                    <p className="mt-1 text-xs font-medium text-[var(--accent)]">
+                      Includes {product.price} + ₹{WARRANTY_OPTION.fee} ({WARRANTY_OPTION.label})
+                    </p>
+                  )}
                 </div>
 
                 {/* Description */}
@@ -372,8 +398,47 @@ export default function ProductDetailTemplate({
                   {product.desc}
                 </p>
 
+                {/* Optional 1-Year Warranty Add-On Tick Box (+₹500) */}
+                {hasValidPrice && (
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={withWarranty}
+                    onClick={() => setWithWarranty((prev) => !prev)}
+                    className={`w-full flex items-center justify-between gap-3 rounded-xl border p-3.5 text-left transition-all cursor-pointer ${
+                      withWarranty
+                        ? "border-[var(--accent)] bg-[var(--accent-tint)]/60 shadow-2xs"
+                        : "border-[var(--border-subtle)] bg-[var(--bg-canvas)] hover:border-[#CFCFC8]"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3 min-w-0">
+                      <span
+                        className={`mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-[5px] border transition-colors ${
+                          withWarranty
+                            ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                            : "border-[#B8B8B0] bg-white"
+                        }`}
+                      >
+                        {withWarranty && <Check className="h-3 w-3 stroke-[3]" />}
+                      </span>
+                      <div className="min-w-0">
+                        <span className="block text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
+                          Add {WARRANTY_OPTION.label}
+                        </span>
+                        <span className="block text-[11px] text-[var(--text-muted)] mt-0.5 leading-snug">
+                          Optional · {WARRANTY_OPTION.detail}
+                        </span>
+                      </div>
+                    </div>
+
+                    <span className="shrink-0 font-['Outfit'] text-sm font-bold text-[var(--accent)] tabular-nums">
+                      +₹{WARRANTY_OPTION.fee}
+                    </span>
+                  </button>
+                )}
+
                 {/* Quantity Stepper */}
-                <div className="space-y-2 pt-2">
+                <div className="space-y-2 pt-1">
                   <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider block">
                     Quantity
                   </label>
@@ -399,9 +464,9 @@ export default function ProductDetailTemplate({
                       </button>
                     </div>
 
-                    {inCart && (
+                    {inCartCount > 0 && (
                       <span className="text-xs text-[var(--accent)] font-medium">
-                        ({inCart.quantity} already in cart)
+                        ({inCartCount} already in cart)
                       </span>
                     )}
                   </div>
@@ -440,7 +505,7 @@ export default function ProductDetailTemplate({
                     <span>Order on WhatsApp</span>
                   </a>
 
-                  {inCart && (
+                  {inCartCount > 0 && (
                     <button
                       onClick={openCart}
                       className="w-full text-center text-xs text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors pt-1"
@@ -515,10 +580,10 @@ export default function ProductDetailTemplate({
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[var(--border-subtle)] px-4 pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 md:hidden shadow-[0_-4px_20px_rgba(20,22,26,0.08)]">
           <div className="min-w-0">
             <span className="block text-[11px] text-[var(--text-muted)] truncate">
-              {product.title}
+              {product.title}{withWarranty ? " · +1-Yr Warranty" : ""}
             </span>
             <span className="font-['Outfit'] text-base font-bold text-[var(--text-primary)] tabular-nums">
-              {product.price}
+              {displayUnitPrice}
             </span>
           </div>
 

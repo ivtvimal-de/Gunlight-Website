@@ -55,15 +55,80 @@ function saveToStorage(items) {
 function cartReducer(state, action) {
   switch (action.type) {
     case "ADD_ITEM": {
-      const { id, title, price, img } = action.payload;
-      const priceNum = parsePriceNum(price);
-      const existing = state.find((i) => i.id === id);
+      const { title, img } = action.payload;
+      const baseId = action.payload.baseId || action.payload.id;
+      const hasWarranty = Boolean(action.payload.hasWarranty);
+      const warrantyFee = hasWarranty ? (action.payload.warrantyFee ?? 500) : 0;
+      const cartId = hasWarranty ? `${baseId}__warranty` : baseId;
+      const basePriceNum =
+        action.payload.basePriceNum ?? parsePriceNum(action.payload.price);
+      const priceNum = basePriceNum > 0 ? basePriceNum + warrantyFee : 0;
+      const price = priceNum > 0 ? formatPrice(priceNum) : action.payload.price;
+      const quantityToAdd = action.payload.quantity ?? 1;
+
+      const existing = state.find((i) => i.id === cartId);
       if (existing) {
         return state.map((i) =>
-          i.id === id ? { ...i, quantity: i.quantity + (action.payload.quantity ?? 1) } : i
+          i.id === cartId ? { ...i, quantity: i.quantity + quantityToAdd } : i
         );
       }
-      return [...state, { id, title, price, priceNum, img, quantity: action.payload.quantity ?? 1 }];
+      return [
+        ...state,
+        {
+          id: cartId,
+          baseId,
+          title,
+          price,
+          priceNum,
+          basePriceNum,
+          hasWarranty,
+          warrantyFee,
+          img,
+          quantity: quantityToAdd,
+        },
+      ];
+    }
+
+    case "TOGGLE_WARRANTY": {
+      const { id, warrantyFee = 500 } = action.payload;
+      const target = state.find((i) => i.id === id);
+      if (!target) return state;
+
+      const nextWarranty = !target.hasWarranty;
+      const baseId = target.baseId || String(target.id).replace(/__warranty$/, "");
+      const nextId = nextWarranty ? `${baseId}__warranty` : baseId;
+      const basePriceNum =
+        target.basePriceNum ??
+        (target.hasWarranty
+          ? Math.max(0, target.priceNum - (target.warrantyFee ?? warrantyFee))
+          : target.priceNum);
+      const nextWarrantyFee = nextWarranty ? warrantyFee : 0;
+      const nextPriceNum = basePriceNum > 0 ? basePriceNum + nextWarrantyFee : 0;
+      const nextPrice = nextPriceNum > 0 ? formatPrice(nextPriceNum) : target.price;
+
+      const duplicate = state.find((i) => i.id === nextId && i.id !== id);
+      if (duplicate) {
+        return state
+          .filter((i) => i.id !== id)
+          .map((i) =>
+            i.id === nextId ? { ...i, quantity: i.quantity + target.quantity } : i
+          );
+      }
+
+      return state.map((i) =>
+        i.id === id
+          ? {
+              ...i,
+              id: nextId,
+              baseId,
+              basePriceNum,
+              hasWarranty: nextWarranty,
+              warrantyFee: nextWarrantyFee,
+              priceNum: nextPriceNum,
+              price: nextPrice,
+            }
+          : i
+      );
     }
 
     case "REMOVE_ITEM":
@@ -102,13 +167,20 @@ export function CartProvider({ children }) {
     return () => { document.body.style.overflow = ""; };
   }, [isCartOpen]);
 
-  const addItem    = useCallback((item) => dispatch({ type: "ADD_ITEM",        payload: item }), []);
-  const removeItem = useCallback((id)   => dispatch({ type: "REMOVE_ITEM",     payload: id   }), []);
-  const updateQuantity = useCallback((id, quantity) =>
-    dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity } }), []);
-  const clearCart  = useCallback(()     => dispatch({ type: "CLEAR_CART" }), []);
-  const openCart   = useCallback(()     => setIsCartOpen(true),  []);
-  const closeCart  = useCallback(()     => setIsCartOpen(false), []);
+  const addItem = useCallback((item) => dispatch({ type: "ADD_ITEM", payload: item }), []);
+  const toggleWarranty = useCallback(
+    (id, warrantyFee = 500) =>
+      dispatch({ type: "TOGGLE_WARRANTY", payload: { id, warrantyFee } }),
+    []
+  );
+  const removeItem = useCallback((id) => dispatch({ type: "REMOVE_ITEM", payload: id }), []);
+  const updateQuantity = useCallback(
+    (id, quantity) => dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity } }),
+    []
+  );
+  const clearCart = useCallback(() => dispatch({ type: "CLEAR_CART" }), []);
+  const openCart = useCallback(() => setIsCartOpen(true), []);
+  const closeCart = useCallback(() => setIsCartOpen(false), []);
 
   // Derived values
   const cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
@@ -120,6 +192,7 @@ export function CartProvider({ children }) {
       value={{
         items,
         addItem,
+        toggleWarranty,
         removeItem,
         updateQuantity,
         clearCart,

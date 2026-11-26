@@ -114,3 +114,10 @@ export const CLAIMS = {
   gstin: "33AAMFJ0709K1ZD",
   pitch: "Professional-grade illumination hardware by Jerone Enterprises. High-power rechargeable LED searchlights and portable torches built for emergency, industrial, and outdoor use across India.",
 };
+
+/** Optional paid warranty add-on selectable per product */
+export const WARRANTY_OPTION = {
+  fee: 500,
+  label: "1-Year Warranty",
+  detail: "Internal LED chip & switch coverage",
+};

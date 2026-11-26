@@ -1,16 +1,35 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, MessageCircle, Check } from "lucide-react";
-import { useCart } from "../context/CartContext";
-import { WHATSAPP_NUMBER } from "../config";
+import { useCart, parsePriceNum, formatPrice } from "../context/CartContext";
+import { WHATSAPP_NUMBER, WARRANTY_OPTION } from "../config";
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
+  const [withWarranty, setWithWarranty] = useState(false);
+
+  const basePriceNum = product.priceNum ?? parsePriceNum(product.price);
+  const hasValidPrice =
+    basePriceNum > 0 &&
+    product.price &&
+    !product.price.includes("[") &&
+    product.price !== "On Request";
+
+  const activeWarrantyFee = withWarranty ? WARRANTY_OPTION.fee : 0;
+  const totalPriceNum = hasValidPrice ? basePriceNum + activeWarrantyFee : 0;
+  const displayPrice = totalPriceNum > 0 ? formatPrice(totalPriceNum) : product.price;
 
   const handleAddToCart = (e) => {
     e.preventDefault();
-    addItem({ ...product, quantity: 1 });
+    addItem({
+      ...product,
+      baseId: product.id,
+      basePriceNum,
+      hasWarranty: withWarranty,
+      warrantyFee: activeWarrantyFee,
+      quantity: 1,
+    });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1800);
   };
@@ -46,22 +65,18 @@ export default function ProductCard({ product }) {
 
   const specLine = getShortSpec();
 
-  // 4. Price formatting
-  const hasValidPrice =
-    product.price && !product.price.includes("[") && product.price !== "On Request";
-
   // WhatsApp enquiry prefilled URL
   const whatsappEnquiryUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    `Hi Jerone Enterprises, I would like to enquire about ${displayName} (${
-      hasValidPrice ? product.price : "Price on request"
-    }). Is it available for dispatch?`
+    `Hi Jerone Enterprises, I would like to enquire about ${displayName}${
+      withWarranty ? ` with ${WARRANTY_OPTION.label} (+₹${WARRANTY_OPTION.fee})` : ""
+    } (${hasValidPrice ? displayPrice : "Price on request"}). Is it available for dispatch?`
   )}`;
 
   const imgSrc = product.imgWebp || product.img;
   const fallbackSrc = product.fallback || product.imgPng || product.img;
 
   return (
-    <div className="group flex flex-col h-full rounded-2xl sm:rounded-[20px] overflow-hidden bg-[#111317] ring-1 ring-black/10 shadow-[0_10px_28px_rgba(20,22,26,0.12)] hover:shadow-[0_16px_36px_rgba(20,22,26,0.2)] transition-all duration-250 active:scale-[0.985] md:active:scale-100 md:hover:-translate-y-1">
+    <div className="group flex flex-col h-full rounded-2xl sm:rounded-[20px] overflow-hidden bg-[#111317] ring-1 ring-black/10 shadow-[0_10px_28px_rgba(20,22,26,0.12)] hover:shadow-[0_16px_36px_rgba(20,22,26,0.2)] transition-all duration-250 md:hover:-translate-y-1">
       
       {/* 1. Image: Natural 3:2 ratio with seamless bottom feather into dark card body */}
       <Link
@@ -118,6 +133,39 @@ export default function ProductCard({ product }) {
           </span>
         </div>
 
+        {/* Optional 1-Year Warranty Tick Box (+₹500) */}
+        {hasValidPrice && (
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={withWarranty}
+            onClick={() => setWithWarranty((prev) => !prev)}
+            className={`mt-2 w-full flex items-center justify-between gap-1.5 rounded-lg border px-2 py-1.5 text-left transition-colors cursor-pointer ${
+              withWarranty
+                ? "bg-[var(--accent)]/15 border-[var(--accent)]/50 text-white"
+                : "bg-white/[0.04] border-white/[0.09] text-white/75 hover:border-white/20"
+            }`}
+          >
+            <span className="flex items-center gap-1.5 min-w-0">
+              <span
+                className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${
+                  withWarranty
+                    ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                    : "border-white/35 bg-transparent"
+                }`}
+              >
+                {withWarranty && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+              </span>
+              <span className="text-[10px] min-[390px]:text-[11px] font-medium truncate">
+                {WARRANTY_OPTION.label}
+              </span>
+            </span>
+            <span className="text-[10px] min-[390px]:text-[11px] font-semibold text-white/90 tabular-nums shrink-0">
+              +₹{WARRANTY_OPTION.fee}
+            </span>
+          </button>
+        )}
+
         {/* Bottom Dock: Hairline divider, Price + WhatsApp quick icon, Full-width Red CTA */}
         <div className="mt-auto pt-3">
           <div className="pt-2.5 border-t border-white/[0.08] flex flex-col gap-2.5">
@@ -125,7 +173,7 @@ export default function ProductCard({ product }) {
             <div className="flex items-center justify-between gap-2">
               {hasValidPrice ? (
                 <span className="font-['Outfit'] font-bold text-[17px] sm:text-[19px] text-white leading-none tabular-nums">
-                  {product.price}
+                  {displayPrice}
                 </span>
               ) : (
                 <span className="text-[12px] font-semibold text-[#FF6B7A] leading-none">

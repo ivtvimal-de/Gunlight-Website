@@ -9,16 +9,19 @@
  *  - Empty-cart state
  */
 
-import { Flashlight, AlertTriangle, MessageCircle, X } from "lucide-react";
+import { Flashlight, AlertTriangle, MessageCircle, X, Check } from "lucide-react";
 import { useCart, formatPrice } from "../context/CartContext";
-import { WHATSAPP_NUMBER } from "../config";
+import { WHATSAPP_NUMBER, WARRANTY_OPTION } from "../config";
 
 function buildWhatsAppMessage(items, cartTotal) {
   const lines = items.map((item, i) => {
     const lineTotal = item.priceNum > 0
       ? formatPrice(item.priceNum * item.quantity)
       : "On Request";
-    return `${i + 1}. ${item.title} × ${item.quantity} — ${lineTotal}`;
+    const warrantySuffix = item.hasWarranty
+      ? ` (with ${WARRANTY_OPTION.label} +₹${item.warrantyFee ?? WARRANTY_OPTION.fee})`
+      : "";
+    return `${i + 1}. ${item.title}${warrantySuffix} × ${item.quantity} — ${lineTotal}`;
   });
 
   const hasOnRequest = items.some((i) => i.priceNum === 0);
@@ -47,6 +50,7 @@ export default function CartDrawer() {
   const {
     items,
     removeItem,
+    toggleWarranty,
     updateQuantity,
     clearCart,
     cartCount,
@@ -147,7 +151,36 @@ export default function CartDrawer() {
                     {/* Info */}
                     <div className="flex flex-1 flex-col gap-1 min-w-0">
                       <p className="truncate font-['Outfit'] text-sm font-bold text-[var(--text-primary)]">{item.title}</p>
-                      <p className="text-xs text-[var(--text-muted)]">{item.price}</p>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        {item.price}
+                        {item.hasWarranty ? ` (incl. ₹${item.warrantyFee ?? WARRANTY_OPTION.fee} warranty)` : ""}
+                      </p>
+
+                      {/* Optional 1-Year Warranty toggle inside cart */}
+                      {item.priceNum > 0 && (
+                        <button
+                          type="button"
+                          role="checkbox"
+                          aria-checked={Boolean(item.hasWarranty)}
+                          onClick={() => toggleWarranty(item.id, WARRANTY_OPTION.fee)}
+                          className={`mt-0.5 inline-flex items-center gap-1.5 w-fit rounded-md border px-2 py-1 text-[11px] font-medium transition-colors ${
+                            item.hasWarranty
+                              ? "border-[var(--accent)]/40 bg-[var(--accent-tint)] text-[var(--accent)]"
+                              : "border-[var(--border-subtle)] bg-[var(--bg-canvas)] text-[var(--text-secondary)] hover:border-[var(--border-strong)]"
+                          }`}
+                        >
+                          <span
+                            className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[4px] border ${
+                              item.hasWarranty
+                                ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                                : "border-[#B8B8B0] bg-white"
+                            }`}
+                          >
+                            {item.hasWarranty && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                          </span>
+                          <span>{WARRANTY_OPTION.label} (+₹{WARRANTY_OPTION.fee})</span>
+                        </button>
+                      )}
 
                       {/* Quantity stepper */}
                       <div className="mt-1 flex items-center gap-2">
