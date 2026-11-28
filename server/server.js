@@ -133,6 +133,15 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser());
 app.use(sanitizeInput);
 
+// Root status endpoint for Render health checks and direct browser visits
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Gunlight Backend API is running",
+    status: "OK",
+  });
+});
+
 // Health check (verifies DB state and Cloudinary readiness without exposing secrets)
 app.get("/api/health", async (req, res, next) => {
   try {
