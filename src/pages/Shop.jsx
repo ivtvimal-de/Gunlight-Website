@@ -6,6 +6,8 @@ import { Search, X, Flashlight, Package, Sparkles } from "lucide-react";
 import { useCatalog } from "../context/CatalogContext";
 import SEO from "../components/SEO";
 import ProductCard from "../components/ProductCard";
+import { useTranslation } from "../i18n/LanguageContext";
+import { translateCategoryName, translateProductDescription } from "../i18n/catalogI18n";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,6 +30,8 @@ export default function Shop() {
     brands: apiBrands,
     loading,
   } = useCatalog();
+  const { language, t } = useTranslation();
+
   const BRANDS_LIST = useMemo(
     () => apiBrands.filter((b) => b.isActive !== false),
     [apiBrands]
@@ -42,9 +46,7 @@ export default function Shop() {
   const urlCategory = searchParams.get("category");
   const urlBrand = searchParams.get("brand");
 
-  // Check if URL brand param or search query matches a managed brand
   const matchedBrandObj = useMemo(() => {
-    // 1. Direct ?brand= URL parameter
     if (urlBrand) {
       const needle = urlBrand.toLowerCase();
       return (
@@ -58,7 +60,6 @@ export default function Shop() {
         }
       );
     }
-    // 2. Search query matching a brand name
     const q = urlQuery.trim().toLowerCase();
     if (!q) return null;
     return (
@@ -86,7 +87,6 @@ export default function Shop() {
 
   const [brandSheetOpen, setBrandSheetOpen] = useState(false);
 
-  // Sync state if category in URL changes
   useEffect(() => {
     if (urlCategory) {
       setActiveCategory(matchedUrlCategory);
@@ -95,7 +95,6 @@ export default function Shop() {
     }
   }, [urlCategory, urlQuery, matchedUrlCategory]);
 
-  // Open brand sheet if opened from navigation state or URL hash
   useEffect(() => {
     const handleOpenBrandSheet = () => setBrandSheetOpen(true);
     window.addEventListener("open-brand-sheet", handleOpenBrandSheet);
@@ -107,7 +106,6 @@ export default function Shop() {
     };
   }, []);
 
-  // Animate hero on mount
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(heroRef.current, {
@@ -120,18 +118,15 @@ export default function Shop() {
     return () => ctx.revert();
   }, []);
 
-  // Filter products based on brand, category AND search query
   const filtered = useMemo(() => {
     const q = urlQuery.trim().toLowerCase();
     const qClean = q.replace(/[\s\-_]+/g, "");
 
     return ALL_PRODUCTS.filter((product) => {
-      // 0. URL Brand Filter
       if (urlBrand && !matchesProductBrand(product, matchedBrandObj)) {
         return false;
       }
 
-      // 1. Category Tab Filter
       const matchesCategoryTab =
         activeCategory === "All" ||
         product.categories.some(
@@ -139,11 +134,8 @@ export default function Shop() {
         );
 
       if (!matchesCategoryTab) return false;
-
-      // 2. If no search query, matches category & brand tabs!
       if (!q) return true;
 
-      // 3. Brand Search
       if (
         (matchedBrandObj && matchesProductBrand(product, matchedBrandObj)) ||
         (product.brand && product.brand.toLowerCase().includes(q))
@@ -151,31 +143,33 @@ export default function Shop() {
         return true;
       }
 
-      // 4. Product Title, Description, ShortSpec & SKU Match
       const titleMatch = (product.title || "").toLowerCase().includes(q);
-      const descMatch = (product.desc || "").toLowerCase().includes(q);
+      const localizedDesc = translateProductDescription(product, language);
+      const descMatch =
+        (product.desc || "").toLowerCase().includes(q) ||
+        localizedDesc.toLowerCase().includes(q);
       const skuMatch = (product.sku || "").toLowerCase().includes(q);
       const shortSpecMatch = (product.shortSpec || "").toLowerCase().includes(q);
 
-      // 5. Specs Match (handles both string specs and { label, value } objects from MongoDB)
       const specsMatch = (product.specs || []).some((s) => {
         const text = typeof s === "string" ? s : `${s.label || ""} ${s.value || ""}`;
         return text.toLowerCase().includes(q);
       });
 
-      // 6. Category-wise Search Match (e.g. "search light", "searchlight", "led torch", "torch", "rechargeable")
       const categoryMatch = (product.categories || []).some((c) => {
         const cLower = c.toLowerCase();
+        const cLocalLower = String(translateCategoryName(c, language) || "").toLowerCase();
         const cClean = cLower.replace(/[\s\-_]+/g, "");
         return (
           cLower.includes(q) ||
           q.includes(cLower) ||
+          cLocalLower.includes(q) ||
+          q.includes(cLocalLower) ||
           cClean.includes(qClean) ||
           qClean.includes(cClean)
         );
       });
 
-      // Flexible Category Search Synonyms
       const synonymMatch =
         (q.includes("torch") &&
           (product.categories || []).some(
@@ -196,9 +190,8 @@ export default function Shop() {
         synonymMatch
       );
     });
-  }, [ALL_PRODUCTS, activeCategory, urlQuery, urlBrand, matchedBrandObj]);
+  }, [ALL_PRODUCTS, activeCategory, urlQuery, urlBrand, matchedBrandObj, language]);
 
-  // Animate cards whenever filtered list changes
   useEffect(() => {
     cardsRef.current = [];
     const timer = setTimeout(() => {
@@ -253,33 +246,35 @@ export default function Shop() {
   return (
     <>
       <SEO
-        title="Shop LED Torches & High-Power Search Lights"
-        description="Browse all GunLite high-power rechargeable LED searchlights, tactical flashlights, and portable torches by Jerone Enterprises. Fast dispatch across India."
+        title={t("seo.shopTitle")}
+        description={t("seo.shopDesc")}
         path="/shop"
         type="website"
       />
       <main className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)]">
         
-        {/* ── Page Header (Compact) ── */}
+        {/* ── Page Header ── */}
         <section className="relative border-b border-[var(--border-subtle)] bg-white py-8 sm:py-10">
           <div ref={heroRef} className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
             <span className="mb-2 inline-block rounded-full border border-[var(--border-subtle)] bg-[var(--accent-tint)] px-3.5 py-1 text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
-              {matchedBrandObj ? matchedBrandObj.name : "Illumination Hardware"}
+              {matchedBrandObj ? matchedBrandObj.name : t("shop.eyebrowDefault")}
             </span>
             <h1 className="mb-2 font-['Outfit'] text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] tracking-tight">
-              {matchedBrandObj ? `${matchedBrandObj.name} Products` : "Shop GunLite Torches"}
+              {matchedBrandObj
+                ? t("shop.headingBrand", { brand: matchedBrandObj.name })
+                : t("shop.headingDefault")}
             </h1>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed max-w-xl mx-auto">
-              Professional LED torches built for performance, durability, and reliability across India.
+              {t("shop.subtitle")}
             </p>
           </div>
         </section>
 
-        {/* ── Filter Bar (Sticky below the Navbar: 64px mobile / 72px desktop) ── */}
+        {/* ── Filter Bar ── */}
         <section className="sticky top-16 lg:top-[72px] z-30 border-b border-[var(--border-subtle)] bg-[var(--bg-canvas)]/95 px-4 py-3 backdrop-blur-md">
           <div className="mx-auto flex max-w-7xl items-center gap-2 sm:gap-3 overflow-x-auto pb-1 px-4 sm:px-6 lg:px-8">
             
-            {/* Mobile "Brand" Chip that opens the brand bottom sheet */}
+            {/* Mobile "Brand" Chip */}
             <button
               onClick={() => setBrandSheetOpen(true)}
               className={`md:hidden shrink-0 flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors ${
@@ -289,7 +284,11 @@ export default function Shop() {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{urlBrand ? `Brand: ${matchedBrandObj?.name || urlBrand}` : "Brands"}</span>
+              <span>
+                {urlBrand
+                  ? t("shop.brandChipPrefix", { brand: matchedBrandObj?.name || urlBrand })
+                  : t("shop.brandsButton")}
+              </span>
             </button>
 
             {/* Category Filter Chips */}
@@ -303,18 +302,24 @@ export default function Shop() {
                     : "border border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                {cat}
+                {cat === "All"
+                  ? t("shop.allCategory")
+                  : translateCategoryName(cat, language)}
               </button>
             ))}
 
-            {/* Active Brand Removable Chip (Item 5: "Brand: <name> x") */}
+            {/* Active Brand Removable Chip */}
             {urlBrand && (
               <span className="flex shrink-0 items-center gap-1.5 rounded-lg bg-[var(--accent-tint)] border border-[var(--border-subtle)] px-3 py-1.5 text-xs text-[var(--accent)] font-semibold">
-                <span>Brand: {matchedBrandObj ? matchedBrandObj.name : urlBrand}</span>
+                <span>
+                  {t("shop.brandChipPrefix", {
+                    brand: matchedBrandObj ? matchedBrandObj.name : urlBrand,
+                  })}
+                </span>
                 <button
                   onClick={handleClearBrand}
                   className="ml-0.5 text-[var(--accent)] hover:text-[var(--accent-hover)] transition p-0.5 rounded-full hover:bg-black/5"
-                  aria-label="Clear brand filter"
+                  aria-label={t("shop.clearBrandAria")}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -329,7 +334,7 @@ export default function Shop() {
                 <button
                   onClick={handleClearSearch}
                   className="ml-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition"
-                  aria-label="Clear search"
+                  aria-label={t("shop.clearSearchAria")}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -337,7 +342,10 @@ export default function Shop() {
             )}
 
             <span className="ml-auto shrink-0 text-xs text-[var(--text-muted)]">
-              {filtered.length} of {ALL_PRODUCTS.length} products
+              {t("shop.productCountOfTotal", {
+                filtered: filtered.length,
+                total: ALL_PRODUCTS.length,
+              })}
             </span>
           </div>
         </section>
@@ -353,22 +361,22 @@ export default function Shop() {
                 />
               ))}
             </div>
-      ) : (matchedBrandObj?.isComingSoon || matchedBrandObj?.demo) && filtered.length === 0 ? (
+          ) : (matchedBrandObj?.isComingSoon || matchedBrandObj?.demo) && filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 py-20 sm:py-24 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-[#E6E6E1] shadow-xs">
                 <Package className="w-8 h-8 text-[var(--accent)]" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold font-['Outfit'] text-[var(--text-primary)]">
-                No products from {matchedBrandObj.name} yet
+                {t("shop.noBrandProductsTitle", { brand: matchedBrandObj.name })}
               </h2>
               <p className="text-[var(--text-secondary)] text-sm max-w-md">
-                New brands are coming soon.
+                {t("shop.noBrandProductsDesc")}
               </p>
               <Link
                 to="/shop?brand=gunlite"
                 className="mt-2 inline-flex items-center justify-center rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-6 py-3 text-xs sm:text-sm font-semibold text-white transition-colors shadow-xs"
               >
-                View GunLite Products
+                {t("shop.viewGunliteProducts")}
               </Link>
             </div>
           ) : filtered.length === 0 ? (
@@ -376,15 +384,17 @@ export default function Shop() {
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-[var(--border-subtle)] shadow-xs">
                 <Flashlight className="w-8 h-8 text-[var(--accent)]" />
               </div>
-              <p className="text-xl font-bold font-['Outfit'] text-[var(--text-primary)]">No products found</p>
+              <p className="text-xl font-bold font-['Outfit'] text-[var(--text-primary)]">
+                {t("shop.noProductsTitle")}
+              </p>
               <p className="text-[var(--text-muted)] text-sm">
-                Try a different search term or category filter.
+                {t("shop.noProductsDesc")}
               </p>
               <button
                 onClick={() => { setActiveCategory("All"); handleClearSearch(); }}
                 className="mt-2 rounded-lg bg-[var(--accent)] px-6 py-2.5 text-xs font-semibold text-white hover:bg-[var(--accent-hover)] transition shadow-xs"
               >
-                Show all products
+                {t("shop.showAllProducts")}
               </button>
             </div>
           ) : (
@@ -405,30 +415,27 @@ export default function Shop() {
         {/* ── Mobile Brands Bottom Sheet ── */}
         {brandSheetOpen && (
           <div className="fixed inset-0 z-50 md:hidden font-['Inter']">
-            {/* Backdrop */}
             <div
               className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-200"
               onClick={() => setBrandSheetOpen(false)}
             />
 
-            {/* Bottom Sheet Modal */}
             <div className="fixed bottom-0 left-0 right-0 max-h-[80vh] overflow-y-auto rounded-t-[20px] bg-white p-5 shadow-2xl z-10 animate-in slide-in-from-bottom duration-250 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
-              {/* Drag handle */}
               <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-[#E6E6E1]" />
 
               <div className="flex items-center justify-between pb-3 border-b border-[#E6E6E1] mb-4">
                 <div>
                   <h3 className="font-['Outfit'] text-lg font-bold text-[#14161A]">
-                    Select Brand
+                    {t("shop.selectBrandTitle")}
                   </h3>
                   <p className="text-xs text-[#6B727C]">
-                    Browse torches by manufacturer
+                    {t("shop.selectBrandSubtitle")}
                   </p>
                 </div>
                 <button
                   onClick={() => setBrandSheetOpen(false)}
                   className="h-8 w-8 rounded-full border border-[#E6E6E1] flex items-center justify-center text-[#14161A] hover:bg-[#F4F4F1]"
-                  aria-label="Close brand sheet"
+                  aria-label={t("shop.closeBrandSheetAria")}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -444,6 +451,8 @@ export default function Shop() {
                   const count = ALL_PRODUCTS.filter((p) =>
                     matchesProductBrand(p, b)
                   ).length;
+                  const unit =
+                    count === 1 ? t("common.productSingular") : t("common.productPlural");
 
                   return (
                     <button
@@ -483,15 +492,15 @@ export default function Shop() {
                           </div>
                           <div className="text-[11px] text-[#6B727C]">
                             {b.isComingSoon && count === 0
-                              ? "Partner Brand • Coming soon"
-                              : `${b.isFlagship ? "Flagship Brand" : "Active Brand"} • ${count} product${count !== 1 ? "s" : ""}`}
+                              ? t("shop.partnerComingSoon")
+                              : `${b.isFlagship ? t("shop.flagshipBrand") : t("shop.activeBrand")} • ${count} ${unit}`}
                           </div>
                         </div>
                       </div>
 
                       {isSelected && (
                         <span className="text-xs font-bold text-[var(--accent)]">
-                          Active
+                          {t("shop.activeStatus")}
                         </span>
                       )}
                     </button>
@@ -499,7 +508,6 @@ export default function Shop() {
                 })}
               </div>
 
-              {/* Clear brand option if a brand is currently selected */}
               {urlBrand && (
                 <button
                   onClick={() => {
@@ -508,7 +516,7 @@ export default function Shop() {
                   }}
                   className="w-full mt-3 py-2.5 text-center text-xs font-semibold text-[#6B727C] hover:text-[#14161A] border-t border-[#E6E6E1]"
                 >
-                  Clear Brand Filter (Show All)
+                  {t("shop.clearBrandShowAll")}
                 </button>
               )}
             </div>

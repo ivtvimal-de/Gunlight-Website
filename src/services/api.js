@@ -23,6 +23,7 @@ async function fetchCsrfToken() {
     const res = await fetch(`${API_BASE_URL}/api/admin/csrf-token`, {
       method: "GET",
       credentials: "include",
+      cache: "no-store",
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data?.csrfToken) {
@@ -183,6 +184,9 @@ async function sendMultipartXhr({
         try {
           const res = JSON.parse(xhr.responseText || "{}");
           if (xhr.status >= 200 && xhr.status < 300) {
+            if (res?.csrfToken) {
+              csrfTokenMemory = res.csrfToken;
+            }
             resolve(res);
           } else {
             const err = new Error(

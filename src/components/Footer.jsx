@@ -8,9 +8,11 @@ import {
 } from "lucide-react";
 import { WHATSAPP_URL, COMPANY } from "../config";
 import { useCatalog } from "../context/CatalogContext";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function Footer() {
   const { products } = useCatalog();
+  const { t } = useTranslation();
   const shopLinks = products.slice(0, 5);
 
   return (
@@ -22,7 +24,7 @@ export default function Footer() {
           
           {/* Column 1: Brand */}
           <div className="col-span-2 lg:col-span-1 space-y-3">
-            <Link to="/" className="inline-block" aria-label="GunLite Home">
+            <Link to="/" className="inline-block" aria-label={t("nav.homeAria")}>
               <picture>
                 <source srcSet="/images/logo.webp" type="image/webp" />
                 <img
@@ -36,14 +38,14 @@ export default function Footer() {
               </picture>
             </Link>
             <p className="text-[13px] text-[#8B97A8] leading-relaxed max-w-[280px]">
-              Professional LED torches and search lights from Coimbatore.
+              {t("footer.description")}
             </p>
           </div>
 
           {/* Column 2: Shop */}
           <div className="col-span-1">
             <h4 className="font-['Outfit'] text-[13px] font-bold uppercase tracking-wider text-[#F8FAFC] mb-3">
-              Shop
+              {t("footer.shopHeading")}
             </h4>
             <ul className="space-y-2 text-[14px] leading-[1.4] text-[#94A3B8]">
               {shopLinks.map((item) => (
@@ -59,40 +61,40 @@ export default function Footer() {
           {/* Column 3: Company & Policies */}
           <div className="col-span-1">
             <h4 className="font-['Outfit'] text-[13px] font-bold uppercase tracking-wider text-[#F8FAFC] mb-3">
-              Company
+              {t("footer.companyHeading")}
             </h4>
             <ul className="space-y-2 text-[14px] leading-[1.4] text-[#94A3B8]">
               <li>
                 <Link to="/about" className="hover:text-[var(--accent)] transition-colors">
-                  About
+                  {t("footer.about")}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="hover:text-[var(--accent)] transition-colors">
-                  Dealership &amp; Bulk Enquiries
+                  {t("footer.dealership")}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="hover:text-[var(--accent)] transition-colors">
-                  Support
+                  {t("footer.support")}
                 </Link>
               </li>
             </ul>
             <div className="pt-2.5 mt-2.5 border-t border-[#232730] flex flex-wrap gap-x-2 gap-y-1 text-[12px] text-[#8B97A8]">
               <Link to="/privacy" className="hover:text-[var(--accent)] transition-colors">
-                Privacy
+                {t("footer.privacy")}
               </Link>
               <span>·</span>
               <Link to="/shipping" className="hover:text-[var(--accent)] transition-colors">
-                Shipping
+                {t("footer.shipping")}
               </Link>
               <span>·</span>
               <Link to="/returns" className="hover:text-[var(--accent)] transition-colors">
-                Returns &amp; Warranty
+                {t("footer.returnsWarranty")}
               </Link>
               <span>·</span>
               <Link to="/terms" className="hover:text-[var(--accent)] transition-colors">
-                Terms
+                {t("footer.terms")}
               </Link>
             </div>
           </div>
@@ -100,10 +102,10 @@ export default function Footer() {
           {/* Column 4: Contact */}
           <div className="col-span-2 lg:col-span-1 space-y-2.5 text-[13px] text-[#8B97A8]">
             <h4 className="font-['Outfit'] text-[13px] font-bold uppercase tracking-wider text-[#F8FAFC] mb-3">
-              Contact
+              {t("footer.contactHeading")}
             </h4>
             <a
-              href={`tel:${COMPANY.phone.replace(/\s+/g, '')}`}
+              href={`tel:${COMPANY.phone.replace(/\s+/g, "")}`}
               className="flex items-center gap-2 text-[#F8FAFC] font-semibold hover:text-[var(--accent)] transition-colors"
             >
               <Phone className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
@@ -119,13 +121,14 @@ export default function Footer() {
             <p className="flex items-start gap-2 leading-snug">
               <MapPin className="w-3.5 h-3.5 text-[var(--accent)] shrink-0 mt-0.5" />
               <span>
-                39/2, Sakthi Nagar, Kavundampalayam,<br />
-                Coimbatore – 641030, Tamil Nadu
+                {t("footer.addressLine1")}
+                <br />
+                {t("footer.addressLine2")}
               </span>
             </p>
             <p className="flex items-center gap-2 text-[12px] text-[#8B97A8]">
               <Clock className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
-              <span>Mon-Sat, 9:30 AM - 7:30 PM</span>
+              <span>{t("footer.hours")}</span>
             </p>
             <div className="pt-1">
               <a
@@ -135,7 +138,7 @@ export default function Footer() {
                 className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-3.5 h-[36px] text-xs font-semibold text-white transition-colors shadow-sm"
               >
                 <MessageCircle className="w-4 h-4 text-white" />
-                <span>WhatsApp Order Desk</span>
+                <span>{t("footer.whatsappDesk")}</span>
               </a>
             </div>
           </div>
@@ -147,10 +150,11 @@ export default function Footer() {
       <div className="border-t border-[#232730] bg-[#0D0F12] py-3 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-2 text-[13px] text-[#8B97A8]">
           <p className="text-center sm:text-left">
-            © {new Date().getFullYear()} {COMPANY.name}. All rights reserved. · GSTIN: <span className="font-mono text-[#CBD5E1]">{COMPANY.gst}</span>
+            {t("footer.copyright", { year: new Date().getFullYear(), company: COMPANY.name })} · {t("footer.gstinLabel")}{" "}
+            <span className="font-mono text-[#CBD5E1]">{COMPANY.gst}</span>
           </p>
           <p className="text-center sm:text-right">
-            Developed by <span className="font-semibold text-[#F8FAFC]">Devozzz</span>
+            {t("footer.developedBy")} <span className="font-semibold text-[#F8FAFC]">Devozzz</span>
           </p>
         </div>
       </div>

@@ -17,6 +17,7 @@ import { logAdminActivity } from "../utils/helpers.js";
  */
 export function getCsrfToken(req, res, next) {
   try {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
     const csrfToken = ensureCsrfCookie(req, res);
     res.status(200).json({
       success: true,
@@ -69,7 +70,7 @@ export async function loginAdmin(req, res, next) {
     await admin.save();
 
     const token = signAdminToken(admin);
-    res.cookie(COOKIE_NAME, token, getCookieOptions());
+    res.cookie(COOKIE_NAME, token, getCookieOptions(req));
     const csrfToken = ensureCsrfCookie(req, res, { rotate: true });
 
     await logAdminActivity({
@@ -112,11 +113,11 @@ export async function logoutAdmin(req, res, next) {
       }
     }
 
-    const authCookieOpts = getCookieOptions();
+    const authCookieOpts = getCookieOptions(req);
     delete authCookieOpts.maxAge;
     res.clearCookie(COOKIE_NAME, authCookieOpts);
 
-    const csrfCookieOpts = getCsrfCookieOptions();
+    const csrfCookieOpts = getCsrfCookieOptions(req);
     delete csrfCookieOpts.maxAge;
     res.clearCookie(CSRF_COOKIE_NAME, csrfCookieOpts);
 
@@ -144,6 +145,7 @@ export async function logoutAdmin(req, res, next) {
  */
 export async function getMe(req, res, next) {
   try {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
     const csrfToken = ensureCsrfCookie(req, res);
     res.status(200).json({
       success: true,

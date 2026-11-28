@@ -1,27 +1,29 @@
 import { ShieldCheck, MessageCircle, Truck, Headphones } from "lucide-react";
-import { CLAIMS, COMPANY } from "../config";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function TrustBar() {
+  const { t } = useTranslation();
+
   const trustItems = [
     {
       icon: <ShieldCheck className="w-5 h-5 text-[var(--accent)]" />,
-      title: CLAIMS.warranty || "1-Year Hardware Warranty",
-      desc: "Comprehensive protection against internal LED chip & switch defects.",
+      title: t("trustBar.warrantyTitle"),
+      desc: t("trustBar.warrantyDesc"),
     },
     {
       icon: <MessageCircle className="w-5 h-5 text-[var(--accent)]" />,
-      title: "Direct WhatsApp Ordering",
-      desc: "Instant stock confirmation, live pricing, and personal support from {COMPANY.city}.",
+      title: t("trustBar.whatsappTitle"),
+      desc: t("trustBar.whatsappDesc"),
     },
     {
       icon: <Truck className="w-5 h-5 text-[var(--accent)]" />,
-      title: CLAIMS.shipping || "Pan-India Safe Transit",
-      desc: "Insulated battery packaging with tracked surface and express couriers.",
+      title: t("trustBar.shippingTitle"),
+      desc: t("trustBar.shippingDesc"),
     },
     {
       icon: <Headphones className="w-5 h-5 text-[var(--accent)]" />,
-      title: "Direct Merchant Support",
-      desc: "Mon – Sat, 9:30 AM – 7:30 PM IST via direct call or WhatsApp.",
+      title: t("trustBar.supportTitle"),
+      desc: t("trustBar.supportDesc"),
     },
   ];
 
@@ -42,7 +44,7 @@ export default function TrustBar() {
                   {item.title}
                 </h4>
                 <p className="mt-1 text-[11.5px] sm:text-xs text-[var(--text-secondary)] leading-relaxed">
-                  {item.desc.replace("{COMPANY.city}", COMPANY.city)}
+                  {item.desc}
                 </p>
               </div>
             </div>
@@ -52,4 +54,3 @@ export default function TrustBar() {
     </section>
   );
 }
-

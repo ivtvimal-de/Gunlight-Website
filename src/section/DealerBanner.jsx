@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
 import { MessageCircle, Briefcase, ArrowRight } from "lucide-react";
-import { WHATSAPP_URL, COMPANY } from "../config";
+import { WHATSAPP_URL } from "../config";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function DealerBanner() {
+  const { t } = useTranslation();
+
   return (
     <section className="py-10 sm:py-18 bg-[var(--bg-canvas)] border-b border-[var(--border-subtle)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -15,16 +18,15 @@ export default function DealerBanner() {
             <div className="max-w-2xl space-y-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#242934] border border-[#384050] px-3.5 py-1 text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
                 <Briefcase className="w-3.5 h-3.5" />
-                B2B &amp; Wholesale Supply
+                {t("dealerBanner.badge")}
               </span>
 
               <h2 className="font-['Outfit'] text-2xl sm:text-3xl lg:text-4xl font-bold text-[#F8FAFC] tracking-tight">
-                Bulk Orders &amp; Dealership Enquiries Across India
+                {t("dealerBanner.heading")}
               </h2>
 
               <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                We supply security agencies, industrial estates, agricultural contractors, and regional distributors
-                with volume pricing and direct logistics support. Get custom GST tax invoices and expedited surface transport.
+                {t("dealerBanner.description")}
               </p>
             </div>
 
@@ -33,7 +35,7 @@ export default function DealerBanner() {
                 to="/contact"
                 className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-[#F4F4F1] px-6 py-3.5 text-xs sm:text-sm font-semibold text-[#14161A] transition-colors shadow-sm"
               >
-                <span>Submit Dealer Enquiry</span>
+                <span>{t("dealerBanner.submitEnquiry")}</span>
                 <ArrowRight className="w-4 h-4 text-[#14161A]" />
               </Link>
 
@@ -44,7 +46,7 @@ export default function DealerBanner() {
                 className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-6 py-3.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-colors"
               >
                 <MessageCircle className="w-4 h-4 text-white" />
-                <span>WhatsApp Wholesale Desk</span>
+                <span>{t("dealerBanner.whatsappDesk")}</span>
               </a>
             </div>
           </div>
@@ -54,4 +56,3 @@ export default function DealerBanner() {
     </section>
   );
 }
-

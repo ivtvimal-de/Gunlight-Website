@@ -7,34 +7,37 @@ import {
   Truck,
   Headphones,
 } from "lucide-react";
-import { CLAIMS, WHATSAPP_URL } from "../config";
+import { WHATSAPP_URL } from "../config";
 import { useCatalog } from "../context/CatalogContext";
-
-const TRUST_STRIP_ITEMS = [
-  {
-    icon: ShieldCheck,
-    title: CLAIMS.warranty || "1-Year Warranty",
-    subtitle: "Internal chip & switch coverage",
-  },
-  {
-    icon: MessageCircle,
-    title: CLAIMS.orders || "Direct WhatsApp Orders",
-    subtitle: "Stock confirmation & live tracking",
-  },
-  {
-    icon: Truck,
-    title: CLAIMS.shipping || "Pan-India Safe Transit",
-    subtitle: "Insulated protective packaging",
-  },
-  {
-    icon: Headphones,
-    title: "Dedicated Support",
-    subtitle: "Mon–Sat 9:30 AM – 7:30 PM",
-  },
-];
+import { useTranslation } from "../i18n/LanguageContext";
+import { formatLocalizedPrice, translateShortSpec } from "../i18n/catalogI18n";
 
 export default function Hero() {
   const { products } = useCatalog();
+  const { language, t } = useTranslation();
+
+  const TRUST_STRIP_ITEMS = [
+    {
+      icon: ShieldCheck,
+      title: t("hero.claims.warranty"),
+      subtitle: t("hero.claims.warrantyShort"),
+    },
+    {
+      icon: MessageCircle,
+      title: t("hero.claims.orders"),
+      subtitle: t("hero.claims.ordersShort"),
+    },
+    {
+      icon: Truck,
+      title: t("hero.claims.shipping"),
+      subtitle: t("hero.claims.shippingShort"),
+    },
+    {
+      icon: Headphones,
+      title: t("hero.claims.support"),
+      subtitle: t("hero.claims.supportHours"),
+    },
+  ];
 
   const heroProducts = (() => {
     const featured = products.filter((p) => p.isFeatured);
@@ -42,28 +45,31 @@ export default function Hero() {
     return pool.slice(0, 5);
   })();
 
-  const HERO_SLIDES = heroProducts.map((p) => ({
-    id: p.id,
-    name: (p.title || "").replace(/\s*GunLite\s*/gi, "").trim() || p.title,
-    spec:
+  const HERO_SLIDES = heroProducts.map((p) => {
+    const rawSpec =
       p.shortSpec ||
-      (p.specs?.[0]?.value ? `${p.specs[0].value}` : "High-Power LED"),
-    price: p.price,
-    link: p.link,
-    imgWebp: p.heroImg || p.imgWebp || p.img,
-    imgPng: p.heroImg || p.imgPng || p.img,
-    alt: `${p.title} - GunLite Illumination`,
-  }));
+      (p.specs?.[0]?.value ? `${p.specs[0].value}` : "High-Power LED");
+    return {
+      id: p.id,
+      name: (p.title || "").replace(/\s*GunLite\s*/gi, "").trim() || p.title,
+      spec: translateShortSpec(p, rawSpec, language),
+      price: formatLocalizedPrice(p.price, t),
+      link: p.link,
+      imgWebp: p.heroImg || p.imgWebp || p.img,
+      imgPng: p.heroImg || p.imgPng || p.img,
+      alt: `${p.title} - ${t("hero.slideAltSuffix")}`,
+    };
+  });
 
   const FALLBACK_HERO_SLIDE = {
     id: "default",
-    name: "GunLite Torches",
-    spec: "Professional LED Illumination",
+    name: t("hero.defaultSlideName"),
+    spec: t("hero.defaultSlideSpec"),
     price: "₹999",
     link: "/shop",
     imgWebp: "/images/eaglemain.webp",
     imgPng: "/images/eaglemain.webp",
-    alt: "GunLite High-Power LED Torches",
+    alt: t("hero.defaultSlideAlt"),
   };
 
   const renderedSlides =
@@ -112,10 +118,8 @@ export default function Hero() {
     if (!touchStartX.current || !touchEndX.current) return;
     const distance = touchStartX.current - touchEndX.current;
     if (distance > 45) {
-      // Swiped left -> next slide
       setCurrent((prev) => (prev + 1) % slideCount);
     } else if (distance < -45) {
-      // Swiped right -> prev slide
       setCurrent((prev) => (prev - 1 + slideCount) % slideCount);
     }
     touchStartX.current = null;
@@ -125,13 +129,9 @@ export default function Hero() {
   const activeSlide = renderedSlides[safeCurrent] || FALLBACK_HERO_SLIDE;
 
   return (
-    <section className="bg-[#FAFAF8] overflow-hidden" aria-label="Hero Showcase">
+    <section className="bg-[#FAFAF8] overflow-hidden" aria-label={t("hero.ariaLabel")}>
       
-      {/* ─────────────────────────────────────────────────────────────
-          1. MOBILE HERO BANNER (under 1024px / lg:hidden)
-          - Full-frame 3:2 photo (zero cropping) with seamless bottom feather
-          - Sleek flagship dark card with editorial slide counter, crisp specs, price & CTA
-         ───────────────────────────────────────────────────────────── */}
+      {/* ── 1. MOBILE HERO BANNER (under 1024px / lg:hidden) ── */}
       <div className="lg:hidden px-4 pt-3 pb-5">
         <div
           className="w-full rounded-[20px] overflow-hidden bg-[#111317] ring-1 ring-black/10 shadow-[0_12px_32px_rgba(20,22,26,0.14)] select-none"
@@ -139,7 +139,6 @@ export default function Hero() {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Full-frame 3:2 product photo area with seamless bottom edge blend */}
           <div className="relative w-full aspect-[3/2] bg-[#16181D] overflow-hidden">
             {renderedSlides.map((slide, idx) => {
               const isActive = safeCurrent === idx;
@@ -167,7 +166,6 @@ export default function Hero() {
               );
             })}
 
-            {/* Subtle 28px feather at the very bottom edge to melt photo into card footer */}
             <div
               className="pointer-events-none absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-[#111317] via-[#111317]/45 to-transparent z-20"
               aria-hidden="true"
@@ -179,7 +177,7 @@ export default function Hero() {
             <div className="flex items-center justify-between gap-2 mb-1.5">
               <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/60">
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-                Featured Hardware
+                {t("hero.featuredHardware")}
               </span>
               <span className="font-mono text-[10px] font-medium text-white/45 tabular-nums">
                 0{safeCurrent + 1} / 0{slideCount}
@@ -203,7 +201,7 @@ export default function Hero() {
             <div className="mt-3.5 pt-3 border-t border-white/[0.08] flex items-center justify-between gap-3">
               <div className="flex flex-col">
                 <span className="text-[10px] uppercase tracking-wider text-white/45 font-medium leading-none">
-                  Price
+                  {t("hero.priceLabel")}
                 </span>
                 <span className="text-white font-['Outfit'] font-bold text-[20px] leading-tight mt-0.5 tabular-nums">
                   {activeSlide.price}
@@ -214,18 +212,17 @@ export default function Hero() {
                 to={activeSlide.link}
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-5 h-10 text-[13px] font-semibold text-white shadow-[0_4px_14px_rgba(217,15,37,0.35)] transition-all active:scale-[0.98]"
               >
-                <span>Shop Now</span>
+                <span>{t("common.shopNow")}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            {/* Minimal Progress Indicators */}
             <div className="mt-3.5 flex items-center justify-center gap-1.5">
               {HERO_SLIDES.map((s, index) => (
                 <button
                   key={s.id}
                   onClick={() => setCurrent(index)}
-                  aria-label={`Go to slide ${index + 1}: ${s.name}`}
+                  aria-label={t("hero.goToSlideAria", { index: index + 1, name: s.name })}
                   className={`transition-all rounded-full ${
                     safeCurrent === index
                       ? "w-6 h-1 bg-white"
@@ -238,44 +235,32 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* ─────────────────────────────────────────────────────────────
-          2. DESKTOP HERO (hidden on mobile, visible on desktop lg:block)
-          Preserves the desktop layout 100% UNCHANGED:
-          - 2 columns
-          - Left: eyebrow, H1, text, 48px buttons, 3 claims
-          - Right: 4/3 showcase panel, overlapping caption card, dots below
-          - Bottom: slim white trust strip
-         ───────────────────────────────────────────────────────────── */}
+      {/* ── 2. DESKTOP HERO (lg:block) ── */}
       <div className="hidden lg:block">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-16 min-h-[560px] flex items-center">
           <div className="grid grid-cols-2 gap-12 items-center w-full">
             
-            {/* LEFT COLUMN (about 50%) */}
+            {/* LEFT COLUMN */}
             <div className="flex flex-col justify-center">
-              
-              {/* 1. Eyebrow */}
               <p className="text-sm font-bold uppercase tracking-wider text-[var(--accent)] mb-3">
-                Professional LED Torches &amp; Search Lights
+                {t("hero.eyebrow")}
               </p>
 
-              {/* 2. Headline */}
               <h1 className="font-['Outfit'] font-bold text-[#14161A] text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.08] tracking-tight mb-4">
-                Powerful Light.{" "}
-                <span className="text-[var(--accent)]">Built to Last.</span>
+                {t("hero.headlineStart")}{" "}
+                <span className="text-[var(--accent)]">{t("hero.headlineAccent")}</span>
               </h1>
 
-              {/* 3. Supporting text */}
               <p className="text-[18px] text-[#4A5058] leading-relaxed max-w-xl mb-7">
-                Rechargeable torches and search lights, made in Coimbatore and delivered across India.
+                {t("hero.subtitle")}
               </p>
 
-              {/* 4. Action Buttons (48px high) */}
               <div className="flex items-center gap-4 mb-7">
                 <Link
                   to="/shop"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-7 h-12 text-base font-semibold text-white transition-colors shadow-sm"
                 >
-                  <span>Shop Now</span>
+                  <span>{t("common.shopNow")}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 
@@ -286,38 +271,33 @@ export default function Hero() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D5D5CF] bg-white hover:bg-[#F4F4F1] px-6 h-12 text-base font-semibold text-[#14161A] transition-colors shadow-2xs"
                 >
                   <MessageCircle className="w-4 h-4 text-[#25D366]" />
-                  <span>Order on WhatsApp</span>
+                  <span>{t("common.orderOnWhatsapp")}</span>
                 </a>
               </div>
 
-              {/* 5. 3 Real Facts from config.js CLAIMS */}
               <div className="flex flex-wrap items-center gap-y-2.5 gap-x-6 text-sm text-[#4A5058]">
                 <div className="flex items-center gap-2 font-medium">
                   <ShieldCheck className="w-4 h-4 text-[var(--accent)] shrink-0" />
-                  <span>{CLAIMS.warranty}</span>
+                  <span>{t("hero.claims.warranty")}</span>
                 </div>
                 <div className="flex items-center gap-2 font-medium">
                   <MessageCircle className="w-4 h-4 text-[var(--accent)] shrink-0" />
-                  <span>{CLAIMS.orders}</span>
+                  <span>{t("hero.claims.orders")}</span>
                 </div>
                 <div className="flex items-center gap-2 font-medium">
                   <Truck className="w-4 h-4 text-[var(--accent)] shrink-0" />
-                  <span>{CLAIMS.shipping}</span>
+                  <span>{t("hero.claims.shipping")}</span>
                 </div>
               </div>
-
             </div>
 
-            {/* RIGHT COLUMN (about 50%) */}
+            {/* RIGHT COLUMN */}
             <div
               className="flex flex-col items-center justify-center"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
-              {/* Large Product Showcase Panel (4/3 desktop) */}
               <div className="relative w-full aspect-[4/3] rounded-[24px] overflow-hidden border border-[#E6E6E1] bg-[#F4F4F1] shadow-[0_8px_30px_rgba(20,22,26,0.06)]">
-                
-                {/* Product Photos (Cross-fade transition) */}
                 {renderedSlides.map((slide, idx) => {
                   const isActive = safeCurrent === idx;
                   return (
@@ -344,7 +324,6 @@ export default function Hero() {
                   );
                 })}
 
-                {/* Overlapping Bottom-Left Caption Card */}
                 <div className="absolute bottom-6 left-6 z-20 bg-white/95 backdrop-blur-md border border-[#E6E6E1] rounded-2xl p-4 shadow-[0_8px_24px_rgba(20,22,26,0.12)] max-w-[280px]">
                   <h3 className="font-['Outfit'] font-bold text-base text-[#14161A] truncate">
                     {activeSlide.name}
@@ -352,29 +331,27 @@ export default function Hero() {
                   <p className="text-xs text-[#64748B] mt-0.5 truncate">
                     {activeSlide.spec}
                   </p>
-                  <div className="mt-2.5 pt-2 border-t border-[#F1F1ED] flex items-center justify-between">
+                  <div className="mt-2.5 pt-2 border-t border-[#F1F1ED] flex items-center justify-between gap-3">
                     <span className="font-['Outfit'] font-bold text-lg text-[#14161A]">
                       {activeSlide.price}
                     </span>
                     <Link
                       to={activeSlide.link}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors whitespace-nowrap"
                     >
-                      <span>View Product</span>
+                      <span>{t("common.viewProduct")}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
                 </div>
-
               </div>
 
-              {/* Slider Dots Below */}
               <div className="mt-4 flex items-center justify-center gap-2">
                 {HERO_SLIDES.map((s, index) => (
                   <button
                     key={s.id}
                     onClick={() => setCurrent(index)}
-                    aria-label={`Go to slide ${index + 1}: ${s.name}`}
+                    aria-label={t("hero.goToSlideAria", { index: index + 1, name: s.name })}
                     className={`h-2 transition-all rounded-full ${
                       safeCurrent === index
                         ? "w-8 bg-[var(--accent)]"
@@ -383,7 +360,6 @@ export default function Hero() {
                   />
                 ))}
               </div>
-
             </div>
 
           </div>

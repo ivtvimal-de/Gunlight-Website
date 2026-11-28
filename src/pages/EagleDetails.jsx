@@ -1,11 +1,13 @@
 import ProductDetailsDynamic from "./ProductDetailsDynamic";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function EagleDetails() {
+  const { t } = useTranslation();
   return (
     <ProductDetailsDynamic
       slugProp="eagle"
-      seoTitle="Eagle 3.1 GunLite | 50W High-Power LED Search Light"
-      seoDescription="Eagle 3.1 GunLite: 50W high-power search light with long-range focused beam, multi-color lenses, USB power bank function, and rugged aircraft aluminum body."
+      seoTitle={t("seo.eagleTitle")}
+      seoDescription={t("seo.eagleDesc")}
       seoPath="/eagle"
     />
   );

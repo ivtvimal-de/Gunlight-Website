@@ -1,11 +1,13 @@
 import ProductDetailsDynamic from "./ProductDetailsDynamic";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function SniperDetails() {
+  const { t } = useTranslation();
   return (
     <ProductDetailsDynamic
       slugProp="sniper"
-      seoTitle="Sniper X2 GunLite | 1000 Lumens Compact Zoom Torch"
-      seoDescription="Sniper X2 GunLite: 1000 Lumens CREE LED, dual 18650 lithium battery, flood & focus zoom lens, and 5 operating modes. Order directly on WhatsApp."
+      seoTitle={t("seo.sniperTitle")}
+      seoDescription={t("seo.sniperDesc")}
       seoPath="/sniper"
     />
   );

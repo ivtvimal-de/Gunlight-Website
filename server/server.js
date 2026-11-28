@@ -63,11 +63,14 @@ app.use(
   })
 );
 
-// Strict CORS limited to allowed frontend origins
+// Strict CORS limited to allowed frontend origins with credentials & CSRF header support
 app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
+    optionsSuccessStatus: 204,
   })
 );
 

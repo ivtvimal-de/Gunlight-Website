@@ -4,6 +4,7 @@ import { Lock, Mail, Eye, EyeOff, ArrowLeft, ShieldCheck, Sparkles } from "lucid
 import { useAuth } from "../../context/AuthContext";
 import { useCatalog } from "../../context/CatalogContext";
 import { useToast } from "../../context/ToastContext";
+import { api } from "../../services/api";
 
 export default function AdminLogin() {
   const { isAuthenticated, authLoading, login, enterDemoMode } = useAuth();
@@ -19,6 +20,12 @@ export default function AdminLogin() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const redirectTo = location.state?.from || "/admin";
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      api.getCsrfToken().catch(() => {});
+    }
+  }, [authLoading, isAuthenticated]);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {

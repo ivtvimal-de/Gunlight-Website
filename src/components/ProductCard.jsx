@@ -3,9 +3,16 @@ import { Link } from "react-router-dom";
 import { ShoppingCart, MessageCircle, Check } from "lucide-react";
 import { useCart, parsePriceNum } from "../context/CartContext";
 import { WHATSAPP_NUMBER } from "../config";
+import { useTranslation } from "../i18n/LanguageContext";
+import {
+  translateBadge,
+  translateCategoryName,
+  translateShortSpec,
+} from "../i18n/catalogI18n";
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
+  const { language, t } = useTranslation();
   const [isAdded, setIsAdded] = useState(false);
 
   const basePriceNum = product.priceNum ?? parsePriceNum(product.price);
@@ -32,25 +39,26 @@ export default function ProductCard({ product }) {
     setTimeout(() => setIsAdded(false), 1800);
   };
 
-  // Remove repeated "GunLite" from displayed name
+  // Keep product model / brand names untouched across languages
   const displayName = (product.title || "")
     .replace(/\s*GunLite\s*/gi, "")
     .trim();
 
-  // 1. Category line: uppercase 11px, letter-spacing 0.06em, weight 600, color #8B97A8 (muted)
-  const category =
+  const rawCategory =
     (product.categories && product.categories[0]) ||
     product.category?.name ||
     product.category ||
     "LED Torch";
+  const category = translateCategoryName(rawCategory, language);
 
-  // 3. ONE concise key spec line so it fits cleanly on 2-column mobile without wrapping
   const getShortSpec = () => {
-    if (product.shortSpec) return product.shortSpec;
-    if (product.id === "eagle") return "50W LED · Type-C";
-    if (product.id === "everest") return "55W LED · 10,000mAh";
-    if (product.id === "tiger") return "500 Lm · 4000mAh";
-    if (product.id === "sniper") return "1000 Lm · Zoom";
+    if (product.shortSpec) {
+      return translateShortSpec(product, product.shortSpec, language);
+    }
+    if (product.id === "eagle") return translateShortSpec(product, "50W LED · Type-C", language);
+    if (product.id === "everest") return translateShortSpec(product, "55W LED · 10,000mAh", language);
+    if (product.id === "tiger") return translateShortSpec(product, "500 Lm · 4000mAh", language);
+    if (product.id === "sniper") return translateShortSpec(product, "1000 Lm · Zoom", language);
 
     if (product.specs && product.specs.length > 0) {
       const firstRaw =
@@ -62,12 +70,13 @@ export default function ProductCard({ product }) {
         .replace(/\s*Rechargeable\s*/i, "")
         .replace(/\s*Emergency\s*/i, "")
         .trim();
-      return first;
+      return translateShortSpec(product, first, language);
     }
-    return "High-Power LED";
+    return translateShortSpec(product, "High-Power LED", language);
   };
 
   const specLine = getShortSpec();
+  const localizedBadge = translateBadge(product.badge, language);
 
   // WhatsApp enquiry prefilled URL
   const whatsappEnquiryUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
@@ -105,7 +114,7 @@ export default function ProductCard({ product }) {
         />
       </Link>
 
-      {/* 2. Sleek Dark Editorial Card Body (matching Hero & Category cards) */}
+      {/* 2. Sleek Dark Editorial Card Body */}
       <div className="flex-1 flex flex-col bg-gradient-to-b from-[#111317] to-[#171A21] px-3 sm:px-4 pt-1.5 sm:pt-2 pb-3 sm:pb-4">
         
         {/* Category Eyebrow & Optional Badge */}
@@ -114,9 +123,9 @@ export default function ProductCard({ product }) {
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] shrink-0" />
             <span className="truncate">{category}</span>
           </span>
-          {product.badge && (
+          {localizedBadge && (
             <span className="hidden sm:inline-flex items-center rounded-md bg-[var(--accent)]/15 border border-[var(--accent)]/30 px-1.5 py-0.5 text-[10px] font-semibold text-[#FF6B7A] leading-none shrink-0">
-              {product.badge}
+              {localizedBadge}
             </span>
           )}
         </div>
@@ -137,7 +146,7 @@ export default function ProductCard({ product }) {
           </span>
         </div>
 
-        {/* Bottom Dock: Hairline divider, Price + WhatsApp quick icon, Full-width Red CTA */}
+        {/* Bottom Dock */}
         <div className="mt-auto pt-3">
           <div className="pt-2.5 border-t border-white/[0.08] flex flex-col gap-2.5">
             
@@ -155,7 +164,7 @@ export default function ProductCard({ product }) {
                 </div>
               ) : (
                 <span className="text-[12px] font-semibold text-[#FF6B7A] leading-none">
-                  Price on WhatsApp
+                  {t("common.priceOnWhatsapp")}
                 </span>
               )}
 
@@ -164,8 +173,8 @@ export default function ProductCard({ product }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 inline-flex items-center justify-center rounded-lg bg-white/[0.07] border border-white/10 text-white/80 hover:border-[var(--accent)] hover:bg-[var(--accent)]/20 hover:text-white transition-colors"
-                title="Enquire on WhatsApp"
-                aria-label="Enquire on WhatsApp"
+                title={t("common.enquireOnWhatsapp")}
+                aria-label={t("common.enquireOnWhatsapp")}
               >
                 <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               </a>
@@ -177,7 +186,7 @@ export default function ProductCard({ product }) {
                 disabled
                 className="w-full h-9 sm:h-10 inline-flex items-center justify-center rounded-xl px-2.5 text-[12px] sm:text-[13px] font-semibold bg-white/10 text-white/50 border border-white/10 cursor-not-allowed whitespace-nowrap"
               >
-                Out of Stock
+                {t("common.outOfStock")}
               </button>
             ) : hasValidPrice ? (
               <button
@@ -188,17 +197,17 @@ export default function ProductCard({ product }) {
                     ? "bg-emerald-600 text-white shadow-xs"
                     : "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-[0_4px_14px_rgba(217,15,37,0.3)]"
                 }`}
-                aria-label={`Add ${displayName} to Cart`}
+                aria-label={`${t("common.addToCart")} — ${displayName}`}
               >
                 {isAdded ? (
                   <>
                     <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                    <span>Added to Cart</span>
+                    <span>{t("common.addedToCart")}</span>
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                    <span>Add to Cart</span>
+                    <span>{t("common.addToCart")}</span>
                   </>
                 )}
               </button>
@@ -209,7 +218,7 @@ export default function ProductCard({ product }) {
                 rel="noopener noreferrer"
                 className="w-full h-9 sm:h-10 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-[12px] sm:text-[13px] font-semibold whitespace-nowrap shadow-[0_4px_14px_rgba(217,15,37,0.3)] transition-colors px-2.5"
               >
-                <span>Enquire Now</span>
+                <span>{t("common.enquireNow")}</span>
               </a>
             )}
 

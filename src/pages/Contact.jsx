@@ -2,23 +2,26 @@ import { useState } from "react";
 import { Check, MessageCircle, MapPin, Phone, Mail, FileText } from "lucide-react";
 import { WHATSAPP_NUMBER, WHATSAPP_URL, COMPANY } from "../config";
 import SEO from "../components/SEO";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function Contact() {
+  const { t } = useTranslation();
   const [form, setForm] = useState({ name: "", email: "", phone: "", type: "", message: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = "Name is required.";
+    if (!form.name.trim()) e.name = "contact.validation.nameRequired";
     if (!form.phone.trim()) {
-      e.phone = "Phone number is required.";
+      e.phone = "contact.validation.phoneRequired";
     } else if (!/^[6-9]\d{9}$/.test(form.phone.replace(/\s/g, ""))) {
-      e.phone = "Enter a valid 10-digit Indian mobile number.";
+      e.phone = "contact.validation.phoneInvalid";
     }
-    if (!form.message.trim()) e.message = "Message is required.";
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = "Enter a valid email address.";
+    if (!form.message.trim()) e.message = "contact.validation.messageRequired";
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      e.email = "contact.validation.emailInvalid";
+    }
     return e;
   };
 
@@ -48,11 +51,13 @@ export default function Contact() {
     setForm({ name: "", email: "", phone: "", type: "", message: "" });
   };
 
+  const addressParts = t("contact.addressText").split(/[,،]/);
+
   return (
     <>
       <SEO
-        title="Contact Us & Dealership Enquiries"
-        description="Contact Jerone Enterprises for GunLite high-power LED torch orders, wholesale distribution, bulk pricing, and retail enquiries. Call or WhatsApp +91 96987 88270."
+        title={t("seo.contactTitle")}
+        description={t("seo.contactDesc")}
         path="/contact"
         type="website"
       />
@@ -61,15 +66,13 @@ export default function Contact() {
         <section className="py-14 border-b border-[#e6e6e1] bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <span className="mb-3 inline-block rounded-full border border-[#e6e6e1] bg-[#f4f4f1] px-4 py-1.5 text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
-              Communication Desk
+              {t("contact.badge")}
             </span>
             <h1 className="text-3xl md:text-5xl font-['Outfit'] font-bold text-[#14161a] mb-3 tracking-tight">
-              Contact Us
+              {t("contact.heading")}
             </h1>
             <p className="text-sm md:text-base text-[#4a5058] max-w-3xl leading-relaxed">
-              For product enquiries, wholesale orders, partner brand products or
-              dealership opportunities, feel free to contact us using the details
-              below. Our team will assist you at the earliest over phone or WhatsApp.
+              {t("contact.subtitle")}
             </p>
           </div>
         </section>
@@ -80,45 +83,51 @@ export default function Contact() {
             {/* LEFT SIDE – COMPANY INFO */}
             <div className="bg-white border border-[#e6e6e1] rounded-3xl p-8 sm:p-10 shadow-[0_4px_20px_rgba(20,22,26,0.06)]">
               <span className="text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
-                Authorized Operator
+                {t("contact.authorizedOperator")}
               </span>
               <h2 className="text-2xl sm:text-3xl font-['Outfit'] font-bold text-[#14161a] mb-4 mt-1">
                 {COMPANY.name}
               </h2>
 
               <p className="text-sm text-[#4a5058] leading-relaxed mb-6">
-                GunLite is operated by {COMPANY.name}, Coimbatore. We deal in
-                GunLite branded torch lights as well as selected products from our
-                authorized partner manufacturers. We support both wholesale and
-                single-piece sales across India.
+                {t("contact.companyIntro", { company: COMPANY.name })}
               </p>
 
               <div className="space-y-4 text-sm text-[#4a5058] border-t border-[#e6e6e1] pt-6">
                 <div className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-[var(--accent)] shrink-0 mt-1" />
                   <div>
-                    <strong className="text-[#14161a] block mb-0.5">Address:</strong>
-                    {COMPANY.address.split(",").map((line, i) => (
-                      <span key={i}>{line.trim()}{i < 4 ? "," : ""}<br /></span>
+                    <strong className="text-[#14161a] block mb-0.5">
+                      {t("contact.addressLabel")}
+                    </strong>
+                    {addressParts.map((line, i) => (
+                      <span key={i}>
+                        {line.trim()}
+                        {i < addressParts.length - 1 ? "," : ""}
+                        <br />
+                      </span>
                     ))}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="w-4 h-4 text-[var(--accent)] shrink-0" />
                   <div>
-                    <strong className="text-[#14161a]">Phone: </strong>{COMPANY.phone}
+                    <strong className="text-[#14161a]">{t("contact.phoneLabel")} </strong>
+                    {COMPANY.phone}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="w-4 h-4 text-[var(--accent)] shrink-0" />
                   <div>
-                    <strong className="text-[#14161a]">Email: </strong>{COMPANY.email}
+                    <strong className="text-[#14161a]">{t("contact.emailLabel")} </strong>
+                    {COMPANY.email}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <FileText className="w-4 h-4 text-[var(--accent)] shrink-0" />
                   <div>
-                    <strong className="text-[#14161a]">GSTIN: </strong>{COMPANY.gst}
+                    <strong className="text-[#14161a]">{t("contact.gstinLabel")} </strong>
+                    {COMPANY.gst}
                   </div>
                 </div>
               </div>
@@ -130,17 +139,17 @@ export default function Contact() {
                 className="mt-8 inline-flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-lg text-xs font-semibold transition-colors shadow-sm"
               >
                 <MessageCircle className="w-4 h-4 text-white" />
-                <span>WhatsApp Enquiry</span>
+                <span>{t("contact.whatsappEnquiryBtn")}</span>
               </a>
             </div>
 
             {/* RIGHT SIDE – ENQUIRY FORM */}
             <div className="rounded-3xl p-8 sm:p-10 border border-[#e6e6e1] bg-white shadow-[0_4px_20px_rgba(20,22,26,0.06)]">
               <h3 className="text-xl sm:text-2xl font-['Outfit'] font-bold text-[#14161a] mb-2">
-                Send Us an Enquiry
+                {t("contact.formHeading")}
               </h3>
               <p className="text-xs text-[#6b727c] mb-6">
-                Direct WhatsApp routing for quick replies.
+                {t("contact.formSubheading")}
               </p>
 
               {submitted ? (
@@ -148,13 +157,17 @@ export default function Contact() {
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#f4f4f1] border border-[#e6e6e1]">
                     <Check className="w-8 h-8 text-[var(--accent)]" />
                   </div>
-                  <p className="font-['Outfit'] text-lg font-bold text-[#14161a]">Sent via WhatsApp!</p>
-                  <p className="text-sm text-[#6b727c]">We'll reply to your query on WhatsApp shortly.</p>
+                  <p className="font-['Outfit'] text-lg font-bold text-[#14161a]">
+                    {t("contact.submittedTitle")}
+                  </p>
+                  <p className="text-sm text-[#6b727c]">
+                    {t("contact.submittedDesc")}
+                  </p>
                   <button
                     onClick={() => setSubmitted(false)}
                     className="mt-2 rounded-lg border border-[#e6e6e1] bg-white px-6 py-2 text-xs font-semibold text-[#14161a] hover:bg-[#f4f4f1] transition-colors"
                   >
-                    Send another enquiry
+                    {t("contact.sendAnother")}
                   </button>
                 </div>
               ) : (
@@ -165,12 +178,12 @@ export default function Contact() {
                       name="name"
                       value={form.name}
                       onChange={handleChange}
-                      placeholder="Your Name *"
+                      placeholder={t("contact.placeholders.name")}
                       className={`w-full bg-[#f4f4f1] rounded-xl px-4 py-3 text-sm text-[#14161a] placeholder-[#6b727c] border ${
                         errors.name ? "border-red-400" : "border-[#e6e6e1]"
                       } focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors`}
                     />
-                    {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+                    {errors.name && <p className="mt-1 text-xs text-red-500">{t(errors.name)}</p>}
                   </div>
 
                   <div>
@@ -179,12 +192,12 @@ export default function Contact() {
                       name="email"
                       value={form.email}
                       onChange={handleChange}
-                      placeholder="Email Address (optional)"
+                      placeholder={t("contact.placeholders.email")}
                       className={`w-full bg-[#f4f4f1] rounded-xl px-4 py-3 text-sm text-[#14161a] placeholder-[#6b727c] border ${
                         errors.email ? "border-red-400" : "border-[#e6e6e1]"
                       } focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors`}
                     />
-                    {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+                    {errors.email && <p className="mt-1 text-xs text-red-500">{t(errors.email)}</p>}
                   </div>
 
                   <div>
@@ -193,12 +206,12 @@ export default function Contact() {
                       name="phone"
                       value={form.phone}
                       onChange={handleChange}
-                      placeholder="Phone Number *"
+                      placeholder={t("contact.placeholders.phone")}
                       className={`w-full bg-[#f4f4f1] rounded-xl px-4 py-3 text-sm text-[#14161a] placeholder-[#6b727c] border ${
                         errors.phone ? "border-red-400" : "border-[#e6e6e1]"
                       } focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors`}
                     />
-                    {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
+                    {errors.phone && <p className="mt-1 text-xs text-red-500">{t(errors.phone)}</p>}
                   </div>
 
                   <select
@@ -207,11 +220,21 @@ export default function Contact() {
                     onChange={handleChange}
                     className="w-full bg-[#f4f4f1] rounded-xl px-4 py-3 text-sm border border-[#e6e6e1] focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors text-[#14161a]"
                   >
-                    <option value="" className="text-[#6b727c]">Type of Enquiry</option>
-                    <option value="Product Enquiry">Product Enquiry</option>
-                    <option value="Wholesale / Bulk Order">Wholesale / Bulk Order</option>
-                    <option value="Partner Brand Products">Partner Brand Products</option>
-                    <option value="Dealership Enquiry">Dealership Enquiry</option>
+                    <option value="" className="text-[#6b727c]">
+                      {t("contact.enquiryTypes.defaultOption")}
+                    </option>
+                    <option value="Product Enquiry">
+                      {t("contact.enquiryTypes.product")}
+                    </option>
+                    <option value="Wholesale / Bulk Order">
+                      {t("contact.enquiryTypes.wholesale")}
+                    </option>
+                    <option value="Partner Brand Products">
+                      {t("contact.enquiryTypes.partner")}
+                    </option>
+                    <option value="Dealership Enquiry">
+                      {t("contact.enquiryTypes.dealership")}
+                    </option>
                   </select>
 
                   <div>
@@ -220,19 +243,19 @@ export default function Contact() {
                       name="message"
                       value={form.message}
                       onChange={handleChange}
-                      placeholder="Your Message *"
+                      placeholder={t("contact.placeholders.message")}
                       className={`w-full bg-[#f4f4f1] rounded-xl px-4 py-3 text-sm text-[#14161a] placeholder-[#6b727c] border ${
                         errors.message ? "border-red-400" : "border-[#e6e6e1]"
                       } focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-colors resize-none`}
                     />
-                    {errors.message && <p className="mt-1 text-xs text-red-500">{errors.message}</p>}
+                    {errors.message && <p className="mt-1 text-xs text-red-500">{t(errors.message)}</p>}
                   </div>
 
                   <button
                     type="submit"
                     className="w-full bg-[var(--accent)] text-white py-3.5 rounded-lg text-xs font-semibold hover:bg-[var(--accent-hover)] transition-colors shadow-sm"
                   >
-                    Send via WhatsApp →
+                    {t("contact.submitBtn")}
                   </button>
                 </form>
               )}

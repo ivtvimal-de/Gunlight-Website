@@ -39,33 +39,64 @@ function getCsrfSigningSecret() {
   return getJwtSecret();
 }
 
-function resolveCookieSameSite(isProduction) {
-  const configured = (process.env.COOKIE_SAME_SITE || "").trim().toLowerCase();
-  if (configured === "lax" || configured === "strict" || configured === "none") {
-    return configured;
-  }
-  return isProduction ? "none" : "lax";
+function isHttpsContext(req) {
+  if (process.env.NODE_ENV === "production") return true;
+  if (!req) return false;
+  if (req.secure) return true;
+  const proto = String(req.get?.("x-forwarded-proto") || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase();
+  return proto === "https";
 }
 
-export function getCookieOptions() {
-  const isProduction = process.env.NODE_ENV === "production";
-  const sameSite = resolveCookieSameSite(isProduction);
+function isCrossOriginRequest(req) {
+  const origin = req?.get?.("origin");
+  const host = req?.get?.("host");
+  if (!origin || !host) return false;
+  try {
+    const parsed = new URL(origin);
+    return parsed.host.toLowerCase() !== host.toLowerCase();
+  } catch {
+    return false;
+  }
+}
+
+function resolveCookiePolicy(req) {
+  const isHttps = isHttpsContext(req);
+  const crossSiteHttps = isHttps && isCrossOriginRequest(req);
+  const configured = (process.env.COOKIE_SAME_SITE || "").trim().toLowerCase();
+
+  let sameSite = isHttps ? "none" : "lax";
+  if (configured === "lax" || configured === "strict" || configured === "none") {
+    // Cross-site requests hitting an HTTPS backend (e.g. gunlite.in or localhost -> onrender.com) cannot use Lax/Strict cookies
+    sameSite = crossSiteHttps && configured !== "none" ? "none" : configured;
+  }
+
+  const secure = sameSite === "none" ? true : isHttps;
+  const partitioned = sameSite === "none" && secure;
+  return { secure, sameSite, partitioned };
+}
+
+export function getCookieOptions(req) {
+  const { secure, sameSite, partitioned } = resolveCookiePolicy(req);
   return {
     httpOnly: true,
-    secure: sameSite === "none" ? true : isProduction,
+    secure,
     sameSite,
+    ...(partitioned ? { partitioned: true } : {}),
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
 }
 
-export function getCsrfCookieOptions() {
-  const isProduction = process.env.NODE_ENV === "production";
-  const sameSite = resolveCookieSameSite(isProduction);
+export function getCsrfCookieOptions(req) {
+  const { secure, sameSite, partitioned } = resolveCookiePolicy(req);
   return {
     httpOnly: true,
-    secure: sameSite === "none" ? true : isProduction,
+    secure,
     sameSite,
+    ...(partitioned ? { partitioned: true } : {}),
     path: "/",
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   };
@@ -109,7 +140,7 @@ export function ensureCsrfCookie(req, res, { rotate = false } = {}) {
     return existing;
   }
   const fresh = generateSignedCsrfToken();
-  res.cookie(CSRF_COOKIE_NAME, fresh, getCsrfCookieOptions());
+  res.cookie(CSRF_COOKIE_NAME, fresh, getCsrfCookieOptions(req));
   return fresh;
 }
 

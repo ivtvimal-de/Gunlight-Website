@@ -1,11 +1,13 @@
 import ProductDetailsDynamic from "./ProductDetailsDynamic";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function EverestDetails() {
+  const { t } = useTranslation();
   return (
     <ProductDetailsDynamic
       slugProp="everest"
-      seoTitle="Everest LED GunLite | 55W Tri-Light Searchlight"
-      seoDescription="Everest LED GunLite: 55 Watts high power output, 10000mAh battery with power bank function, main light, side light, and tail light. Order on WhatsApp with fast Pan-India shipping."
+      seoTitle={t("seo.everestTitle")}
+      seoDescription={t("seo.everestDesc")}
       seoPath="/everest"
     />
   );

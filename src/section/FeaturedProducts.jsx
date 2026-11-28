@@ -2,9 +2,11 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Zap } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import { useCatalog } from "../context/CatalogContext";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function FeaturedProducts() {
   const { products, loading } = useCatalog();
+  const { t } = useTranslation();
 
   const featuredList = (() => {
     const featured = products.filter((p) => p.isFeatured);
@@ -21,26 +23,26 @@ export default function FeaturedProducts() {
             <div className="flex items-center gap-2 mb-1">
               <span className="flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold text-[var(--accent)] uppercase tracking-[0.08em]">
                 <Zap className="w-3.5 h-3.5" />
-                Featured Collection
+                {t("featuredSection.eyebrow")}
               </span>
             </div>
             <h2 className="font-['Outfit'] text-xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight leading-tight">
-              Popular Illumination Hardware
+              {t("featuredSection.heading")}
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1 hidden sm:block">
-              Tested, verified models ready for instant dispatch across India
+              {t("featuredSection.subtitle")}
             </p>
           </div>
           <Link
             to="/shop"
             className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors pb-0.5"
           >
-            <span>Explore All</span>
+            <span>{t("common.exploreAll")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        {/* 4-Column Product Grid (2 columns on mobile / 4 columns on desktop) */}
+        {/* 4-Column Product Grid */}
         {loading && products.length === 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Play, Video as VideoIcon } from "lucide-react";
 import { api } from "../services/api";
+import { useTranslation } from "../i18n/LanguageContext";
 
 /**
  * Fetch published videos for a product and refresh when the tab regains focus
@@ -53,6 +54,7 @@ export function useProductVideos(product) {
  * Enlarged 3:2 video player rendered inside the main ProductDetailTemplate gallery stage.
  */
 export function ProductStageVideo({ video, autoStart = false, videoRef: externalRef }) {
+  const { t } = useTranslation();
   const fallbackRef = useRef(null);
   const resolvedRef = externalRef || fallbackRef;
   const [activated, setActivated] = useState(autoStart);
@@ -98,13 +100,13 @@ export function ProductStageVideo({ video, autoStart = false, videoRef: external
         <button
           type="button"
           onClick={handlePlayTrigger}
-          aria-label={`Play video: ${video.title || "Product video"}`}
+          aria-label={`${t("productDetail.productVideoLabel")}: ${video.title || t("productDetail.productVideoLabel")}`}
           className="group/play absolute inset-0 w-full h-full bg-[#14161A] flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           {video.thumbnailUrl ? (
             <img
               src={video.thumbnailUrl}
-              alt={video.title || "Product video"}
+              alt={video.title || t("productDetail.productVideoLabel")}
               className="h-full w-full object-contain opacity-95 group-hover/play:opacity-100 transition-opacity duration-200"
             />
           ) : (

@@ -1,17 +1,12 @@
 /**
  * CartDrawer — slide-in cart panel from the right side.
- *
- * Shows:
- *  - Each item: image, name, price, qty stepper, remove button, line total
- *  - Subtotal
- *  - "Send Order on WhatsApp" button (pre-filled message)
- *  - "Clear Cart" link
- *  - Empty-cart state
  */
 
 import { Flashlight, AlertTriangle, MessageCircle, X, Trash2 } from "lucide-react";
 import { useCart, formatPrice } from "../context/CartContext";
 import { WHATSAPP_NUMBER, WARRANTY_OPTION } from "../config";
+import { useTranslation } from "../i18n/LanguageContext";
+import { formatLocalizedPrice, translateWarrantyLabel } from "../i18n/catalogI18n";
 
 function buildWhatsAppMessage(items, cartTotal, productsSubtotal, warrantyTotal) {
   const lines = items.map((item, i) => {
@@ -65,6 +60,7 @@ export default function CartDrawer() {
     isCartOpen,
     closeCart,
   } = useCart();
+  const { language, t } = useTranslation();
 
   // Compute tallied product subtotal and warranty add-on total
   const warrantyCount = items.reduce(
@@ -76,6 +72,9 @@ export default function CartDrawer() {
     return sum + (item.warrantyFee ?? WARRANTY_OPTION.fee) * item.quantity;
   }, 0);
   const productsSubtotal = Math.max(0, cartTotal - warrantyTotal);
+
+  const localizedWarrantyLabel = translateWarrantyLabel(WARRANTY_OPTION.label, language);
+  const itemUnit = cartCount === 1 ? t("common.itemSingular") : t("common.itemPlural");
 
   const handleSendWhatsApp = () => {
     const message = buildWhatsAppMessage(items, cartTotal, productsSubtotal, warrantyTotal);
@@ -98,7 +97,7 @@ export default function CartDrawer() {
 
       {/* ── Drawer panel ── */}
       <aside
-        aria-label="Shopping cart"
+        aria-label={t("cart.ariaLabel")}
         className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white border-l border-[var(--border-subtle)] text-[var(--text-primary)] shadow-2xl transition-transform duration-300 ease-in-out ${
           isCartOpen ? "translate-x-0" : "translate-x-full"
         }`}
@@ -107,7 +106,7 @@ export default function CartDrawer() {
         <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4 bg-[var(--bg-canvas)]">
           <div className="flex items-center gap-2">
             <h2 className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)]">
-              Your Cart
+              {t("cart.title")}
             </h2>
             {cartCount > 0 && (
               <span className="rounded-full bg-[var(--accent-tint)] border border-[var(--border-subtle)] px-2 py-0.5 text-xs font-bold text-[var(--accent)]">
@@ -117,7 +116,7 @@ export default function CartDrawer() {
           </div>
           <button
             onClick={closeCart}
-            aria-label="Close cart"
+            aria-label={t("cart.closeAria")}
             className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-surface-2)] hover:text-[var(--text-primary)] transition-colors"
           >
             <X className="h-5 w-5" />
@@ -131,15 +130,17 @@ export default function CartDrawer() {
             <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border-subtle)]">
               <Flashlight className="h-10 w-10 text-[var(--accent)]" />
             </div>
-            <p className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)]">Your cart is empty</p>
+            <p className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)]">
+              {t("cart.emptyTitle")}
+            </p>
             <p className="text-sm text-[var(--text-muted)]">
-              Browse our collection and add a torch to your cart.
+              {t("cart.emptyDesc")}
             </p>
             <button
               onClick={closeCart}
               className="mt-2 rounded-lg bg-[var(--accent)] px-6 py-2.5 text-xs font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors shadow-xs"
             >
-              Shop Now →
+              {t("cart.emptyCta")}
             </button>
           </div>
         ) : (
@@ -149,7 +150,7 @@ export default function CartDrawer() {
               {items.map((item) => {
                 const lineTotal = item.priceNum > 0
                   ? formatPrice(item.priceNum * item.quantity)
-                  : "On Request";
+                  : t("common.onRequest");
 
                 return (
                   <li key={item.id} className="flex gap-4 py-4">
@@ -157,7 +158,7 @@ export default function CartDrawer() {
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--bg-surface-2)] p-1.5 border border-[var(--border-subtle)]">
                       <img
                         src={item.img}
-                        alt={`${item.title} - GunLite cart item`}
+                        alt={t("cart.itemAlt", { title: item.title })}
                         width={64}
                         height={64}
                         className="h-full w-full object-contain"
@@ -171,12 +172,12 @@ export default function CartDrawer() {
                       <p className="text-xs text-[var(--text-muted)]">
                         {item.hasWarranty && item.basePriceNum > 0
                           ? formatPrice(item.basePriceNum)
-                          : item.price}
+                          : formatLocalizedPrice(item.price, t)}
                       </p>
 
                       {item.hasWarranty && (
                         <span className="inline-flex items-center w-fit rounded-md bg-[var(--accent-tint)] px-2 py-0.5 text-[10.5px] font-semibold text-[var(--accent)]">
-                          {WARRANTY_OPTION.label} (+₹{item.warrantyFee ?? WARRANTY_OPTION.fee})
+                          {localizedWarrantyLabel} (+₹{item.warrantyFee ?? WARRANTY_OPTION.fee})
                         </span>
                       )}
 
@@ -185,7 +186,7 @@ export default function CartDrawer() {
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
-                          aria-label="Decrease quantity"
+                          aria-label={t("cart.decreaseQtyAria")}
                           className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40 transition-colors text-sm font-bold"
                         >
                           −
@@ -195,7 +196,7 @@ export default function CartDrawer() {
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          aria-label="Increase quantity"
+                          aria-label={t("cart.increaseQtyAria")}
                           className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors text-sm font-bold"
                         >
                           +
@@ -208,8 +209,8 @@ export default function CartDrawer() {
                       <p className="font-['Outfit'] text-sm font-bold text-[var(--accent)] tabular-nums">{lineTotal}</p>
                       <button
                         onClick={() => removeItem(item.id)}
-                        aria-label={`Remove ${item.title}`}
-                        title={`Remove ${item.title}`}
+                        aria-label={t("cart.removeItemAria", { title: item.title })}
+                        title={t("cart.removeItemAria", { title: item.title })}
                         className="h-7 w-7 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -227,11 +228,11 @@ export default function CartDrawer() {
                 {warrantyTotal > 0 && (
                   <>
                     <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
-                      <span>Products Subtotal ({cartCount} item{cartCount !== 1 ? "s" : ""})</span>
+                      <span>{t("cart.productsSubtotal", { count: cartCount, unit: itemUnit })}</span>
                       <span className="font-medium tabular-nums">{formatPrice(productsSubtotal)}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs text-[var(--accent)]">
-                      <span>{WARRANTY_OPTION.label} (×{warrantyCount})</span>
+                      <span>{localizedWarrantyLabel} (×{warrantyCount})</span>
                       <span className="font-semibold tabular-nums">+{formatPrice(warrantyTotal)}</span>
                     </div>
                     <div className="my-1.5 border-t border-[var(--border-subtle)]" />
@@ -240,10 +241,12 @@ export default function CartDrawer() {
 
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-[var(--text-primary)]">
-                    {warrantyTotal > 0 ? "Total Amount" : `Subtotal (${cartCount} item${cartCount !== 1 ? "s" : ""})`}
+                    {warrantyTotal > 0
+                      ? t("cart.totalAmount")
+                      : t("cart.subtotal", { count: cartCount, unit: itemUnit })}
                   </span>
                   <span className="font-['Outfit'] text-lg font-bold text-[var(--text-primary)] tabular-nums">
-                    {cartTotalStr ?? "To be quoted"}
+                    {cartTotalStr ?? t("common.toBeQuoted")}
                   </span>
                 </div>
               </div>
@@ -252,7 +255,11 @@ export default function CartDrawer() {
               {items.some((i) => i.priceNum === 0) && (
                 <p className="flex items-start gap-2 rounded-lg bg-[var(--accent-tint)] border border-[var(--border-subtle)] px-3 py-2 text-xs text-[var(--accent)] font-medium">
                   <AlertTriangle className="w-4 h-4 text-[var(--accent)] shrink-0 mt-0.5" />
-                  <span>One or more items are priced <strong>On Request</strong>. We will confirm the final price on WhatsApp.</span>
+                  <span>
+                    {t("cart.onRequestNoticeBefore")}
+                    <strong>{t("cart.onRequestNoticeBold")}</strong>
+                    {t("cart.onRequestNoticeAfter")}
+                  </span>
                 </p>
               )}
 
@@ -262,7 +269,7 @@ export default function CartDrawer() {
                 className="w-full flex items-center justify-center gap-2 rounded-lg bg-[var(--accent)] py-3.5 text-xs font-semibold text-white shadow-xs hover:bg-[var(--accent-hover)] transition-colors"
               >
                 <MessageCircle className="w-4 h-4 text-white" />
-                <span>Send Order on WhatsApp</span>
+                <span>{t("cart.sendOrderWhatsapp")}</span>
               </button>
 
               {/* Clear cart */}
@@ -271,13 +278,13 @@ export default function CartDrawer() {
                   onClick={closeCart}
                   className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:underline transition-colors"
                 >
-                  ← Continue Shopping
+                  {t("cart.continueShopping")}
                 </button>
                 <button
                   onClick={clearCart}
                   className="text-xs text-[var(--text-muted)] hover:text-red-500 hover:underline transition-colors"
                 >
-                  Clear Cart
+                  {t("cart.clearCart")}
                 </button>
               </div>
             </div>

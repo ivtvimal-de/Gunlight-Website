@@ -4,6 +4,7 @@ import { CartProvider } from "./context/CartContext";
 import { CatalogProvider } from "./context/CatalogContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 import CartDrawer from "./components/CartDrawer";
 import Navbar from "./components/Navbar";
@@ -117,17 +118,19 @@ function AppRoutesShell() {
 
 function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <CatalogProvider>
-          <CartProvider>
-            <Router>
-              <AppRoutesShell />
-            </Router>
-          </CartProvider>
-        </CatalogProvider>
-      </AuthProvider>
-    </ToastProvider>
+    <LanguageProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <CatalogProvider>
+            <CartProvider>
+              <Router>
+                <AppRoutesShell />
+              </Router>
+            </CartProvider>
+          </CatalogProvider>
+        </AuthProvider>
+      </ToastProvider>
+    </LanguageProvider>
   );
 }
 

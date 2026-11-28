@@ -4,6 +4,8 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 import SEO from "../components/SEO";
 import ProductCard from "../components/ProductCard";
 import { useCatalog } from "../context/CatalogContext";
+import { useTranslation } from "../i18n/LanguageContext";
+import { translateBrandTagline } from "../i18n/catalogI18n";
 
 function productMatchesBrand(product, brand) {
   const pb = String(product?.brand || "").trim().toLowerCase();
@@ -18,6 +20,7 @@ function productMatchesBrand(product, brand) {
 
 export default function Brands() {
   const { products, brands } = useCatalog();
+  const { language, t } = useTranslation();
 
   const activeBrands = brands.filter(
     (b) => b.isActive !== false && !b.isComingSoon
@@ -35,8 +38,8 @@ export default function Brands() {
   return (
     <>
       <SEO
-        title="Brands | GunLite Illumination Hardware"
-        description="Explore torch light brands at GunLite. Discover our flagship GunLite professional high-power LED torches and illumination partners."
+        title={t("seo.brandsTitle")}
+        description={t("seo.brandsDesc")}
         path="/brands"
         type="website"
       />
@@ -44,25 +47,25 @@ export default function Brands() {
       <main className="min-h-screen bg-[#FAFAF8] text-[#14161A] font-['Inter']">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
           
-          {/* 1. Compact Header: breadcrumb "Home / Brands", H1 "Brands" (Outfit bold, 32px) */}
+          {/* 1. Compact Header & Breadcrumb */}
           <nav aria-label="Breadcrumb" className="mb-2">
             <ol className="flex items-center gap-1.5 text-xs text-[#6B727C]">
               <li>
                 <Link to="/" className="hover:text-[#14161A] transition-colors">
-                  Home
+                  {t("common.home")}
                 </Link>
               </li>
               <li>
                 <ChevronRight className="w-3.5 h-3.5 text-[#8B97A8]" />
               </li>
               <li className="font-medium text-[#14161A]" aria-current="page">
-                Brands
+                {t("brandsPage.title")}
               </li>
             </ol>
           </nav>
 
           <h1 className="font-['Outfit'] text-[28px] sm:text-[32px] font-bold text-[#14161A] tracking-tight mb-6 sm:mb-10">
-            Brands
+            {t("brandsPage.title")}
           </h1>
 
           {/* 2. FEATURE CARD(S) for Flagship Brands */}
@@ -75,13 +78,18 @@ export default function Brands() {
               brandProducts[0]?.heroImg ||
               brandProducts[0]?.img ||
               "/images/eaglemain.webp";
+            const unit =
+              brandProducts.length === 1
+                ? t("common.productSingular")
+                : t("common.productPlural");
+            const taglineText =
+              translateBrandTagline(brand, language) || t("brandsPage.defaultTagline");
 
             return (
               <section key={brand.slug} className="mb-10 sm:mb-16">
                 <div className="rounded-2xl sm:rounded-[24px] bg-[#14161A] p-5 sm:p-10 text-white shadow-xl">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
                     
-                    {/* Left Column: Logo/Badge, tagline, product count, and red CTA button */}
                     <div className="flex flex-col justify-center">
                       {brand.logo ? (
                         <div className="inline-flex items-center justify-center rounded-xl bg-white px-3.5 py-2 w-fit mb-4 sm:mb-5 shadow-xs">
@@ -98,30 +106,29 @@ export default function Brands() {
                       )}
 
                       <p className="text-sm sm:text-lg text-[#E6E6E1] leading-relaxed mb-3 sm:mb-4 max-w-md">
-                        {brand.tagline ||
-                          brand.description ||
-                          "Professional LED torches and search lights from Coimbatore."}
+                        {taglineText}
                       </p>
 
                       <div className="text-xs text-[#A0A6AF] font-medium mb-5 sm:mb-6">
-                        {brandProducts.length} product
-                        {brandProducts.length !== 1 ? "s" : ""} available
+                        {t("brandsPage.productsAvailable", {
+                          count: brandProducts.length,
+                          unit,
+                        })}
                       </div>
 
                       <Link
                         to={`/shop?brand=${brand.slug}`}
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-5 sm:px-6 h-11 text-sm font-semibold transition-colors w-fit shadow-xs"
                       >
-                        <span>Shop all products</span>
+                        <span>{t("brandsPage.shopAllProducts")}</span>
                         <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>
 
-                    {/* Right Column: Full 3:2 product image rounded 16px, zero cropping */}
                     <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[16px] bg-[#1D2127] border border-white/10">
                       <img
                         src={bannerImg}
-                        alt={`${brand.name} Showcase`}
+                        alt={t("brandsPage.showcaseAlt", { brand: brand.name })}
                         width={1536}
                         height={1024}
                         className="w-full h-full object-cover"
@@ -154,21 +161,21 @@ export default function Brands() {
                       />
                     )}
                     <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-bold text-[#14161A] tracking-tight">
-                      {brand.name} Products
+                      {t("brandsPage.brandProductsHeading", { brand: brand.name })}
                     </h2>
                   </div>
                   <Link
                     to={`/shop?brand=${brand.slug}`}
                     className="text-xs sm:text-sm font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors inline-flex items-center gap-1"
                   >
-                    <span>View all</span>
+                    <span>{t("brandsPage.viewAll")}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
 
                 {brandProducts.length === 0 ? (
                   <p className="text-sm text-[#6B727C] rounded-2xl bg-white border border-[#E6E6E1] p-6">
-                    No active products listed under {brand.name} yet.
+                    {t("brandsPage.noActiveProducts", { brand: brand.name })}
                   </p>
                 ) : (
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
@@ -186,10 +193,10 @@ export default function Brands() {
             <section className="mb-12">
               <div className="mb-6">
                 <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-bold text-[#14161A] tracking-tight">
-                  More Brands
+                  {t("brandsPage.moreBrandsHeading")}
                 </h2>
                 <p className="text-xs sm:text-sm text-[#6B727C] mt-1">
-                  Upcoming partner illumination brands
+                  {t("brandsPage.moreBrandsSubtitle")}
                 </p>
               </div>
 
@@ -210,7 +217,7 @@ export default function Brands() {
                       {b.name}
                     </div>
                     <div className="text-[12px] text-[#8B97A8] font-medium">
-                      Coming soon
+                      {t("brandsPage.comingSoon")}
                     </div>
                   </div>
                 ))}
@@ -223,4 +230,3 @@ export default function Brands() {
     </>
   );
 }
-

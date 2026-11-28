@@ -19,10 +19,17 @@ import {
 } from "lucide-react";
 import { useCart, parsePriceNum, formatPrice } from "../context/CartContext";
 import { useCatalog } from "../context/CatalogContext";
-import { WHATSAPP_NUMBER, CLAIMS, WARRANTY_OPTION } from "../config";
+import { WHATSAPP_NUMBER, WARRANTY_OPTION } from "../config";
 import SEO from "./SEO";
 import ProductCard from "./ProductCard";
 import { useProductVideos, ProductStageVideo } from "./ProductVideoGallery";
+import { useTranslation } from "../i18n/LanguageContext";
+import {
+  formatLocalizedPrice,
+  translateProductDescription,
+  translateSpecItem,
+  translateWarrantyLabel,
+} from "../i18n/catalogI18n";
 
 export default function ProductDetailTemplate({
   product,
@@ -33,7 +40,9 @@ export default function ProductDetailTemplate({
   seoPath,
 }) {
   const { products: catalogProducts } = useCatalog();
+  const { language, t } = useTranslation();
   const productVideos = useProductVideos(product);
+
   const galleryImages = useMemo(
     () =>
       images.length > 0
@@ -43,6 +52,7 @@ export default function ProductDetailTemplate({
         : [product.img],
     [images, product.galleryImages, product.img]
   );
+
   const mediaItems = useMemo(
     () => [
       ...galleryImages.map((src, idx) => ({
@@ -95,6 +105,7 @@ export default function ProductDetailTemplate({
   const warrantyEnabled = product.warrantyEnabled !== false;
   const warrantyFeeValue = Number(product.warrantyPrice ?? WARRANTY_OPTION.fee);
   const warrantyLabelText = product.warrantyLabel || WARRANTY_OPTION.label;
+  const localizedWarrantyLabel = translateWarrantyLabel(warrantyLabelText, language);
 
   const basePriceNum = product.priceNum ?? parsePriceNum(product.price);
   const hasValidPrice = basePriceNum > 0;
@@ -105,8 +116,13 @@ export default function ProductDetailTemplate({
   const activeWarrantyFee = warrantyEnabled && withWarranty ? warrantyFeeValue : 0;
   const unitPriceNum = hasValidPrice ? basePriceNum + activeWarrantyFee : 0;
   const totalPriceNum = hasValidPrice ? unitPriceNum * qty : 0;
-  const displayUnitPrice = unitPriceNum > 0 ? formatPrice(unitPriceNum) : product.price;
-  const displayTotalPrice = totalPriceNum > 0 ? formatPrice(totalPriceNum) : product.price;
+  const displayUnitPrice = unitPriceNum > 0
+    ? formatPrice(unitPriceNum)
+    : formatLocalizedPrice(product.price, t);
+  const displayTotalPrice = totalPriceNum > 0
+    ? formatPrice(totalPriceNum)
+    : formatLocalizedPrice(product.price, t);
+  const displayBasePrice = formatLocalizedPrice(product.price, t);
 
   const selectMediaIndex = (idx, { autoPlayVideo = false } = {}) => {
     setIsZoomed(false);
@@ -181,26 +197,31 @@ export default function ProductDetailTemplate({
     setTimeout(() => setAdded(false), 2000);
   };
 
+  const rawUnitPrice = unitPriceNum > 0 ? formatPrice(unitPriceNum) : product.price;
+  const rawTotalPrice = totalPriceNum > 0 ? formatPrice(totalPriceNum) : product.price;
   const waText = encodeURIComponent(
     `Hi GunLite, I am interested in ordering ${product.title}${
       warrantyEnabled && withWarranty ? ` with ${warrantyLabelText} (+₹${warrantyFeeValue})` : ""
-    } (${displayUnitPrice} × ${qty}${qty > 1 || (warrantyEnabled && withWarranty) ? ` = Total: ${displayTotalPrice}` : ""}). Please share delivery timeline and payment details.`
+    } (${rawUnitPrice} × ${qty}${qty > 1 || (warrantyEnabled && withWarranty) ? ` = Total: ${rawTotalPrice}` : ""}). Please share delivery timeline and payment details.`
   );
   const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`;
 
-  // Filter out any spec that contains placeholder brackets [ ]
-  const validSpecs = specs.filter((item) => {
-    const val = typeof item === "string" ? item : `${item.label} ${item.value}`;
-    return !val.includes("[") && !val.includes("]");
-  });
+  const validSpecs = specs
+    .filter((item) => {
+      const val = typeof item === "string" ? item : `${item.label} ${item.value}`;
+      return !val.includes("[") && !val.includes("]");
+    })
+    .map((item) => translateSpecItem(item, language));
 
   const related = catalogProducts.filter((p) => p.id !== product.id);
+  const localizedDesc = translateProductDescription(product, language);
+  const cartUnit = items.length === 1 ? t("common.itemSingular") : t("common.itemPlural");
 
   return (
     <>
       <SEO
-        title={seoTitle || `${product.title} | Professional GunLite Torch`}
-        description={seoDescription || product.desc}
+        title={seoTitle || `${product.title} | ${t("seo.productFallbackSuffix")}`}
+        description={seoDescription || localizedDesc}
         path={seoPath || `/${product.id}`}
         type="product"
         image={galleryImages[0]}
@@ -212,9 +233,13 @@ export default function ProductDetailTemplate({
         <div className="border-b border-[var(--border-subtle)] bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <nav className="flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]">
-              <Link to="/" className="hover:text-[var(--text-primary)] transition-colors">Home</Link>
+              <Link to="/" className="hover:text-[var(--text-primary)] transition-colors">
+                {t("common.home")}
+              </Link>
               <span>/</span>
-              <Link to="/shop" className="hover:text-[var(--text-primary)] transition-colors">Shop</Link>
+              <Link to="/shop" className="hover:text-[var(--text-primary)] transition-colors">
+                {t("common.shop")}
+              </Link>
               <span>/</span>
               <span className="text-[var(--text-primary)] truncate font-semibold">{product.title}</span>
             </nav>
@@ -228,7 +253,7 @@ export default function ProductDetailTemplate({
             {/* ── LEFT: Edge-to-Edge Studio Gallery ── */}
             <div className="lg:col-span-7 space-y-3">
               
-              {/* Main Media Stage: Pure 3:2 dark studio card for active photo or video */}
+              {/* Main Media Stage */}
               <div
                 className={`relative w-full aspect-[3/2] rounded-2xl overflow-hidden bg-[#14161A] ring-1 ring-black/10 shadow-[0_12px_32px_rgba(20,22,26,0.12)] select-none group ${
                   isVideoActive ? "" : isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
@@ -250,7 +275,7 @@ export default function ProductDetailTemplate({
                     <source srcSet={activeItem?.src} type="image/webp" />
                     <img
                       src={activeItem?.src}
-                      alt={`${product.title} - View ${safeIdx + 1}`}
+                      alt={t("productDetail.viewAlt", { title: product.title, index: safeIdx + 1 })}
                       width={1536}
                       height={1024}
                       fetchPriority="high"
@@ -261,7 +286,6 @@ export default function ProductDetailTemplate({
                   </picture>
                 )}
 
-                {/* Desktop Prev / Next Arrow Controls */}
                 {mediaItems.length > 1 && (
                   <>
                     <button
@@ -270,7 +294,7 @@ export default function ProductDetailTemplate({
                         e.stopPropagation();
                         handlePrevImg();
                       }}
-                      aria-label="Previous media"
+                      aria-label={t("productDetail.prevMediaAria")}
                       className="hidden sm:flex z-10 absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white opacity-0 group-hover:opacity-100 hover:bg-black/75 transition-all"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -281,7 +305,7 @@ export default function ProductDetailTemplate({
                         e.stopPropagation();
                         handleNextImg();
                       }}
-                      aria-label="Next media"
+                      aria-label={t("productDetail.nextMediaAria")}
                       className="hidden sm:flex z-10 absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white opacity-0 group-hover:opacity-100 hover:bg-black/75 transition-all"
                     >
                       <ChevronRight className="w-4 h-4" />
@@ -290,7 +314,7 @@ export default function ProductDetailTemplate({
                 )}
               </div>
 
-              {/* Clean Utility Row below Media (Counter + Dots + Zoom / Fullscreen Toggle) */}
+              {/* Utility Row below Media */}
               <div className="flex items-center justify-between gap-3 px-0.5">
                 <div className="flex items-center gap-2.5">
                   {mediaItems.length > 1 && (
@@ -306,8 +330,10 @@ export default function ProductDetailTemplate({
                             onClick={() => selectMediaIndex(idx)}
                             aria-label={
                               item.type === "video"
-                                ? `Go to video: ${item.video.title || idx + 1}`
-                                : `Go to image ${idx + 1}`
+                                ? t("productDetail.goToVideoAria", {
+                                    title: item.video.title || idx + 1,
+                                  })
+                                : t("productDetail.goToImageAria", { index: idx + 1 })
                             }
                             className={`h-1.5 rounded-full transition-all ${
                               safeIdx === idx
@@ -325,11 +351,13 @@ export default function ProductDetailTemplate({
                   <button
                     type="button"
                     onClick={handleFullscreenVideo}
-                    aria-label={`Fullscreen video: ${activeItem.video.title || "Product video"}`}
+                    aria-label={t("productDetail.fullscreenVideoAria", {
+                      title: activeItem.video.title || t("productDetail.productVideoLabel"),
+                    })}
                     className="inline-flex items-center gap-1.5 rounded-full border border-[#E6E6E1] bg-white px-3 py-1 text-[11px] font-medium text-[#4A5058] shadow-2xs hover:border-[#CFCFC8] hover:text-[#14161A] transition-colors"
                   >
                     <Maximize2 className="w-3.5 h-3.5 text-[var(--accent)]" />
-                    <span>Fullscreen</span>
+                    <span>{t("productDetail.fullscreen")}</span>
                   </button>
                 ) : (
                   <button
@@ -340,19 +368,19 @@ export default function ProductDetailTemplate({
                     {isZoomed ? (
                       <>
                         <ZoomOut className="w-3.5 h-3.5 text-[var(--accent)]" />
-                        <span>Reset Zoom</span>
+                        <span>{t("productDetail.resetZoom")}</span>
                       </>
                     ) : (
                       <>
                         <ZoomIn className="w-3.5 h-3.5 text-[var(--accent)]" />
-                        <span>Tap to Zoom</span>
+                        <span>{t("productDetail.tapToZoom")}</span>
                       </>
                     )}
                   </button>
                 )}
               </div>
 
-              {/* Sleek 3:2 Thumbnail Strip (photos first, published videos at the end) */}
+              {/* Thumbnail Strip */}
               {mediaItems.length > 1 && (
                 <div className="flex items-center gap-2.5 overflow-x-auto py-1 px-0.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {mediaItems.map((item, idx) => {
@@ -372,10 +400,16 @@ export default function ProductDetailTemplate({
                         }`}
                         aria-label={
                           isVideo
-                            ? `Play product video: ${item.video.title || idx + 1}`
-                            : `View angle ${idx + 1}`
+                            ? t("productDetail.playVideoAria", {
+                                title: item.video.title || idx + 1,
+                              })
+                            : t("productDetail.viewAngleAria", { index: idx + 1 })
                         }
-                        title={isVideo ? item.video.title || "Product video" : undefined}
+                        title={
+                          isVideo
+                            ? item.video.title || t("productDetail.productVideoLabel")
+                            : undefined
+                        }
                       >
                         {isVideo ? (
                           <>
@@ -422,9 +456,11 @@ export default function ProductDetailTemplate({
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] leading-tight">
-                      {CLAIMS.warranty || "1-Year Warranty"}
+                      {t("productDetail.trust.warranty")}
                     </p>
-                    <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-0.5">Official Guarantee</p>
+                    <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-0.5">
+                      {t("productDetail.trust.warrantySub")}
+                    </p>
                   </div>
                 </div>
 
@@ -434,9 +470,11 @@ export default function ProductDetailTemplate({
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] leading-tight">
-                      Pan-India Shipping
+                      {t("productDetail.trust.shipping")}
                     </p>
-                    <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-0.5">Dispatched in 24-48h</p>
+                    <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-0.5">
+                      {t("productDetail.trust.shippingSub")}
+                    </p>
                   </div>
                 </div>
 
@@ -446,9 +484,11 @@ export default function ProductDetailTemplate({
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] leading-tight">
-                      Direct WhatsApp
+                      {t("productDetail.trust.whatsapp")}
                     </p>
-                    <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-0.5">Instant Confirmation</p>
+                    <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-0.5">
+                      {t("productDetail.trust.whatsappSub")}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -481,40 +521,42 @@ export default function ProductDetailTemplate({
                       }`}
                     />
                     {isOutOfStock
-                      ? "Out of Stock"
+                      ? t("productDetail.stock.outOfStock")
                       : product.stockQuantity !== undefined && Number(product.stockQuantity) <= 5
-                      ? `Low Stock · Only ${product.stockQuantity} left`
-                      : "In Stock & Ready for Dispatch"}
+                      ? t("productDetail.stock.lowStock", { count: product.stockQuantity })
+                      : t("productDetail.stock.inStock")}
                   </div>
                   <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
                     {product.title}
                   </h1>
                   {product.sku && (
                     <p className="mt-1 font-mono text-[11px] text-[var(--text-muted)]">
-                      SKU: {product.sku}
+                      {t("productDetail.skuLabel")} {product.sku}
                     </p>
                   )}
                 </div>
 
-                {/* Price Display (always shows base product price; tallied total appears below) */}
+                {/* Price Display */}
                 <div className="flex flex-wrap items-baseline gap-2.5 pb-5 border-b border-[var(--border-subtle)]">
                   <span className="font-['Outfit'] text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tabular-nums">
-                    {product.price}
+                    {displayBasePrice}
                   </span>
                   {product.hasDiscount && product.regularPrice && (
                     <span className="text-base text-[var(--text-muted)] line-through tabular-nums">
                       {product.regularPrice}
                     </span>
                   )}
-                  <span className="text-xs text-[var(--text-muted)]">Inclusive of all taxes</span>
+                  <span className="text-xs text-[var(--text-muted)]">
+                    {t("productDetail.inclusiveTaxes")}
+                  </span>
                 </div>
 
                 {/* Description */}
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                  {product.desc}
+                  {localizedDesc}
                 </p>
 
-                {/* Optional 1-Year Warranty Add-On Tick Box */}
+                {/* Optional 1-Year Warranty Add-On */}
                 {hasValidPrice && warrantyEnabled && warrantyFeeValue > 0 && (
                   <button
                     type="button"
@@ -539,10 +581,10 @@ export default function ProductDetailTemplate({
                       </span>
                       <div className="min-w-0">
                         <span className="block text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
-                          Add {warrantyLabelText}
+                          {t("productDetail.addWarrantyPrefix", { label: localizedWarrantyLabel })}
                         </span>
                         <span className="block text-[11px] text-[var(--text-muted)] mt-0.5 leading-snug">
-                          Optional · {WARRANTY_OPTION.detail}
+                          {t("productDetail.optionalWarrantyDetail")}
                         </span>
                       </div>
                     </div>
@@ -556,7 +598,7 @@ export default function ProductDetailTemplate({
                 {/* Quantity Stepper */}
                 <div className="space-y-2 pt-1">
                   <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider block">
-                    Quantity
+                    {t("productDetail.quantity")}
                   </label>
                   <div className="flex items-center gap-3">
                     <div className="inline-flex items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)]">
@@ -564,7 +606,7 @@ export default function ProductDetailTemplate({
                         onClick={() => setQty((q) => Math.max(1, q - 1))}
                         disabled={qty <= 1 || isOutOfStock}
                         className="p-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-30 transition-colors"
-                        aria-label="Decrease quantity"
+                        aria-label={t("cart.decreaseQtyAria")}
                       >
                         <Minus className="w-4 h-4" />
                       </button>
@@ -575,7 +617,7 @@ export default function ProductDetailTemplate({
                         onClick={() => setQty((q) => q + 1)}
                         disabled={isOutOfStock}
                         className="p-2.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-30 transition-colors"
-                        aria-label="Increase quantity"
+                        aria-label={t("cart.increaseQtyAria")}
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -583,31 +625,31 @@ export default function ProductDetailTemplate({
 
                     {inCartCount > 0 && (
                       <span className="text-xs text-[var(--accent)] font-medium">
-                        ({inCartCount} already in cart)
+                        {t("productDetail.alreadyInCart", { count: inCartCount })}
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Price Tally Breakdown (shown clearly when warranty or qty > 1 is selected) */}
+                {/* Price Tally Breakdown */}
                 {hasValidPrice && ((warrantyEnabled && withWarranty) || qty > 1) && (
                   <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-canvas)] p-3.5 space-y-1.5 text-xs">
                     <div className="flex items-center justify-between text-[var(--text-secondary)]">
-                      <span>Product ({product.price} × {qty})</span>
+                      <span>{t("productDetail.productPriceRow", { price: displayBasePrice, qty })}</span>
                       <span className="font-medium tabular-nums">
                         {formatPrice(basePriceNum * qty)}
                       </span>
                     </div>
                     {warrantyEnabled && withWarranty && (
                       <div className="flex items-center justify-between text-[var(--accent)]">
-                        <span>{warrantyLabelText} (+₹{warrantyFeeValue} × {qty})</span>
+                        <span>{localizedWarrantyLabel} (+₹{warrantyFeeValue} × {qty})</span>
                         <span className="font-semibold tabular-nums">
                           +{formatPrice(activeWarrantyFee * qty)}
                         </span>
                       </div>
                     )}
                     <div className="pt-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between font-['Outfit'] text-sm font-bold text-[var(--text-primary)]">
-                      <span>Total Amount</span>
+                      <span>{t("productDetail.totalAmount")}</span>
                       <span className="tabular-nums">{displayTotalPrice}</span>
                     </div>
                   </div>
@@ -627,16 +669,16 @@ export default function ProductDetailTemplate({
                     }`}
                   >
                     {isOutOfStock ? (
-                      <span>Currently Out of Stock</span>
+                      <span>{t("common.currentlyOutOfStock")}</span>
                     ) : added ? (
                       <>
                         <Check className="w-4 h-4 text-white" />
-                        <span>Added to Cart!</span>
+                        <span>{t("productDetail.addToCartSuccess")}</span>
                       </>
                     ) : (
                       <>
                         <ShoppingCart className="w-4 h-4 text-white" />
-                        <span>Add to Cart</span>
+                        <span>{t("common.addToCart")}</span>
                       </>
                     )}
                   </button>
@@ -648,7 +690,7 @@ export default function ProductDetailTemplate({
                     className="w-full py-3.5 px-6 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface-2)] hover:bg-[var(--bg-surface-3)] hover:border-[var(--accent)] hover:text-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm transition-colors flex items-center justify-center gap-2"
                   >
                     <MessageCircle className="w-4 h-4 text-[var(--accent)]" />
-                    <span>Order on WhatsApp</span>
+                    <span>{t("common.orderOnWhatsapp")}</span>
                   </a>
 
                   {inCartCount > 0 && (
@@ -656,7 +698,7 @@ export default function ProductDetailTemplate({
                       onClick={openCart}
                       className="w-full text-center text-xs text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors pt-1"
                     >
-                      View Cart ({items.length} items) →
+                      {t("productDetail.viewCart", { count: items.length, unit: cartUnit })}
                     </button>
                   )}
                 </div>
@@ -673,7 +715,7 @@ export default function ProductDetailTemplate({
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-white p-4 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(20,22,26,0.05)]">
             <h2 className="font-['Outfit'] text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-4 sm:mb-6 flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
-              Technical Specifications
+              {t("productDetail.technicalSpecs")}
             </h2>
 
             <div className="divide-y divide-[var(--border-subtle)]">
@@ -686,7 +728,7 @@ export default function ProductDetailTemplate({
                     className="py-3 sm:py-3.5 grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 text-[13px] sm:text-sm"
                   >
                     <span className="font-medium text-[var(--text-muted)]">
-                      {label || `Specification ${idx + 1}`}
+                      {label || t("productDetail.specFallbackLabel", { index: idx + 1 })}
                     </span>
                     <span className="sm:col-span-2 text-[var(--text-primary)] font-medium">
                       {value}
@@ -702,13 +744,13 @@ export default function ProductDetailTemplate({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
           <div className="flex items-center justify-between mb-5 sm:mb-8">
             <h2 className="font-['Outfit'] text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
-              Other Models You May Like
+              {t("productDetail.relatedHeading")}
             </h2>
             <Link
               to="/shop"
               className="text-xs font-semibold text-[var(--accent)] hover:underline flex items-center gap-1"
             >
-              <span>View All</span>
+              <span>{t("common.viewAll")}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -726,7 +768,9 @@ export default function ProductDetailTemplate({
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[var(--border-subtle)] px-4 pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 md:hidden shadow-[0_-4px_20px_rgba(20,22,26,0.08)]">
           <div className="min-w-0">
             <span className="block text-[11px] text-[var(--text-muted)] truncate">
-              {product.title}{qty > 1 ? ` × ${qty}` : ""}{withWarranty ? " · +1-Yr Warranty" : ""}
+              {product.title}
+              {qty > 1 ? ` × ${qty}` : ""}
+              {withWarranty ? t("productDetail.stickyWarrantySuffix") : ""}
             </span>
             <span className="font-['Outfit'] text-base font-bold text-[var(--text-primary)] tabular-nums">
               {displayTotalPrice}
@@ -746,11 +790,11 @@ export default function ProductDetailTemplate({
               }`}
             >
               {isOutOfStock ? (
-                <span>Out of Stock</span>
+                <span>{t("common.outOfStock")}</span>
               ) : (
                 <>
                   {added ? <Check className="w-3.5 h-3.5 text-white" /> : <ShoppingCart className="w-3.5 h-3.5 text-white" />}
-                  <span>{added ? "Added" : "Add to Cart"}</span>
+                  <span>{added ? t("common.addedShort") : t("common.addToCart")}</span>
                 </>
               )}
             </button>
@@ -760,7 +804,7 @@ export default function ProductDetailTemplate({
               target="_blank"
               rel="noopener noreferrer"
               className="h-10 w-10 rounded-xl border border-[var(--border-subtle)] bg-[#FAFAF8] flex items-center justify-center text-[var(--accent)]"
-              aria-label="Enquire on WhatsApp"
+              aria-label={t("common.enquireOnWhatsapp")}
             >
               <MessageCircle className="w-4 h-4 text-[var(--accent)]" />
             </a>

@@ -7,9 +7,11 @@ import {
   X,
   Menu,
   ChevronRight,
+  Globe,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { WHATSAPP_URL, COMPANY } from "../config";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,6 +23,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { cartCount, openCart } = useCart();
+  const { language, setLanguage, t } = useTranslation();
 
   // Lock body scroll when left drawer is open
   useEffect(() => {
@@ -97,16 +100,16 @@ export default function Navbar() {
         <div className="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           
           {/* ── MOBILE LEFT (under 768px): Hamburger 40px outline circle + GunLite Logo 36px ── */}
-          <div className="flex items-center gap-3 md:hidden">
+          <div className="flex items-center gap-2.5 sm:gap-3 md:hidden">
             <button
               onClick={() => setMenuOpen(true)}
-              aria-label="Open navigation menu"
-              className="h-10 w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[#14161A] hover:bg-[#F4F4F1] transition-colors"
+              aria-label={t("nav.openMenuAria")}
+              className="h-9 w-9 min-[400px]:h-10 min-[400px]:w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[#14161A] hover:bg-[#F4F4F1] transition-colors"
             >
               <Menu className="h-5 w-5 text-[#14161A]" />
             </button>
 
-            <Link to="/" className="shrink-0 flex items-center" aria-label="GunLite Home">
+            <Link to="/" className="shrink-0 flex items-center" aria-label={t("nav.homeAria")}>
               <picture>
                 <source srcSet="/images/logo.webp" type="image/webp" />
                 <img
@@ -114,14 +117,14 @@ export default function Navbar() {
                   alt="GunLite"
                   width={130}
                   height={36}
-                  className="h-9 w-auto object-contain"
+                  className="h-8 min-[400px]:h-9 w-auto object-contain"
                 />
               </picture>
             </Link>
           </div>
 
           {/* ── DESKTOP LEFT (768px and above): Logo (about 44px high) ── */}
-          <Link to="/" className="shrink-0 hidden md:flex items-center" aria-label="GunLite Home">
+          <Link to="/" className="shrink-0 hidden md:flex items-center" aria-label={t("nav.homeAria")}>
             <picture>
               <source srcSet="/images/logo.webp" type="image/webp" />
               <img
@@ -135,14 +138,15 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Search Bar (flex-1, max-width 420px, light grey #F4F4F1 background, desktop only) */}
-          <div className="hidden lg:flex flex-1 max-w-[420px] mx-6">
+          <div className="hidden lg:flex flex-1 max-w-[340px] xl:max-w-[420px] mx-4 xl:mx-6">
             <form onSubmit={handleSearchSubmit} className="relative w-full">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />
               <input
+                ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Search torch lights..."
+                placeholder={t("nav.searchPlaceholder")}
                 className="w-full rounded-xl bg-[#F4F4F1] border border-[#E6E6E1] py-2 pl-10 pr-9 text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent)] focus:bg-white focus:outline-none transition-colors"
               />
               {searchQuery && (
@@ -153,7 +157,7 @@ export default function Navbar() {
                     navigate("/shop", { replace: true });
                   }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  aria-label="Clear search"
+                  aria-label={t("nav.clearSearchAria")}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -161,72 +165,104 @@ export default function Navbar() {
             </form>
           </div>
 
-          {/* ── DESKTOP RIGHT GROUP (768px and above): Nav Links, WhatsApp, Cart ── */}
-          <div className="hidden md:flex items-center gap-6 ml-auto">
-            <nav className="flex items-center gap-6" aria-label="Main Navigation">
+          {/* ── DESKTOP RIGHT GROUP (768px and above): Nav Links, Language Switcher, WhatsApp, Cart ── */}
+          <div className="hidden md:flex items-center gap-4 xl:gap-5 ml-auto">
+            <nav className="flex items-center gap-4 xl:gap-5" aria-label={t("nav.mainNavAria")}>
               <Link
                 to="/"
-                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                className={`relative py-2 text-[13px] xl:text-[14px] uppercase font-medium tracking-wider whitespace-nowrap transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
                   location.pathname === "/" && !hasBrandParam
                     ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                Home
+                {t("common.home")}
               </Link>
 
               <Link
                 to="/shop"
-                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                className={`relative py-2 text-[13px] xl:text-[14px] uppercase font-medium tracking-wider whitespace-nowrap transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
                   location.pathname.startsWith("/shop") && !hasBrandParam
                     ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                Shop
+                {t("common.shop")}
               </Link>
 
               <Link
                 to="/brands"
-                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                className={`relative py-2 text-[13px] xl:text-[14px] uppercase font-medium tracking-wider whitespace-nowrap transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
                   isBrandsActive
                     ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                Brands
+                {t("common.brands")}
               </Link>
 
               <Link
                 to="/about"
-                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                className={`relative py-2 text-[13px] xl:text-[14px] uppercase font-medium tracking-wider whitespace-nowrap transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
                   location.pathname.startsWith("/about")
                     ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                About
+                {t("common.about")}
               </Link>
 
               <Link
                 to="/contact"
-                className={`relative py-2 text-[14px] uppercase font-medium tracking-wider transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
+                className={`relative py-2 text-[13px] xl:text-[14px] uppercase font-medium tracking-wider whitespace-nowrap transition-colors outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] ${
                   location.pathname.startsWith("/contact")
                     ? "text-[var(--accent)] font-semibold after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[var(--accent)] after:rounded-full"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                Contact
+                {t("common.contact")}
               </Link>
             </nav>
+
+            {/* Desktop English / हिन्दी Language Switcher */}
+            <div
+              role="group"
+              aria-label={t("nav.languageSwitcherAria")}
+              className="inline-flex items-center rounded-full border border-[#E6E6E1] bg-[#F4F4F1] p-0.5 shrink-0"
+            >
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                aria-pressed={language === "en"}
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
+                  language === "en"
+                    ? "bg-white text-[#14161A] shadow-2xs"
+                    : "text-[#6B727C] hover:text-[#14161A]"
+                }`}
+              >
+                English
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("hi")}
+                aria-pressed={language === "hi"}
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
+                  language === "hi"
+                    ? "bg-[var(--accent)] text-white shadow-2xs"
+                    : "text-[#6B727C] hover:text-[#14161A]"
+                }`}
+              >
+                हिन्दी
+              </button>
+            </div>
 
             {/* WhatsApp icon button (40px) */}
             <a
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Order on WhatsApp"
-              title="Order on WhatsApp"
+              aria-label={t("nav.whatsappTitle")}
+              title={t("nav.whatsappTitle")}
               className="h-10 w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[var(--accent)] hover:border-[var(--accent)] hover:bg-[var(--bg-surface-2)] transition-colors shadow-2xs outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
             >
               <MessageCircle className="h-5 w-5 text-[var(--accent)]" />
@@ -235,7 +271,7 @@ export default function Navbar() {
             {/* Cart icon button (40px) with red count badge */}
             <button
               onClick={openCart}
-              aria-label="Open shopping cart"
+              aria-label={t("nav.openCartAria")}
               className="relative h-10 w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-2)] transition-colors shadow-2xs outline-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
             >
               <ShoppingBag className="h-5 w-5 text-[var(--text-primary)]" />
@@ -247,15 +283,46 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* ── MOBILE RIGHT (under 768px): Search, WhatsApp, and Cart (40px outline circles, 8px gaps) ── */}
-          <div className="flex items-center gap-2 md:hidden">
-            
-            {/* Search Icon Button (40px outline circle) */}
+          {/* ── MOBILE RIGHT (under 768px): Language Switcher, Search, WhatsApp, and Cart ── */}
+          <div className="flex items-center gap-1.5 min-[400px]:gap-2 md:hidden">
+            {/* Compact Mobile English / हिन्दी Switcher */}
+            <div
+              role="group"
+              aria-label={t("nav.languageSwitcherAria")}
+              className="inline-flex items-center rounded-full border border-[#E6E6E1] bg-[#F4F4F1] p-0.5 shrink-0"
+            >
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                aria-pressed={language === "en"}
+                className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap ${
+                  language === "en"
+                    ? "bg-white text-[#14161A] shadow-2xs"
+                    : "text-[#6B727C] hover:text-[#14161A]"
+                }`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("hi")}
+                aria-pressed={language === "hi"}
+                className={`px-2 py-1 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap ${
+                  language === "hi"
+                    ? "bg-[var(--accent)] text-white shadow-2xs"
+                    : "text-[#6B727C] hover:text-[#14161A]"
+                }`}
+              >
+                हिन्दी
+              </button>
+            </div>
+
+            {/* Search Icon Button */}
             <button
               type="button"
               onClick={toggleMobileSearch}
-              aria-label="Toggle search bar"
-              className={`h-10 w-10 shrink-0 rounded-full border flex items-center justify-center transition-colors ${
+              aria-label={t("nav.toggleSearchAria")}
+              className={`h-9 w-9 min-[400px]:h-10 min-[400px]:w-10 shrink-0 rounded-full border flex items-center justify-center transition-colors ${
                 mobileSearchOpen
                   ? "border-[var(--accent)] bg-[var(--accent-tint)] text-[var(--accent)]"
                   : "border-[#E6E6E1] bg-white text-[#14161A] hover:bg-[#F4F4F1]"
@@ -264,23 +331,23 @@ export default function Navbar() {
               <Search className="h-4 w-4" />
             </button>
 
-            {/* WhatsApp Icon Button (40px outline circle) */}
+            {/* WhatsApp Icon Button */}
             <a
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Order on WhatsApp"
-              title="Order on WhatsApp"
-              className="h-10 w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[var(--accent)] hover:bg-[#F4F4F1] transition-colors"
+              aria-label={t("nav.whatsappTitle")}
+              title={t("nav.whatsappTitle")}
+              className="h-9 w-9 min-[400px]:h-10 min-[400px]:w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[var(--accent)] hover:bg-[#F4F4F1] transition-colors"
             >
               <MessageCircle className="h-5 w-5 text-[var(--accent)]" />
             </a>
 
-            {/* Cart Icon Button (40px outline circle with red count badge) */}
+            {/* Cart Icon Button with red count badge */}
             <button
               onClick={openCart}
-              aria-label="Open shopping cart"
-              className="relative h-10 w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[#14161A] hover:bg-[#F4F4F1] transition-colors"
+              aria-label={t("nav.openCartAria")}
+              className="relative h-9 w-9 min-[400px]:h-10 min-[400px]:w-10 shrink-0 rounded-full border border-[#E6E6E1] bg-white flex items-center justify-center text-[#14161A] hover:bg-[#F4F4F1] transition-colors"
             >
               <ShoppingBag className="h-5 w-5 text-[#14161A]" />
               {cartCount > 0 && (
@@ -305,7 +372,7 @@ export default function Navbar() {
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
-              placeholder="Search torch lights..."
+              placeholder={t("nav.searchPlaceholder")}
               className="w-full h-[44px] rounded-[12px] bg-[#F4F4F1] border border-[#E6E6E1] pl-10 pr-9 text-xs sm:text-sm text-[#14161A] placeholder-[#8B97A8] focus:border-[var(--accent)] focus:bg-white focus:outline-none transition-colors"
             />
             {searchQuery && (
@@ -316,7 +383,7 @@ export default function Navbar() {
                   navigate("/shop", { replace: true });
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8B97A8] hover:text-[#14161A]"
-                aria-label="Clear search"
+                aria-label={t("nav.clearSearchAria")}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -349,14 +416,14 @@ export default function Navbar() {
               />
               <button
                 onClick={() => setMenuOpen(false)}
-                aria-label="Close menu"
+                aria-label={t("nav.closeMenuAria")}
                 className="h-9 w-9 rounded-full border border-[#E6E6E1] flex items-center justify-center text-[#14161A] hover:bg-[#F4F4F1] transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Nav links: 18px rows (52px high, 1px dividers): Home, Shop, Brands, About, Contact */}
+            {/* Nav links */}
             <nav className="flex flex-col mt-2 divide-y divide-[#E6E6E1]">
               <Link
                 to="/"
@@ -367,7 +434,7 @@ export default function Navbar() {
                     : "text-[#14161A] hover:text-[var(--accent)]"
                 }`}
               >
-                <span>Home</span>
+                <span>{t("common.home")}</span>
                 <ChevronRight className="h-4 w-4 text-[#8B97A8]" />
               </Link>
 
@@ -380,7 +447,7 @@ export default function Navbar() {
                     : "text-[#14161A] hover:text-[var(--accent)]"
                 }`}
               >
-                <span>Shop</span>
+                <span>{t("common.shop")}</span>
                 <ChevronRight className="h-4 w-4 text-[#8B97A8]" />
               </Link>
 
@@ -393,7 +460,7 @@ export default function Navbar() {
                     : "text-[#14161A] hover:text-[var(--accent)]"
                 }`}
               >
-                <span>Brands</span>
+                <span>{t("common.brands")}</span>
                 <ChevronRight className="h-4 w-4 text-[#8B97A8]" />
               </Link>
 
@@ -402,7 +469,7 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center justify-between h-[52px] text-[18px] font-medium text-[#14161A] hover:text-[var(--accent)] transition-colors"
               >
-                <span>About</span>
+                <span>{t("common.about")}</span>
                 <ChevronRight className="h-4 w-4 text-[#8B97A8]" />
               </Link>
 
@@ -411,15 +478,53 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center justify-between h-[52px] text-[18px] font-medium text-[#14161A] hover:text-[var(--accent)] transition-colors"
               >
-                <span>Contact</span>
+                <span>{t("common.contact")}</span>
                 <ChevronRight className="h-4 w-4 text-[#8B97A8]" />
               </Link>
             </nav>
 
+            {/* Full Language Selector inside Mobile Drawer */}
+            <div className="mt-4 pt-4 border-t border-[#E6E6E1]">
+              <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-[#8B97A8] mb-2.5 px-1">
+                <Globe className="h-3.5 w-3.5 text-[var(--accent)]" />
+                <span>{t("nav.languageLabel")}</span>
+              </div>
+              <div
+                role="group"
+                aria-label={t("nav.languageSwitcherAria")}
+                className="grid grid-cols-2 gap-1.5 rounded-xl bg-[#F4F4F1] p-1 border border-[#E6E6E1]"
+              >
+                <button
+                  type="button"
+                  onClick={() => setLanguage("en")}
+                  aria-pressed={language === "en"}
+                  className={`py-2 rounded-lg text-xs font-semibold transition-all ${
+                    language === "en"
+                      ? "bg-white text-[#14161A] shadow-2xs"
+                      : "text-[#6B727C] hover:text-[#14161A]"
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguage("hi")}
+                  aria-pressed={language === "hi"}
+                  className={`py-2 rounded-lg text-xs font-semibold transition-all ${
+                    language === "hi"
+                      ? "bg-[var(--accent)] text-white shadow-2xs"
+                      : "text-[#6B727C] hover:text-[#14161A]"
+                  }`}
+                >
+                  हिन्दी
+                </button>
+              </div>
+            </div>
+
             {/* Small heading "Policies" with Shipping, Returns and Warranty, Privacy, Terms */}
-            <div className="mt-6 pt-4 border-t border-[#E6E6E1]">
+            <div className="mt-5 pt-4 border-t border-[#E6E6E1]">
               <div className="text-[11px] uppercase tracking-wider font-semibold text-[#8B97A8] mb-2 px-1">
-                Policies
+                {t("common.policies")}
               </div>
               <div className="flex flex-col space-y-2">
                 <Link
@@ -427,28 +532,28 @@ export default function Navbar() {
                   onClick={() => setMenuOpen(false)}
                   className="text-sm text-[#4A5058] hover:text-[#14161A] py-1 transition-colors px-1"
                 >
-                  Shipping
+                  {t("nav.shipping")}
                 </Link>
                 <Link
                   to="/returns"
                   onClick={() => setMenuOpen(false)}
                   className="text-sm text-[#4A5058] hover:text-[#14161A] py-1 transition-colors px-1"
                 >
-                  Returns and Warranty
+                  {t("nav.returnsAndWarranty")}
                 </Link>
                 <Link
                   to="/privacy"
                   onClick={() => setMenuOpen(false)}
                   className="text-sm text-[#4A5058] hover:text-[#14161A] py-1 transition-colors px-1"
                 >
-                  Privacy
+                  {t("nav.privacy")}
                 </Link>
                 <Link
                   to="/terms"
                   onClick={() => setMenuOpen(false)}
                   className="text-sm text-[#4A5058] hover:text-[#14161A] py-1 transition-colors px-1"
                 >
-                  Terms
+                  {t("nav.terms")}
                 </Link>
               </div>
             </div>
@@ -463,11 +568,11 @@ export default function Navbar() {
                 className="flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-4 py-3 text-sm font-semibold text-white shadow-xs transition-colors w-full"
               >
                 <MessageCircle className="h-4 w-4 text-white" />
-                <span>Order on WhatsApp</span>
+                <span>{t("common.orderOnWhatsapp")}</span>
               </a>
 
               <p className="text-[11px] text-[#8B97A8] text-center">
-                Jerone Enterprises • {COMPANY.phone}
+                {t("nav.footerCompanyPhone", { phone: COMPANY.phone })}
               </p>
             </div>
 

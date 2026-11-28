@@ -1,9 +1,11 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useCatalog } from "../context/CatalogContext";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function BrandStrip() {
   const [searchParams] = useSearchParams();
   const { brands } = useCatalog();
+  const { t } = useTranslation();
   const currentBrand = (searchParams.get("brand") || "").toLowerCase();
   const visibleBrands = brands.filter((b) => b.isActive !== false);
 
@@ -14,7 +16,7 @@ export default function BrandStrip() {
     <section
       id="brand-strip"
       className="md:hidden relative bg-[#FAFAF8] border-b border-[#E6E6E1] py-3 overflow-hidden font-['Inter']"
-      aria-label="Shop by Brand"
+      aria-label={t("brandStrip.ariaLabel")}
     >
       <div className="relative mx-auto px-4">
         
@@ -41,7 +43,7 @@ export default function BrandStrip() {
                 key={brand.slug}
                 to={`/shop?brand=${brand.slug}`}
                 className="group flex flex-col items-center shrink-0 snap-start focus:outline-none"
-                aria-label={`View products from ${displayLabel}`}
+                aria-label={t("brandStrip.viewProductsAria", { brand: displayLabel })}
               >
                 <div
                   className={`w-[56px] h-[56px] rounded-full overflow-hidden flex items-center justify-center transition-transform duration-150 active:scale-[0.96] shadow-[0_2px_6px_rgba(20,22,26,0.06)] ${

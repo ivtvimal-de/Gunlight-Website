@@ -6,13 +6,16 @@ import FeaturedProducts from "../section/FeaturedProducts";
 import TrustBar from "../section/TrustBar";
 import BrandStory from "../section/BrandStory";
 import DealerBanner from "../section/DealerBanner";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function Home() {
+  const { t } = useTranslation();
+
   return (
     <>
       <SEO
-        title="High-Power LED Torches & Search Lights"
-        description="GunLite e-commerce store by Jerone Enterprises. Professional high-power LED searchlights and torches. Long-range optics, 10000mAh battery backup, and rugged aluminium body. Pan-India safe transit."
+        title={t("seo.homeTitle")}
+        description={t("seo.homeDesc")}
         path="/"
         image="/images/eaglemain.webp"
         type="website"
@@ -21,16 +24,16 @@ export default function Home() {
         {/* Brand Strip between Navbar and Hero */}
         <BrandStrip />
 
-        {/* 3. Hero banner slider with product image, headline, Shop Now CTA */}
+        {/* 3. Hero banner slider */}
         <Hero />
 
         {/* 4. Shop by Category tile row */}
         <ShopByCategory />
 
-        {/* 5 & 6. Featured Products (4-column grid, 2 on mobile) & Product Cards */}
+        {/* 5 & 6. Featured Products & Product Cards */}
         <FeaturedProducts />
 
-        {/* 7. Trust bar (Warranty, WhatsApp, Shipping, Support) */}
+        {/* 7. Trust bar */}
         <TrustBar />
 
         {/* 8. Brand / About strip */}

@@ -5,6 +5,7 @@ import ProductDetailTemplate from "../components/ProductDetailTemplate";
 import { useCatalog } from "../context/CatalogContext";
 import { api } from "../services/api";
 import { adaptProduct } from "../utils/productAdapter";
+import { useTranslation } from "../i18n/LanguageContext";
 
 export default function ProductDetailsDynamic({
   slugProp,
@@ -15,6 +16,7 @@ export default function ProductDetailsDynamic({
   const { slug: paramSlug } = useParams();
   const targetSlug = slugProp || paramSlug;
   const { getProductBySlugOrId, loading: catalogLoading } = useCatalog();
+  const { t } = useTranslation();
 
   const cachedProduct = getProductBySlugOrId(targetSlug);
   const [liveProduct, setLiveProduct] = useState(null);
@@ -71,17 +73,17 @@ export default function ProductDetailsDynamic({
           <Flashlight className="w-8 h-8 text-[var(--accent)]" />
         </div>
         <h1 className="font-['Outfit'] text-2xl font-bold text-[var(--text-primary)]">
-          Product Not Found
+          {t("productDetail.notFoundTitle")}
         </h1>
         <p className="mt-2 text-sm text-[var(--text-secondary)] max-w-md">
-          This product may have been removed or is currently unavailable.
+          {t("productDetail.notFoundDesc")}
         </p>
         <Link
           to="/shop"
           className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-6 py-3 text-xs font-semibold text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Shop</span>
+          <span>{t("common.backToShop")}</span>
         </Link>
       </main>
     );
@@ -92,8 +94,8 @@ export default function ProductDetailsDynamic({
       product={product}
       images={product.galleryImages}
       specs={product.specs}
-      seoTitle={seoTitle || `${product.title} | GunLite`}
-      seoDescription={seoDescription || product.desc}
+      seoTitle={seoTitle || `${product.title} | ${t("seo.productFallbackSuffix")}`}
+      seoDescription={seoDescription}
       seoPath={seoPath || product.link}
     />
   );
