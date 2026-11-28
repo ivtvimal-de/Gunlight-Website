@@ -1,10 +1,5 @@
 import mongoose from "mongoose";
 
-<<<<<<< HEAD
-const productImageSchema = new mongoose.Schema(
-  {
-    url: { type: String, required: true, trim: true },
-=======
 function rejectDataUrl(val) {
   if (!val) return true;
   return !/^data:/i.test(String(val).trim());
@@ -21,7 +16,6 @@ const productImageSchema = new mongoose.Schema(
         message: "Base64 data: URLs are not allowed for product images",
       },
     },
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     publicId: { type: String, default: "", trim: true },
     isPrimary: { type: Boolean, default: false },
   },
@@ -82,11 +76,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-<<<<<<< HEAD
-      required: [true, "Primary category is required"],
-=======
       required: [function () { return this.isNew; }, "Primary category is required"],
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     },
     categories: [
       {
@@ -118,13 +108,8 @@ const productSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-<<<<<<< HEAD
-      enum: ["active", "inactive"],
-      default: "active",
-=======
       enum: ["draft", "published"],
       default: "draft",
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     },
     isFeatured: {
       type: Boolean,
@@ -155,9 +140,6 @@ const productSchema = new mongoose.Schema(
       default: [],
     },
     heroImage: {
-<<<<<<< HEAD
-      url: { type: String, default: "" },
-=======
       url: {
         type: String,
         default: "",
@@ -166,7 +148,6 @@ const productSchema = new mongoose.Schema(
           message: "Base64 data: URLs are not allowed for hero image",
         },
       },
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       publicId: { type: String, default: "" },
     },
   },

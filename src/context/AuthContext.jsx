@@ -45,27 +45,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
-<<<<<<< HEAD
-    try {
-      const res = await api.adminLogin({ email, password });
-      setAdmin(res?.admin || null);
-      setIsDemoMode(Boolean(res?.demo));
-      return res;
-    } catch (err) {
-      if (err?.isBackendUnavailable) {
-        const demoAdmin = enableDemoMode(email);
-        setAdmin(demoAdmin);
-        setIsDemoMode(true);
-        return { admin: demoAdmin, demo: true };
-      }
-      throw err;
-    }
-=======
     const res = await api.adminLogin({ email, password });
     setAdmin(res?.admin || null);
     setIsDemoMode(false);
     return res;
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   }, []);
 
   const logout = useCallback(async () => {

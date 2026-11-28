@@ -1,25 +1,4 @@
 import mongoose from "mongoose";
-<<<<<<< HEAD
-import { isLocalStoreMode } from "../storage/models.js";
-import { initLocalStore, hasLocalBrandsKey } from "../storage/localStore.js";
-import { ensureLocalSeedIfEmpty } from "../utils/seedInitialData.js";
-
-/**
- * Connect to MongoDB Atlas / local MongoDB, or initialize local persistent JSON storage
- * when USE_LOCAL_STORE=true.
- */
-export async function connectDB() {
-  if (isLocalStoreMode()) {
-    const hadBrandsKey = await hasLocalBrandsKey();
-    await initLocalStore();
-    await ensureLocalSeedIfEmpty({ seedMissingBrandsKey: !hadBrandsKey });
-    return null;
-  }
-
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    throw new Error("MONGODB_URI is missing in server environment variables.");
-=======
 
 function isPlaceholderUri(uri = "") {
   const trimmed = String(uri).trim();
@@ -65,23 +44,10 @@ export async function connectDB() {
     throw new Error(
       "MONGODB_URI must start with mongodb:// or mongodb+srv://."
     );
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   }
 
   mongoose.set("strictQuery", true);
 
-<<<<<<< HEAD
-  const conn = await mongoose.connect(uri, {
-    serverSelectionTimeoutMS: 10000,
-  });
-
-  console.log(`MongoDB connected: ${conn.connection.host}`);
-  return conn;
-}
-
-export async function disconnectDB() {
-  if (!isLocalStoreMode() && mongoose.connection.readyState !== 0) {
-=======
   mongoose.connection.on("error", (err) => {
     console.error("MongoDB runtime error:", maskMongoCredentials(err.message));
   });
@@ -118,7 +84,6 @@ export function getDatabaseStatus() {
 
 export async function disconnectDB() {
   if (mongoose.connection.readyState !== 0) {
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     await mongoose.disconnect();
   }
 }

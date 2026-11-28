@@ -8,15 +8,6 @@ export const ALLOWED_IMAGE_MIME_TYPES = new Set([
   "image/avif",
 ]);
 
-<<<<<<< HEAD
-export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
-export const MAX_IMAGE_FILES = 10;
-
-const storage = multer.memoryStorage();
-
-function fileFilter(req, file, cb) {
-  if (!ALLOWED_IMAGE_MIME_TYPES.has(file.mimetype)) {
-=======
 export const MAX_IMAGE_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB
 export const MAX_IMAGE_FILES = 10;
 
@@ -106,7 +97,6 @@ const storage = multer.memoryStorage();
 
 function fileFilter(_req, file, cb) {
   if (!ALLOWED_IMAGE_MIME_TYPES.has(String(file.mimetype || "").toLowerCase())) {
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     const err = new Error(
       `Unsupported image format "${file.mimetype}". Allowed formats: JPG, PNG, WebP, AVIF.`
     );
@@ -124,8 +114,6 @@ export const uploadImagesMiddleware = multer({
     files: MAX_IMAGE_FILES,
   },
 });
-<<<<<<< HEAD
-=======
 
 /**
  * Express middleware run immediately after Multer to enforce magic-byte verification
@@ -147,4 +135,3 @@ export function validateUploadedImages(req, _res, next) {
     next(err);
   }
 }
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)

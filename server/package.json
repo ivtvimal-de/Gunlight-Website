@@ -8,11 +8,8 @@
   "scripts": {
     "dev": "node --watch server.js",
     "start": "node server.js",
-<<<<<<< HEAD
-=======
     "create-admin": "node scripts/createAdmin.js",
     "migrate:status": "node scripts/migrateStatus.js",
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     "seed": "node scripts/seed.js"
   },
   "dependencies": {

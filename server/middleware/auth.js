@@ -1,21 +1,9 @@
-<<<<<<< HEAD
-=======
 import crypto from "node:crypto";
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import { Admin } from "../storage/models.js";
 
 export const COOKIE_NAME = "gunlite_admin_token";
-<<<<<<< HEAD
-
-export function getCookieOptions() {
-  const isProduction = process.env.NODE_ENV === "production";
-  return {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-=======
 export const CSRF_COOKIE_NAME = "gunlite_csrf";
 export const CSRF_HEADER_NAME = "x-csrf-token";
 
@@ -66,19 +54,11 @@ export function getCookieOptions() {
     httpOnly: true,
     secure: sameSite === "none" ? true : isProduction,
     sameSite,
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
 }
 
-<<<<<<< HEAD
-export function signAdminToken(admin) {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error("JWT_SECRET is missing in environment variables.");
-  }
-=======
 export function getCsrfCookieOptions() {
   const isProduction = process.env.NODE_ENV === "production";
   const sameSite = resolveCookieSameSite(isProduction);
@@ -188,7 +168,6 @@ export function requireCsrf(req, res, next) {
 
 export function signAdminToken(admin) {
   const secret = getJwtSecret();
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   return jwt.sign(
     { id: admin._id.toString(), role: admin.role },
     secret,
@@ -202,29 +181,14 @@ export function signAdminToken(admin) {
 export async function requireAuth(req, res, next) {
   try {
     const token = req.cookies?.[COOKIE_NAME];
-<<<<<<< HEAD
-    if (!token) {
-=======
     if (!token || typeof token !== "string") {
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       return res.status(401).json({
         success: false,
         message: "Authentication required. Please log in as an administrator.",
       });
     }
 
-<<<<<<< HEAD
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      return res.status(500).json({
-        success: false,
-        message: "Server authentication is not configured.",
-      });
-    }
-
-=======
     const secret = getJwtSecret();
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     const decoded = jwt.verify(token, secret);
     const admin = await Admin.findById(decoded.id).select("-passwordHash");
 
@@ -237,11 +201,7 @@ export async function requireAuth(req, res, next) {
 
     req.admin = admin;
     next();
-<<<<<<< HEAD
-  } catch (err) {
-=======
   } catch {
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     return res.status(401).json({
       success: false,
       message: "Invalid or expired authentication session.",
@@ -267,20 +227,12 @@ export function requireAdmin(req, res, next) {
  */
 export const loginRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-<<<<<<< HEAD
-  max: 15,
-=======
   max: 10,
   skipSuccessfulRequests: true,
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   standardHeaders: true,
   legacyHeaders: false,
   message: {
     success: false,
-<<<<<<< HEAD
-    message: "Too many login attempts from this IP. Please try again in 15 minutes.",
-=======
     message: "Too many failed login attempts from this IP. Please try again in 15 minutes.",
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   },
 });

@@ -27,11 +27,7 @@ const ALLOWED_TYPES = new Set([
   "image/webp",
   "image/avif",
 ]);
-<<<<<<< HEAD
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-=======
 const MAX_FILE_SIZE = 1 * 1024 * 1024;
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
 function makeSlug(str) {
   return String(str || "")
@@ -177,11 +173,7 @@ export default function AdminBrands() {
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
-<<<<<<< HEAD
-      toast.error("Image exceeds the 5 MB file size limit.");
-=======
       toast.error("Image exceeds the 1 MB file size limit.");
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       return;
     }
 

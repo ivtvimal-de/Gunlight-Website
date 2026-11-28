@@ -19,11 +19,7 @@ const ALLOWED_TYPES = new Set([
   "image/webp",
   "image/avif",
 ]);
-<<<<<<< HEAD
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-=======
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
 function makeSlug(str) {
   return String(str || "")
@@ -56,11 +52,7 @@ export default function ProductFormModal({
   const [price, setPrice] = useState("");
   const [discountPrice, setDiscountPrice] = useState("");
   const [stockQuantity, setStockQuantity] = useState("10");
-<<<<<<< HEAD
-  const [status, setStatus] = useState("active");
-=======
   const [status, setStatus] = useState("draft");
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   const [isFeatured, setIsFeatured] = useState(false);
   const [badge, setBadge] = useState("");
   const [shortSpec, setShortSpec] = useState("");
@@ -114,11 +106,7 @@ export default function ProductFormModal({
           ? String(initialProduct.stockQuantity)
           : "0"
       );
-<<<<<<< HEAD
-      setStatus(initialProduct.status || "active");
-=======
       setStatus(initialProduct.status || "draft");
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       setIsFeatured(Boolean(initialProduct.isFeatured));
       setBadge(initialProduct.badge || "");
       setShortSpec(initialProduct.shortSpec || "");
@@ -163,11 +151,7 @@ export default function ProductFormModal({
       setPrice("");
       setDiscountPrice("");
       setStockQuantity("15");
-<<<<<<< HEAD
-      setStatus("active");
-=======
       setStatus("draft");
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       setIsFeatured(false);
       setBadge("");
       setShortSpec("");
@@ -195,11 +179,7 @@ export default function ProductFormModal({
         return `"${file.name}" is not a supported image format (use JPG, PNG, WebP, or AVIF).`;
       }
       if (file.size > MAX_FILE_SIZE) {
-<<<<<<< HEAD
-        return `"${file.name}" exceeds the 5 MB file size limit.`;
-=======
         return `"${file.name}" exceeds the 1 MB file size limit.`;
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       }
     }
     return files;
@@ -256,11 +236,7 @@ export default function ProductFormModal({
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
-<<<<<<< HEAD
-      toast.error("Image exceeds 5 MB limit.");
-=======
       toast.error("Image exceeds 1 MB limit.");
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       return;
     }
 
@@ -643,13 +619,8 @@ export default function ProductFormModal({
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
               >
-<<<<<<< HEAD
-                <option value="active">Active (Visible)</option>
-                <option value="inactive">Inactive (Hidden)</option>
-=======
                 <option value="published">Published (Visible)</option>
                 <option value="draft">Draft (Hidden)</option>
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
               </select>
             </div>
           </div>
@@ -768,11 +739,7 @@ export default function ProductFormModal({
                   Product Images (Cloudinary)
                 </label>
                 <p className="text-[11px] text-[#6B727C]">
-<<<<<<< HEAD
-                  Upload up to 10 images (JPG, PNG, WebP, AVIF · max 5 MB each). Mark one as primary.
-=======
                   Upload up to 10 images (JPG, PNG, WebP, AVIF · max 1 MB each). Mark one as primary.
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                 </p>
               </div>
               <button

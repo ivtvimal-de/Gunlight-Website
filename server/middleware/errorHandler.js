@@ -1,28 +1,12 @@
 import multer from "multer";
 
-<<<<<<< HEAD
-export function notFound(req, res, next) {
-=======
 export function notFound(req, res) {
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   res.status(404).json({
     success: false,
     message: `Route not found: ${req.method} ${req.originalUrl}`,
   });
 }
 
-<<<<<<< HEAD
-export function errorHandler(err, req, res, next) {
-  let statusCode = err.statusCode || 500;
-  let message = err.message || "Internal server error";
-
-  if (err instanceof multer.MulterError) {
-    statusCode = 400;
-    if (err.code === "LIMIT_FILE_SIZE") {
-      message = "Image file size exceeds the 5 MB limit.";
-    } else if (err.code === "LIMIT_FILE_COUNT") {
-      message = "You can upload up to 10 images at once.";
-=======
 export function errorHandler(err, req, res, _next) {
   let statusCode = err.statusCode || err.status || 500;
   let message = err.message || "Internal server error";
@@ -38,7 +22,6 @@ export function errorHandler(err, req, res, _next) {
       message = "You can upload up to 10 images at once.";
     } else {
       message = err.message || "File upload error.";
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     }
   } else if (err.name === "ValidationError") {
     statusCode = 400;
@@ -51,12 +34,6 @@ export function errorHandler(err, req, res, _next) {
   } else if (err.name === "CastError") {
     statusCode = 400;
     message = `Invalid identifier format for ${err.path || "resource"}.`;
-<<<<<<< HEAD
-  }
-
-  if (process.env.NODE_ENV !== "production" && statusCode >= 500) {
-    console.error(err);
-=======
   } else if (
     err.name === "JsonWebTokenError" ||
     err.name === "TokenExpiredError"
@@ -72,7 +49,6 @@ export function errorHandler(err, req, res, _next) {
       console.error(`[${req.method} ${req.originalUrl}] ${err.message}`);
       message = "Internal server error";
     }
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   }
 
   res.status(statusCode).json({

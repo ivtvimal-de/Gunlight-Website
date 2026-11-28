@@ -8,13 +8,8 @@ export async function getDashboardStats(req, res, next) {
   try {
     const [
       totalProducts,
-<<<<<<< HEAD
-      activeProducts,
-      inactiveProducts,
-=======
       publishedProducts,
       draftProducts,
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       outOfStockProducts,
       lowStockProducts,
       featuredProducts,
@@ -28,13 +23,8 @@ export async function getDashboardStats(req, res, next) {
       recentActivities,
     ] = await Promise.all([
       Product.countDocuments(),
-<<<<<<< HEAD
-      Product.countDocuments({ status: "active" }),
-      Product.countDocuments({ status: "inactive" }),
-=======
       Product.countDocuments({ status: "published" }),
       Product.countDocuments({ status: "draft" }),
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       Product.countDocuments({ stockQuantity: { $lte: 0 } }),
       Product.countDocuments({ stockQuantity: { $gt: 0, $lte: 5 } }),
       Product.countDocuments({ isFeatured: true }),
@@ -79,11 +69,7 @@ export async function getDashboardStats(req, res, next) {
         name: cat.name,
         slug: cat.slug,
         count: matched.length,
-<<<<<<< HEAD
-        activeCount: matched.filter((m) => m.status === "active").length,
-=======
         publishedCount: matched.filter((m) => m.status === "published").length,
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         totalStock: matched.reduce((s, m) => s + (Number(m.stockQuantity) || 0), 0),
       };
     });
@@ -102,11 +88,7 @@ export async function getDashboardStats(req, res, next) {
         slug: b.slug,
         isComingSoon: Boolean(b.isComingSoon),
         count: matched.length,
-<<<<<<< HEAD
-        activeCount: matched.filter((m) => m.status === "active").length,
-=======
         publishedCount: matched.filter((m) => m.status === "published").length,
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         totalStock: matched.reduce((s, m) => s + (Number(m.stockQuantity) || 0), 0),
       };
     });
@@ -115,13 +97,8 @@ export async function getDashboardStats(req, res, next) {
       success: true,
       stats: {
         totalProducts,
-<<<<<<< HEAD
-        activeProducts,
-        inactiveProducts,
-=======
         publishedProducts,
         draftProducts,
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         outOfStockProducts,
         lowStockProducts,
         inStockHealthy,

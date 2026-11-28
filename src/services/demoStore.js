@@ -334,13 +334,8 @@ export async function handleDemoRequest(
   // Dashboard
   if (pathname === "/api/admin/dashboard") {
     const totalProducts = state.products.length;
-<<<<<<< HEAD
-    const activeProducts = state.products.filter((p) => p.status === "active").length;
-    const inactiveProducts = totalProducts - activeProducts;
-=======
     const publishedProducts = state.products.filter((p) => p.status === "published").length;
     const draftProducts = totalProducts - publishedProducts;
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     const outOfStockProducts = state.products.filter(
       (p) => Number(p.stockQuantity) <= 0
     ).length;
@@ -369,11 +364,7 @@ export async function handleDemoRequest(
         name: cat.name,
         slug: cat.slug,
         count: matched.length,
-<<<<<<< HEAD
-        activeCount: matched.filter((m) => m.status === "active").length,
-=======
         publishedCount: matched.filter((m) => m.status === "published").length,
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         totalStock: matched.reduce(
           (s, m) => s + (Number(m.stockQuantity) || 0),
           0
@@ -389,11 +380,7 @@ export async function handleDemoRequest(
         slug: b.slug,
         isComingSoon: Boolean(b.isComingSoon),
         count: matched.length,
-<<<<<<< HEAD
-        activeCount: matched.filter((m) => m.status === "active").length,
-=======
         publishedCount: matched.filter((m) => m.status === "published").length,
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         totalStock: matched.reduce(
           (s, m) => s + (Number(m.stockQuantity) || 0),
           0
@@ -405,13 +392,8 @@ export async function handleDemoRequest(
       success: true,
       stats: {
         totalProducts,
-<<<<<<< HEAD
-        activeProducts,
-        inactiveProducts,
-=======
         publishedProducts,
         draftProducts,
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         outOfStockProducts,
         lowStockProducts,
         inStockHealthy,
@@ -445,10 +427,7 @@ export async function handleDemoRequest(
         slug: makeSlug(body.slug || body.name) || makeId("item"),
         sku: String(body.sku || makeId("SKU")).toUpperCase(),
         brand: String(body.brand || "GunLite").trim(),
-<<<<<<< HEAD
-=======
         status: body.status || "draft",
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -468,17 +447,10 @@ export async function handleDemoRequest(
 
     const isPublic = pathname === "/api/products";
     let list = state.products.filter((p) =>
-<<<<<<< HEAD
-      isPublic ? p.status === "active" : true
-    );
-
-    if (query.status === "active" || query.status === "inactive") {
-=======
       isPublic ? p.status === "published" : true
     );
 
     if (query.status === "published" || query.status === "draft") {
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       list = list.filter((p) => p.status === query.status);
     }
     if (query.category && query.category !== "All") {
@@ -634,11 +606,7 @@ export async function handleDemoRequest(
         const cid = String(cat._id);
         const matching = state.products.filter(
           (p) =>
-<<<<<<< HEAD
-            (!isPublic || p.status === "active") &&
-=======
             (!isPublic || p.status === "published") &&
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
             (String(p.category) === cid ||
               (p.categories || []).some((id) => String(id) === cid))
         );
@@ -796,21 +764,13 @@ export async function handleDemoRequest(
       brands: list.map((brand) => {
         const matching = state.products.filter(
           (p) =>
-<<<<<<< HEAD
-            (!isPublic || p.status === "active") &&
-=======
             (!isPublic || p.status === "published") &&
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
             productMatchesBrand(p.brand, brand)
         );
         return {
           ...clone(brand),
           productCount: matching.length,
-<<<<<<< HEAD
-          activeProductCount: matching.filter((m) => m.status === "active")
-=======
           publishedProductCount: matching.filter((m) => m.status === "published")
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
             .length,
           products: clone(matching),
           previewBanner:

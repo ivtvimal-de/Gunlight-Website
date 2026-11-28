@@ -12,10 +12,6 @@ export function slugify(value = "") {
 }
 
 /**
-<<<<<<< HEAD
- * Normalize an image list so every entry has { url, publicId, isPrimary }
- * and exactly one entry is marked isPrimary when non-empty.
-=======
  * Check whether a persisted media URL uses an allowed scheme (http/https/relative) and is not a data: URL.
  */
 export function isSafeMediaUrl(url, { allowEmpty = true } = {}) {
@@ -73,20 +69,10 @@ export function validateNonDataImageUrl(url, label = "image") {
 /**
  * Normalize an image list so every entry has { url, publicId, isPrimary },
  * reject any Base64 data: URLs, and mark exactly one entry isPrimary when non-empty.
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
  */
 export function normalizeProductImages(images = []) {
   if (!Array.isArray(images) || images.length === 0) return [];
 
-<<<<<<< HEAD
-  const cleaned = images
-    .filter((img) => img && typeof img.url === "string" && img.url.trim())
-    .map((img) => ({
-      url: img.url.trim(),
-      publicId: typeof img.publicId === "string" ? img.publicId.trim() : "",
-      isPrimary: Boolean(img.isPrimary),
-    }));
-=======
   const cleaned = [];
   for (const img of images) {
     if (!img || typeof img !== "object") continue;
@@ -105,7 +91,6 @@ export function normalizeProductImages(images = []) {
       });
     }
   }
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
   if (cleaned.length === 0) return [];
 

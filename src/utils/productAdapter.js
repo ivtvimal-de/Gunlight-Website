@@ -138,11 +138,7 @@ export function adaptProduct(doc) {
     hasDiscount,
     stockQuantity,
     outOfStock,
-<<<<<<< HEAD
-    status: doc.status || "active",
-=======
     status: doc.status || "published",
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     isFeatured: Boolean(doc.isFeatured),
     badge: doc.badge || "",
     warrantyEnabled: doc.warrantyEnabled !== undefined ? Boolean(doc.warrantyEnabled) : true,
@@ -223,11 +219,7 @@ export const FALLBACK_RAW_PRODUCTS = [
     price: 2499,
     discountPrice: null,
     stockQuantity: 25,
-<<<<<<< HEAD
-    status: "active",
-=======
     status: "published",
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     isFeatured: true,
     badge: "Best Seller",
     warrantyEnabled: true,
@@ -270,11 +262,7 @@ export const FALLBACK_RAW_PRODUCTS = [
     price: 1999,
     discountPrice: null,
     stockQuantity: 20,
-<<<<<<< HEAD
-    status: "active",
-=======
     status: "published",
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     isFeatured: true,
     badge: "New",
     warrantyEnabled: true,
@@ -319,11 +307,7 @@ export const FALLBACK_RAW_PRODUCTS = [
     price: 1499,
     discountPrice: null,
     stockQuantity: 30,
-<<<<<<< HEAD
-    status: "active",
-=======
     status: "published",
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     isFeatured: true,
     badge: "",
     warrantyEnabled: true,
@@ -364,11 +348,7 @@ export const FALLBACK_RAW_PRODUCTS = [
     price: 999,
     discountPrice: null,
     stockQuantity: 35,
-<<<<<<< HEAD
-    status: "active",
-=======
     status: "published",
->>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     isFeatured: true,
     badge: "",
     warrantyEnabled: true,
