@@ -37,42 +37,12 @@ app.disable("x-powered-by");
 // Trust reverse proxy (Render, Railway, Vercel, Nginx) so secure cookies & rate limits work accurately
 app.set("trust proxy", 1);
 
-// Build strict CORS origin allow-list from CLIENT_URL / CORS_ORIGINS
-function resolveAllowedOrigins() {
-  const raw =
-    process.env.CORS_ORIGINS ||
-    process.env.CLIENT_URL ||
-    (isProduction ? "" : "http://localhost:5173");
-
-  const parsed = raw
-    .split(",")
-    .map((o) => o.trim().replace(/\/+$/, ""))
-    .filter(Boolean);
-
-  if (parsed.includes("*")) {
-    throw new Error(
-      "Wildcard '*' is not allowed in CORS_ORIGINS / CLIENT_URL when credentials are enabled."
-    );
-  }
-
-  for (const origin of parsed) {
-    if (!/^https?:\/\/[^/\s]+$/i.test(origin)) {
-      throw new Error(
-        `Invalid CORS origin "${origin}". Use full origin URLs like http://localhost:5173.`
-      );
-    }
-  }
-
-  if (isProduction && parsed.length === 0) {
-    throw new Error(
-      "CLIENT_URL or CORS_ORIGINS must be configured in production."
-    );
-  }
-
-  return parsed;
-}
-
-const allowedOrigins = resolveAllowedOrigins();
+// Strict CORS origin allow-list
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://gunlite.in",
+  "https://www.gunlite.in",
+];
 
 // Security HTTP headers
 app.use(
@@ -93,23 +63,11 @@ app.use(
   })
 );
 
-// Strict CORS limited to configured frontend origin(s)
+// Strict CORS limited to allowed frontend origins
 app.use(
   cors({
-    origin(origin, callback) {
-      // Allow non-browser requests (health checks, server-to-server, curl)
-      if (!origin) return callback(null, true);
-      const cleanOrigin = origin.replace(/\/+$/, "");
-      if (allowedOrigins.includes(cleanOrigin)) {
-        return callback(null, true);
-      }
-      const err = new Error(`CORS policy blocked origin: ${origin}`);
-      err.statusCode = 403;
-      return callback(err);
-    },
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
   })
 );
 
