@@ -40,6 +40,7 @@ export default function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [togglingIds, setTogglingIds] = useState({});
 
   const loadData = useCallback(async () => {
     try {
@@ -72,31 +73,63 @@ export default function AdminProducts() {
     loadData();
   }, [loadData]);
 
-  const handleToggleStatus = async (product) => {
-    const nextStatus = product.status === "published" ? "draft" : "published";
+  const applyQuickProductUpdate = async (product, patch, successMsg, errorMsg) => {
+    const id = product._id;
+    if (!id || togglingIds[id]) return;
+
+    const previousSnapshot = {};
+    for (const key of Object.keys(patch)) {
+      previousSnapshot[key] = product[key];
+    }
+
+    setTogglingIds((prev) => ({ ...prev, [id]: true }));
+    setProducts((prev) =>
+      prev.map((item) => (item._id === id ? { ...item, ...patch } : item))
+    );
+
     try {
-      await api.updateAdminProduct(product._id, { status: nextStatus });
-      toast.success(`"${product.name}" marked ${nextStatus}.`);
-      loadData();
-      refreshCatalog();
+      const res = await api.updateAdminProduct(id, patch);
+      if (res?.product) {
+        setProducts((prev) =>
+          prev.map((item) => (item._id === id ? res.product : item))
+        );
+      }
+      toast.success(successMsg);
+      refreshCatalog({ silent: true });
     } catch (err) {
-      toast.error(err.message || "Failed to update status.");
+      setProducts((prev) =>
+        prev.map((item) =>
+          item._id === id ? { ...item, ...previousSnapshot } : item
+        )
+      );
+      toast.error(err.message || errorMsg);
+    } finally {
+      setTogglingIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     }
   };
 
-  const handleToggleFeatured = async (product) => {
-    try {
-      await api.updateAdminProduct(product._id, {
-        isFeatured: !product.isFeatured,
-      });
-      toast.success(
-        `"${product.name}" ${!product.isFeatured ? "marked as featured" : "removed from featured"}.`
-      );
-      loadData();
-      refreshCatalog();
-    } catch (err) {
-      toast.error(err.message || "Failed to update featured flag.");
-    }
+  const handleToggleStatus = (product) => {
+    const nextStatus = product.status === "published" ? "draft" : "published";
+    return applyQuickProductUpdate(
+      product,
+      { status: nextStatus },
+      `"${product.name}" marked ${nextStatus}.`,
+      "Failed to update status."
+    );
+  };
+
+  const handleToggleFeatured = (product) => {
+    const nextFeatured = !product.isFeatured;
+    return applyQuickProductUpdate(
+      product,
+      { isFeatured: nextFeatured },
+      `"${product.name}" ${nextFeatured ? "marked as featured" : "removed from featured"}.`,
+      "Failed to update featured flag."
+    );
   };
 
   const handleConfirmDelete = async () => {
@@ -320,8 +353,9 @@ export default function AdminProducts() {
                         <td className="py-3.5 px-4">
                           <button
                             type="button"
+                            disabled={Boolean(togglingIds[product._id])}
                             onClick={() => handleToggleFeatured(product)}
-                            className={`h-8 w-8 rounded-lg border flex items-center justify-center transition-colors ${
+                            className={`h-8 w-8 rounded-lg border flex items-center justify-center transition-colors disabled:opacity-60 disabled:cursor-wait ${
                               product.isFeatured
                                 ? "border-amber-200 bg-amber-50 text-amber-500"
                                 : "border-[#E6E6E1] bg-white text-[#8B97A8] hover:text-amber-500"
@@ -338,8 +372,9 @@ export default function AdminProducts() {
                         <td className="py-3.5 px-4">
                           <button
                             type="button"
+                            disabled={Boolean(togglingIds[product._id])}
                             onClick={() => handleToggleStatus(product)}
-                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase transition-colors ${
+                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase transition-colors disabled:opacity-60 disabled:cursor-wait ${
                               product.status === "published"
                                 ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                                 : "bg-[#F4F4F1] text-[#6B727C] hover:bg-[#E6E6E1]"
@@ -411,8 +446,9 @@ export default function AdminProducts() {
                         </p>
                         <button
                           type="button"
+                          disabled={Boolean(togglingIds[product._id])}
                           onClick={() => handleToggleStatus(product)}
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase shrink-0 ${
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase shrink-0 disabled:opacity-60 disabled:cursor-wait ${
                             product.status === "published"
                               ? "bg-emerald-50 text-emerald-700"
                               : "bg-[#F4F4F1] text-[#6B727C]"
@@ -446,8 +482,9 @@ export default function AdminProducts() {
                   <div className="pt-2.5 border-t border-[#F1F1ED] flex items-center justify-between gap-2">
                     <button
                       type="button"
+                      disabled={Boolean(togglingIds[product._id])}
                       onClick={() => handleToggleFeatured(product)}
-                      className={`h-8 rounded-lg border px-2.5 text-xs font-medium inline-flex items-center gap-1 ${
+                      className={`h-8 rounded-lg border px-2.5 text-xs font-medium inline-flex items-center gap-1 disabled:opacity-60 disabled:cursor-wait ${
                         product.isFeatured
                           ? "border-amber-200 bg-amber-50 text-amber-700"
                           : "border-[#E6E6E1] text-[#6B727C]"

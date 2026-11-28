@@ -34,6 +34,9 @@ export function errorHandler(err, req, res, _next) {
   } else if (err.name === "CastError") {
     statusCode = 400;
     message = `Invalid identifier format for ${err.path || "resource"}.`;
+  } else if (err.name === "VersionError") {
+    statusCode = 409;
+    message = "Product was modified concurrently. Please try again.";
   } else if (
     err.name === "JsonWebTokenError" ||
     err.name === "TokenExpiredError"

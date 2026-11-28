@@ -17,9 +17,10 @@ export function CatalogProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [isLive, setIsLive] = useState(false);
 
-  const refreshCatalog = useCallback(async () => {
+  const refreshCatalog = useCallback(async (options = {}) => {
+    const silent = Boolean(options?.silent);
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const [prodRes, catRes, brandRes] = await Promise.all([
         api.getPublicProducts({ limit: 100 }),
         api.getPublicCategories(),
@@ -40,7 +41,7 @@ export function CatalogProvider({ children }) {
       // Keep fallback data when backend is unavailable so public site never breaks
       setIsLive(false);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 

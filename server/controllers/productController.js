@@ -502,8 +502,16 @@ async function buildProductPayload(
         }))
     : [];
 
-  const desiredSlug = body.slug || (existingProduct ? existingProduct.slug : name);
-  const slug = await ensureUniqueSlug(desiredSlug, existingProduct?._id);
+  let slug = existingProduct?.slug || "";
+  const requestedSlug = body.slug !== undefined ? slugify(body.slug) : "";
+  if (
+    !existingProduct ||
+    !slug ||
+    (requestedSlug && requestedSlug !== existingProduct.slug)
+  ) {
+    const desiredSlug = body.slug || (existingProduct ? existingProduct.slug : name);
+    slug = await ensureUniqueSlug(desiredSlug, existingProduct?._id);
+  }
 
   const isFeatured =
     body.isFeatured !== undefined
@@ -640,6 +648,8 @@ export async function createProduct(req, res, next) {
   }
 }
 
+const QUICK_TOGGLE_FIELDS = new Set(["isFeatured", "status"]);
+
 /**
  * PUT /api/admin/products/:id
  */
@@ -647,6 +657,67 @@ export async function updateProduct(req, res, next) {
   const newlyUploadedPublicIds = [];
   let saved = false;
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product identifier.",
+      });
+    }
+
+    const body = req.body || {};
+    const bodyKeys = Object.keys(body);
+    const isQuickToggle =
+      (!req.files || req.files.length === 0) &&
+      bodyKeys.length > 0 &&
+      bodyKeys.every((key) => QUICK_TOGGLE_FIELDS.has(key));
+
+    if (isQuickToggle) {
+      const quickSet = {};
+      if (body.isFeatured !== undefined) {
+        quickSet.isFeatured = body.isFeatured === true || body.isFeatured === "true";
+      }
+      if (body.status !== undefined) {
+        if (body.status !== "draft" && body.status !== "published") {
+          return res.status(400).json({
+            success: false,
+            message: 'Product status must be either "draft" or "published".',
+          });
+        }
+        quickSet.status = body.status;
+      }
+
+      const updated = await Product.findByIdAndUpdate(
+        req.params.id,
+        { $set: quickSet },
+        { new: true, runValidators: true }
+      )
+        .populate("category", "name nameHi slug")
+        .populate("categories", "name nameHi slug")
+        .lean();
+
+      if (!updated) {
+        return res.status(404).json({
+          success: false,
+          message: "Product not found.",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Product updated successfully.",
+        product: updated,
+      });
+
+      void logAdminActivity({
+        admin: req.admin,
+        action: "UPDATE_PRODUCT",
+        entityType: "product",
+        entityId: updated._id,
+        summary: `Updated ${Object.keys(quickSet).join(", ")} for "${updated.name}"`,
+      });
+      return;
+    }
+
     const existing = await Product.findById(req.params.id);
     if (!existing) {
       return res.status(404).json({
@@ -670,7 +741,7 @@ export async function updateProduct(req, res, next) {
 
     const removedPublicIds = oldPublicIds.filter((pid) => !newPublicIdSet.has(pid));
 
-    Object.assign(existing, payload);
+    existing.set(payload);
     await existing.save();
     saved = true;
     newlyUploadedPublicIds.length = 0;
