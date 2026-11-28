@@ -43,6 +43,7 @@ export default function ProductFormModal({
   const replaceInputRef = useRef(null);
 
   const [name, setName] = useState("");
+  const [nameHi, setNameHi] = useState("");
   const [slug, setSlug] = useState("");
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [sku, setSku] = useState("");
@@ -55,12 +56,16 @@ export default function ProductFormModal({
   const [status, setStatus] = useState("draft");
   const [isFeatured, setIsFeatured] = useState(false);
   const [badge, setBadge] = useState("");
+  const [badgeHi, setBadgeHi] = useState("");
   const [shortSpec, setShortSpec] = useState("");
+  const [shortSpecHi, setShortSpecHi] = useState("");
   const [description, setDescription] = useState("");
-  const [specs, setSpecs] = useState([{ label: "", value: "" }]);
+  const [descriptionHi, setDescriptionHi] = useState("");
+  const [specs, setSpecs] = useState([{ label: "", labelHi: "", value: "", valueHi: "" }]);
   const [warrantyEnabled, setWarrantyEnabled] = useState(true);
   const [warrantyPrice, setWarrantyPrice] = useState("500");
   const [warrantyLabel, setWarrantyLabel] = useState("1-Year Warranty");
+  const [warrantyLabelHi, setWarrantyLabelHi] = useState("");
 
   const [images, setImages] = useState([]);
   const [sessionUploadedPublicIds, setSessionUploadedPublicIds] = useState([]);
@@ -78,6 +83,7 @@ export default function ProductFormModal({
 
     if (initialProduct) {
       setName(initialProduct.name || "");
+      setNameHi(initialProduct.nameHi || "");
       setSlug(initialProduct.slug || "");
       setSlugManuallyEdited(true);
       setSku(initialProduct.sku || "");
@@ -109,15 +115,20 @@ export default function ProductFormModal({
       setStatus(initialProduct.status || "draft");
       setIsFeatured(Boolean(initialProduct.isFeatured));
       setBadge(initialProduct.badge || "");
+      setBadgeHi(initialProduct.badgeHi || "");
       setShortSpec(initialProduct.shortSpec || "");
+      setShortSpecHi(initialProduct.shortSpecHi || "");
       setDescription(initialProduct.description || "");
+      setDescriptionHi(initialProduct.descriptionHi || "");
       setSpecs(
         Array.isArray(initialProduct.specs) && initialProduct.specs.length > 0
           ? initialProduct.specs.map((s) => ({
               label: s.label || "",
+              labelHi: s.labelHi || "",
               value: s.value || "",
+              valueHi: s.valueHi || "",
             }))
-          : [{ label: "", value: "" }]
+          : [{ label: "", labelHi: "", value: "", valueHi: "" }]
       );
       setWarrantyEnabled(
         initialProduct.warrantyEnabled !== undefined
@@ -130,6 +141,7 @@ export default function ProductFormModal({
           : "500"
       );
       setWarrantyLabel(initialProduct.warrantyLabel || "1-Year Warranty");
+      setWarrantyLabelHi(initialProduct.warrantyLabelHi || "");
       setImages(
         Array.isArray(initialProduct.images)
           ? initialProduct.images.map((img) => ({
@@ -142,6 +154,7 @@ export default function ProductFormModal({
     } else {
       const firstCat = categories[0]?._id ? String(categories[0]._id) : "";
       setName("");
+      setNameHi("");
       setSlug("");
       setSlugManuallyEdited(false);
       setSku("");
@@ -154,12 +167,16 @@ export default function ProductFormModal({
       setStatus("draft");
       setIsFeatured(false);
       setBadge("");
+      setBadgeHi("");
       setShortSpec("");
+      setShortSpecHi("");
       setDescription("");
-      setSpecs([{ label: "", value: "" }]);
+      setDescriptionHi("");
+      setSpecs([{ label: "", labelHi: "", value: "", valueHi: "" }]);
       setWarrantyEnabled(true);
       setWarrantyPrice("500");
       setWarrantyLabel("1-Year Warranty");
+      setWarrantyLabelHi("");
       setImages([]);
     }
   }, [open, initialProduct, categories]);
@@ -361,6 +378,7 @@ export default function ProductFormModal({
 
     const payload = {
       name: name.trim(),
+      nameHi: nameHi.trim(),
       slug: makeSlug(slug || name),
       sku: sku.trim().toUpperCase(),
       brand: brand.trim() || "GunLite",
@@ -374,14 +392,23 @@ export default function ProductFormModal({
       status,
       isFeatured,
       badge: badge.trim(),
+      badgeHi: badgeHi.trim(),
       shortSpec: shortSpec.trim(),
+      shortSpecHi: shortSpecHi.trim(),
       description: description.trim(),
+      descriptionHi: descriptionHi.trim(),
       specs: specs
         .filter((s) => s.label.trim() && s.value.trim())
-        .map((s) => ({ label: s.label.trim(), value: s.value.trim() })),
+        .map((s) => ({
+          label: s.label.trim(),
+          labelHi: (s.labelHi || "").trim(),
+          value: s.value.trim(),
+          valueHi: (s.valueHi || "").trim(),
+        })),
       warrantyEnabled,
       warrantyPrice: Math.max(0, Number(warrantyPrice) || 0),
       warrantyLabel: warrantyLabel.trim() || "1-Year Warranty",
+      warrantyLabelHi: warrantyLabelHi.trim(),
       images,
     };
 
@@ -449,7 +476,7 @@ export default function ProductFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-                Product Name *
+                Product Name (English) *
               </label>
               <input
                 type="text"
@@ -459,6 +486,19 @@ export default function ProductFormModal({
                   if (!slugManuallyEdited) setSlug(makeSlug(e.target.value));
                 }}
                 placeholder="e.g. Eagle 3.1 GunLite"
+                className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Product Name (Hindi — हिन्दी)
+              </label>
+              <input
+                type="text"
+                value={nameHi}
+                onChange={(e) => setNameHi(e.target.value)}
+                placeholder="उदा. Eagle 3.1 GunLite या हिन्दी नाम"
                 className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
               />
             </div>
@@ -625,11 +665,11 @@ export default function ProductFormModal({
             </div>
           </div>
 
-          {/* Short Spec, Badge, Featured, Brand */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          {/* Short Spec, Badge, Featured */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-                Card Short Spec Line
+                Card Short Spec Line (English)
               </label>
               <input
                 type="text"
@@ -642,7 +682,20 @@ export default function ProductFormModal({
 
             <div>
               <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-                Badge Label (optional)
+                Card Short Spec Line (Hindi — हिन्दी)
+              </label>
+              <input
+                type="text"
+                value={shortSpecHi}
+                onChange={(e) => setShortSpecHi(e.target.value)}
+                placeholder="उदा. 50W LED · Type-C"
+                className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Badge Label (English, optional)
               </label>
               <input
                 type="text"
@@ -653,18 +706,31 @@ export default function ProductFormModal({
               />
             </div>
 
-            <label className="flex items-center gap-2.5 h-10 px-3.5 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] cursor-pointer">
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Badge Label (Hindi — हिन्दी, optional)
+              </label>
               <input
-                type="checkbox"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="h-4 w-4 accent-[var(--accent)] rounded"
+                type="text"
+                value={badgeHi}
+                onChange={(e) => setBadgeHi(e.target.value)}
+                placeholder="उदा. बेस्ट सेलर या नया"
+                className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
               />
-              <span className="text-xs font-semibold text-[#14161A]">
-                Mark as Featured Product
-              </span>
-            </label>
+            </div>
           </div>
+
+          <label className="flex items-center gap-2.5 h-10 px-3.5 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] cursor-pointer w-fit">
+            <input
+              type="checkbox"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              className="h-4 w-4 accent-[var(--accent)] rounded"
+            />
+            <span className="text-xs font-semibold text-[#14161A]">
+              Mark as Featured Product (shown on Hero slider & Featured section)
+            </span>
+          </label>
 
           {/* Optional Per-Product Warranty Add-On Settings */}
           <div className="rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-4 space-y-3">
@@ -689,15 +755,27 @@ export default function ProductFormModal({
             </div>
 
             {warrantyEnabled && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                 <div>
                   <label className="block text-[11px] font-medium text-[#4A5058] mb-1">
-                    Warranty Label
+                    Warranty Label (English)
                   </label>
                   <input
                     type="text"
                     value={warrantyLabel}
                     onChange={(e) => setWarrantyLabel(e.target.value)}
+                    className="w-full h-9 rounded-lg border border-[#E6E6E1] bg-white px-3 text-xs focus:border-[var(--accent)] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-[#4A5058] mb-1">
+                    Warranty Label (Hindi)
+                  </label>
+                  <input
+                    type="text"
+                    value={warrantyLabelHi}
+                    onChange={(e) => setWarrantyLabelHi(e.target.value)}
+                    placeholder="उदा. 1-वर्ष की वारंटी"
                     className="w-full h-9 rounded-lg border border-[#E6E6E1] bg-white px-3 text-xs focus:border-[var(--accent)] focus:outline-none"
                   />
                 </div>
@@ -717,18 +795,33 @@ export default function ProductFormModal({
             )}
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-              Product Description *
-            </label>
-            <textarea
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Detailed description shown on the product page..."
-              className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
-            />
+          {/* Description (English & Hindi) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Description (English) *
+              </label>
+              <textarea
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Detailed English description shown on the product page..."
+                className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Description (Hindi — हिन्दी)
+              </label>
+              <textarea
+                rows={4}
+                value={descriptionHi}
+                onChange={(e) => setDescriptionHi(e.target.value)}
+                placeholder="हिन्दी विवरण (जब ग्राहक हिन्दी भाषा चुनें तब यह दिखेगा)..."
+                className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+              />
+            </div>
           </div>
 
           {/* Multiple Image Upload & Cloudinary Manager */}
@@ -864,11 +957,16 @@ export default function ProductFormModal({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-[#14161A]">
-                Technical Specifications
+                Technical Specifications (English &amp; Hindi)
               </label>
               <button
                 type="button"
-                onClick={() => setSpecs((prev) => [...prev, { label: "", value: "" }])}
+                onClick={() =>
+                  setSpecs((prev) => [
+                    ...prev,
+                    { label: "", labelHi: "", value: "", valueHi: "" },
+                  ])
+                }
                 className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:underline"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -876,35 +974,59 @@ export default function ProductFormModal({
               </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {specs.map((spec, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={spec.label}
-                    onChange={(e) => handleSpecChange(idx, "label", e.target.value)}
-                    placeholder="Label (e.g. LED Emitter)"
-                    className="w-2/5 h-9 rounded-lg border border-[#E6E6E1] bg-[#FAFAF8] px-3 text-xs focus:border-[var(--accent)] focus:bg-white focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    value={spec.value}
-                    onChange={(e) => handleSpecChange(idx, "value", e.target.value)}
-                    placeholder="Value (e.g. 50W High Power LED)"
-                    className="flex-1 h-9 rounded-lg border border-[#E6E6E1] bg-[#FAFAF8] px-3 text-xs focus:border-[var(--accent)] focus:bg-white focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSpecs((prev) =>
-                        prev.length > 1 ? prev.filter((_, i) => i !== idx) : [{ label: "", value: "" }]
-                      )
-                    }
-                    className="h-9 w-9 shrink-0 rounded-lg border border-[#E6E6E1] flex items-center justify-center text-[#6B727C] hover:text-red-500 hover:bg-red-50"
-                    aria-label="Remove specification row"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                <div
+                  key={idx}
+                  className="rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-2.5 space-y-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={spec.label}
+                      onChange={(e) => handleSpecChange(idx, "label", e.target.value)}
+                      placeholder="Label (English, e.g. LED Emitter)"
+                      className="w-2/5 h-9 rounded-lg border border-[#E6E6E1] bg-white px-3 text-xs focus:border-[var(--accent)] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={spec.value}
+                      onChange={(e) => handleSpecChange(idx, "value", e.target.value)}
+                      placeholder="Value (English, e.g. 50W High Power LED)"
+                      className="flex-1 h-9 rounded-lg border border-[#E6E6E1] bg-white px-3 text-xs focus:border-[var(--accent)] focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSpecs((prev) =>
+                          prev.length > 1
+                            ? prev.filter((_, i) => i !== idx)
+                            : [{ label: "", labelHi: "", value: "", valueHi: "" }]
+                        )
+                      }
+                      className="h-9 w-9 shrink-0 rounded-lg border border-[#E6E6E1] bg-white flex items-center justify-center text-[#6B727C] hover:text-red-500 hover:bg-red-50"
+                      aria-label="Remove specification row"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 pr-11">
+                    <input
+                      type="text"
+                      value={spec.labelHi || ""}
+                      onChange={(e) => handleSpecChange(idx, "labelHi", e.target.value)}
+                      placeholder="Label (Hindi — हिन्दी, उदा. LED एमिटर)"
+                      className="w-2/5 h-8 rounded-lg border border-[#E6E6E1] bg-white/80 px-3 text-xs focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={spec.valueHi || ""}
+                      onChange={(e) => handleSpecChange(idx, "valueHi", e.target.value)}
+                      placeholder="Value (Hindi — हिन्दी)"
+                      className="flex-1 h-8 rounded-lg border border-[#E6E6E1] bg-white/80 px-3 text-xs focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+                    />
+                  </div>
                 </div>
               ))}
             </div>

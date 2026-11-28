@@ -25,7 +25,9 @@ const productImageSchema = new mongoose.Schema(
 const productSpecSchema = new mongoose.Schema(
   {
     label: { type: String, required: true, trim: true },
+    labelHi: { type: String, default: "", trim: true },
     value: { type: String, required: true, trim: true },
+    valueHi: { type: String, default: "", trim: true },
   },
   { _id: false }
 );
@@ -37,6 +39,12 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product name is required"],
       trim: true,
       maxlength: [140, "Product name cannot exceed 140 characters"],
+    },
+    nameHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [160, "Hindi product name cannot exceed 160 characters"],
     },
     slug: {
       type: String,
@@ -63,11 +71,22 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product description is required"],
       trim: true,
     },
+    descriptionHi: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     shortSpec: {
       type: String,
       trim: true,
       default: "",
       maxlength: [80, "Short spec cannot exceed 80 characters"],
+    },
+    shortSpecHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [100, "Hindi short spec cannot exceed 100 characters"],
     },
     specs: {
       type: [productSpecSchema],
@@ -121,6 +140,12 @@ const productSchema = new mongoose.Schema(
       default: "",
       maxlength: [32, "Badge text cannot exceed 32 characters"],
     },
+    badgeHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [48, "Hindi badge text cannot exceed 48 characters"],
+    },
     warrantyEnabled: {
       type: Boolean,
       default: true,
@@ -134,6 +159,12 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: "1-Year Warranty",
+    },
+    warrantyLabelHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [80, "Hindi warranty label cannot exceed 80 characters"],
     },
     images: {
       type: [productImageSchema],

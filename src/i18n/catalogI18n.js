@@ -1,7 +1,8 @@
 /**
  * Frontend catalog localization helpers.
- * Translates descriptive copy, categories, badges, specs, and warranty labels
- * while strictly keeping brand names, trademarks, and product model names intact.
+ * Prioritizes Admin-saved Hindi fields (*Hi) from MongoDB when Hindi is active,
+ * falling back to built-in translations for initial/seeded data and then English
+ * so legacy English-only records always render seamlessly.
  */
 
 const CATEGORY_MAP_HI = {
@@ -18,6 +19,12 @@ const CATEGORY_DESC_MAP_HI = {
   "lithium backup power": "लिथियम बैटरी बैकअप पावर",
   "complete lineup": "संपूर्ण उत्पाद श्रृंखला",
   "professional illumination": "प्रोफेशनल प्रकाश उपकरण",
+  "handheld high-beam led torches for everyday, industrial, and outdoor tasks.":
+    "दैनिक, औद्योगिक और आउटडोर कार्यों के लिए हैंडहेल्ड हाई-बीम LED टॉर्च।",
+  "long-range focused optics for security, agriculture, and night patrol.":
+    "सुरक्षा, कृषि और रात्रि गश्त के लिए लंबी दूरी के केंद्रित ऑप्टिक्स।",
+  "high-capacity lithium backup lighting with type-c and usb fast charging.":
+    "Type-C और USB फास्ट चार्जिंग के साथ उच्च क्षमता वाली लिथियम बैकअप लाइटिंग।",
 };
 
 const BADGE_MAP_HI = {
@@ -137,59 +144,123 @@ const WARRANTY_LABEL_HI = {
   "1-year hardware warranty": "1-वर्ष की हार्डवेयर वारंटी",
 };
 
-export function translateCategoryName(name, language) {
-  if (language !== "hi" || !name) return name;
-  const key = String(name).trim().toLowerCase();
-  return CATEGORY_MAP_HI[key]?.name || name;
+export function getLocalizedProductTitle(product, language, { stripGunlite = false } = {}) {
+  if (!product) return "";
+  const rawEn = product.title || product.name || "";
+  const rawHi = product.nameHi || product.titleHi || "";
+  const chosen = language === "hi" && String(rawHi).trim() ? String(rawHi).trim() : rawEn;
+  if (stripGunlite) {
+    const stripped = chosen.replace(/\s*GunLite\s*/gi, "").trim();
+    return stripped || chosen;
+  }
+  return chosen;
 }
 
-export function translateCategoryDescription(nameOrDesc, language) {
-  if (language !== "hi" || !nameOrDesc) return nameOrDesc;
-  const key = String(nameOrDesc).trim().toLowerCase();
-  return CATEGORY_DESC_MAP_HI[key] || CATEGORY_MAP_HI[key]?.desc || nameOrDesc;
+export function translateCategoryName(catOrName, language) {
+  if (!catOrName) return "";
+  if (typeof catOrName === "object") {
+    if (language === "hi" && String(catOrName.nameHi || "").trim()) {
+      return String(catOrName.nameHi).trim();
+    }
+    const baseName = catOrName.name || "";
+    if (language !== "hi") return baseName;
+    const key = String(baseName).trim().toLowerCase();
+    return CATEGORY_MAP_HI[key]?.name || baseName;
+  }
+  if (language !== "hi") return catOrName;
+  const key = String(catOrName).trim().toLowerCase();
+  return CATEGORY_MAP_HI[key]?.name || catOrName;
 }
 
-export function translateBadge(badge, language) {
-  if (language !== "hi" || !badge) return badge;
-  const key = String(badge).trim().toLowerCase();
-  return BADGE_MAP_HI[key] || badge;
+export function translateCategoryDescription(catOrDesc, fallbackDescOrLang, maybeLang) {
+  const hasExplicitFallback = typeof maybeLang === "string";
+  const language = hasExplicitFallback ? maybeLang : fallbackDescOrLang;
+  const fallbackDesc = hasExplicitFallback ? fallbackDescOrLang : "";
+
+  if (!catOrDesc) return fallbackDesc || "";
+  if (typeof catOrDesc === "object") {
+    if (language === "hi" && String(catOrDesc.descriptionHi || "").trim()) {
+      return String(catOrDesc.descriptionHi).trim();
+    }
+    const rawDesc = catOrDesc.description || fallbackDesc || "";
+    if (language !== "hi") return rawDesc;
+    const descKey = String(rawDesc).trim().toLowerCase();
+    const nameKey = String(catOrDesc.name || "").trim().toLowerCase();
+    return CATEGORY_DESC_MAP_HI[descKey] || CATEGORY_MAP_HI[nameKey]?.desc || rawDesc;
+  }
+  if (language !== "hi") return catOrDesc;
+  const key = String(catOrDesc).trim().toLowerCase();
+  return CATEGORY_DESC_MAP_HI[key] || CATEGORY_MAP_HI[key]?.desc || catOrDesc;
 }
 
-export function translateWarrantyLabel(label, language) {
-  if (language !== "hi" || !label) return label;
-  const key = String(label).trim().toLowerCase();
-  return WARRANTY_LABEL_HI[key] || label;
+export function translateBadge(badgeOrProduct, language) {
+  if (!badgeOrProduct) return "";
+  if (typeof badgeOrProduct === "object") {
+    if (language === "hi" && String(badgeOrProduct.badgeHi || "").trim()) {
+      return String(badgeOrProduct.badgeHi).trim();
+    }
+    const raw = badgeOrProduct.badge || "";
+    if (language !== "hi" || !raw) return raw;
+    return BADGE_MAP_HI[String(raw).trim().toLowerCase()] || raw;
+  }
+  if (language !== "hi") return badgeOrProduct;
+  const key = String(badgeOrProduct).trim().toLowerCase();
+  return BADGE_MAP_HI[key] || badgeOrProduct;
+}
+
+export function translateWarrantyLabel(labelOrProduct, language) {
+  if (!labelOrProduct) return "";
+  if (typeof labelOrProduct === "object") {
+    if (language === "hi" && String(labelOrProduct.warrantyLabelHi || "").trim()) {
+      return String(labelOrProduct.warrantyLabelHi).trim();
+    }
+    const raw = labelOrProduct.warrantyLabel || "1-Year Warranty";
+    if (language !== "hi") return raw;
+    return WARRANTY_LABEL_HI[String(raw).trim().toLowerCase()] || raw;
+  }
+  if (language !== "hi") return labelOrProduct;
+  const key = String(labelOrProduct).trim().toLowerCase();
+  return WARRANTY_LABEL_HI[key] || labelOrProduct;
 }
 
 export function translateBrandTagline(brand, language) {
-  if (language !== "hi" || !brand) {
-    return brand?.tagline || brand?.description || "";
+  if (!brand) return "";
+  if (language === "hi") {
+    if (String(brand.taglineHi || "").trim()) return String(brand.taglineHi).trim();
+    if (String(brand.descriptionHi || "").trim()) return String(brand.descriptionHi).trim();
+    const slug = String(brand.slug || "").trim().toLowerCase();
+    if (BRAND_TAGLINE_HI[slug]) return BRAND_TAGLINE_HI[slug];
+    if (brand.tagline === "Professional LED torches and search lights from Coimbatore.") {
+      return BRAND_TAGLINE_HI.gunlite;
+    }
+    return brand.tagline || BRAND_DESC_HI[slug] || brand.description || "";
   }
-  const slug = String(brand.slug || "").trim().toLowerCase();
-  if (BRAND_TAGLINE_HI[slug]) return BRAND_TAGLINE_HI[slug];
-  if (brand.tagline === "Professional LED torches and search lights from Coimbatore.") {
-    return BRAND_TAGLINE_HI.gunlite;
-  }
-  return brand.tagline || BRAND_DESC_HI[slug] || brand.description || "";
+  return brand.tagline || brand.description || "";
 }
 
 export function translateProductDescription(product, language) {
-  if (language !== "hi" || !product) return product?.desc || "";
+  if (!product) return "";
+  const rawEn = product.desc || product.description || "";
+  if (language !== "hi") return rawEn;
+  const rawHi = product.descHi || product.descriptionHi || "";
+  if (String(rawHi).trim()) return String(rawHi).trim();
   const slug = String(product.slug || product.id || "").trim().toLowerCase();
   if (PRODUCT_DESC_BY_SLUG_HI[slug]) {
-    // Only override if DB still holds the default English description for that flagship model,
-    // OR normalize exact match against known defaults.
     return PRODUCT_DESC_BY_SLUG_HI[slug];
   }
-  return product.desc || "";
+  return rawEn;
 }
 
 export function translateShortSpec(product, fallbackSpec, language) {
-  if (language !== "hi") return fallbackSpec;
+  if (language !== "hi") return product?.shortSpec || fallbackSpec || "";
+  if (String(product?.shortSpecHi || "").trim()) {
+    return String(product.shortSpecHi).trim();
+  }
   const slug = String(product?.slug || product?.id || "").trim().toLowerCase();
   if (SHORT_SPEC_BY_SLUG_HI[slug]) return SHORT_SPEC_BY_SLUG_HI[slug];
-  if (!fallbackSpec) return "हाई-पावर LED";
-  return String(fallbackSpec)
+  const src = product?.shortSpec || fallbackSpec;
+  if (!src) return "हाई-पावर LED";
+  return String(src)
     .replace(/\bLumens\b/gi, "ल्यूमेन")
     .replace(/\bLm\b/g, "ल्यूमेन")
     .replace(/\bZoom\b/gi, "ज़ूम")
@@ -204,14 +275,32 @@ export function translateSpecItem(item, language) {
   }
   const rawLabel = item.label || item.key || "";
   const rawValue = item.value || item.desc || "";
+  const rawLabelHi = String(item.labelHi || "").trim();
+  const rawValueHi = String(item.valueHi || "").trim();
   const labelKey = String(rawLabel).trim().toLowerCase();
   const valueKey = String(rawValue).trim().toLowerCase();
 
   return {
     ...item,
-    label: SPEC_LABEL_MAP_HI[labelKey] || rawLabel,
-    value: SPEC_VALUE_MAP_HI[valueKey] || rawValue,
+    label: rawLabelHi || SPEC_LABEL_MAP_HI[labelKey] || rawLabel,
+    value: rawValueHi || SPEC_VALUE_MAP_HI[valueKey] || rawValue,
   };
+}
+
+export function getLocalizedVideoTitle(video, language, fallback = "") {
+  if (!video) return fallback;
+  if (language === "hi" && String(video.titleHi || "").trim()) {
+    return String(video.titleHi).trim();
+  }
+  return video.title || fallback;
+}
+
+export function getLocalizedVideoDescription(video, language) {
+  if (!video) return "";
+  if (language === "hi" && String(video.descriptionHi || "").trim()) {
+    return String(video.descriptionHi).trim();
+  }
+  return video.description || "";
 }
 
 export function formatLocalizedPrice(priceStr, t) {

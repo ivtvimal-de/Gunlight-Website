@@ -9,6 +9,12 @@ const categorySchema = new mongoose.Schema(
       trim: true,
       maxlength: [80, "Category name cannot exceed 80 characters"],
     },
+    nameHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [100, "Hindi category name cannot exceed 100 characters"],
+    },
     slug: {
       type: String,
       required: [true, "Category slug is required"],
@@ -21,6 +27,12 @@ const categorySchema = new mongoose.Schema(
       trim: true,
       default: "",
       maxlength: [240, "Description cannot exceed 240 characters"],
+    },
+    descriptionHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [320, "Hindi description cannot exceed 320 characters"],
     },
     image: {
       url: { type: String, default: "" },

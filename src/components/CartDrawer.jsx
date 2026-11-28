@@ -151,6 +151,18 @@ export default function CartDrawer() {
                 const lineTotal = item.priceNum > 0
                   ? formatPrice(item.priceNum * item.quantity)
                   : t("common.onRequest");
+                const displayItemTitle =
+                  language === "hi" && item.titleHi ? item.titleHi : item.title;
+                const displayItemWarrantyLabel =
+                  item.warrantyLabel || item.warrantyLabelHi
+                    ? translateWarrantyLabel(
+                        {
+                          warrantyLabel: item.warrantyLabel || WARRANTY_OPTION.label,
+                          warrantyLabelHi: item.warrantyLabelHi || "",
+                        },
+                        language
+                      )
+                    : localizedWarrantyLabel;
 
                 return (
                   <li key={item.id} className="flex gap-4 py-4">
@@ -158,7 +170,7 @@ export default function CartDrawer() {
                     <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--bg-surface-2)] p-1.5 border border-[var(--border-subtle)]">
                       <img
                         src={item.img}
-                        alt={t("cart.itemAlt", { title: item.title })}
+                        alt={t("cart.itemAlt", { title: displayItemTitle })}
                         width={64}
                         height={64}
                         className="h-full w-full object-contain"
@@ -168,7 +180,7 @@ export default function CartDrawer() {
 
                     {/* Info */}
                     <div className="flex flex-1 flex-col gap-1 min-w-0">
-                      <p className="truncate font-['Outfit'] text-sm font-bold text-[var(--text-primary)]">{item.title}</p>
+                      <p className="truncate font-['Outfit'] text-sm font-bold text-[var(--text-primary)]">{displayItemTitle}</p>
                       <p className="text-xs text-[var(--text-muted)]">
                         {item.hasWarranty && item.basePriceNum > 0
                           ? formatPrice(item.basePriceNum)
@@ -177,7 +189,7 @@ export default function CartDrawer() {
 
                       {item.hasWarranty && (
                         <span className="inline-flex items-center w-fit rounded-md bg-[var(--accent-tint)] px-2 py-0.5 text-[10.5px] font-semibold text-[var(--accent)]">
-                          {localizedWarrantyLabel} (+₹{item.warrantyFee ?? WARRANTY_OPTION.fee})
+                          {displayItemWarrantyLabel} (+₹{item.warrantyFee ?? WARRANTY_OPTION.fee})
                         </span>
                       )}
 
@@ -209,8 +221,8 @@ export default function CartDrawer() {
                       <p className="font-['Outfit'] text-sm font-bold text-[var(--accent)] tabular-nums">{lineTotal}</p>
                       <button
                         onClick={() => removeItem(item.id)}
-                        aria-label={t("cart.removeItemAria", { title: item.title })}
-                        title={t("cart.removeItemAria", { title: item.title })}
+                        aria-label={t("cart.removeItemAria", { title: displayItemTitle })}
+                        title={t("cart.removeItemAria", { title: displayItemTitle })}
                         className="h-7 w-7 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-red-500 hover:bg-red-50 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />

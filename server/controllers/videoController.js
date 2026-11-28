@@ -50,7 +50,7 @@ function validateVideoStatus(rawStatus, fallback = "draft") {
   return rawStatus;
 }
 
-function validateTitleAndDescription(title, description) {
+function validateTitleAndDescription(title, description, titleHi = "", descriptionHi = "") {
   if (!title) {
     const err = new Error("Video title is required.");
     err.statusCode = 400;
@@ -61,8 +61,18 @@ function validateTitleAndDescription(title, description) {
     err.statusCode = 400;
     throw err;
   }
+  if (titleHi.length > 160) {
+    const err = new Error("Hindi video title cannot exceed 160 characters.");
+    err.statusCode = 400;
+    throw err;
+  }
   if (description.length > 2000) {
     const err = new Error("Video description cannot exceed 2000 characters.");
+    err.statusCode = 400;
+    throw err;
+  }
+  if (descriptionHi.length > 2400) {
+    const err = new Error("Hindi video description cannot exceed 2400 characters.");
     err.statusCode = 400;
     throw err;
   }
@@ -85,11 +95,16 @@ export async function getAdminVideos(req, res, next) {
     if (search && String(search).trim()) {
       const term = String(search).trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const regex = new RegExp(term, "i");
-      filter.$or = [{ title: regex }, { description: regex }];
+      filter.$or = [
+        { title: regex },
+        { titleHi: regex },
+        { description: regex },
+        { descriptionHi: regex },
+      ];
     }
 
     const videos = await Video.find(filter)
-      .populate("product", "name slug sku")
+      .populate("product", "name nameHi slug sku")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -144,9 +159,11 @@ export async function createVideo(req, res, next) {
 
     const body = req.body || {};
     const title = String(body.title || "").trim();
+    const titleHi = String(body.titleHi || "").trim();
     const description = String(body.description || "").trim();
+    const descriptionHi = String(body.descriptionHi || "").trim();
 
-    validateTitleAndDescription(title, description);
+    validateTitleAndDescription(title, description, titleHi, descriptionHi);
     const productId = await resolveAssignedProduct(body.product);
     const status = validateVideoStatus(body.status, "draft");
 
@@ -167,7 +184,9 @@ export async function createVideo(req, res, next) {
 
     const created = await Video.create({
       title,
+      titleHi,
       description,
+      descriptionHi,
       product: productId,
       videoUrl,
       publicId: cloudMedia.publicId,
@@ -180,7 +199,7 @@ export async function createVideo(req, res, next) {
     uploadedPublicId = "";
 
     const populated = await Video.findById(created._id)
-      .populate("product", "name slug sku")
+      .populate("product", "name nameHi slug sku")
       .lean();
 
     await logAdminActivity({
@@ -227,12 +246,20 @@ export async function updateVideo(req, res, next) {
 
     const title =
       body.title !== undefined ? String(body.title).trim() : existing.title;
+    const titleHi =
+      body.titleHi !== undefined
+        ? String(body.titleHi || "").trim()
+        : existing.titleHi || "";
     const description =
       body.description !== undefined
         ? String(body.description).trim()
         : existing.description;
+    const descriptionHi =
+      body.descriptionHi !== undefined
+        ? String(body.descriptionHi || "").trim()
+        : existing.descriptionHi || "";
 
-    validateTitleAndDescription(title, description);
+    validateTitleAndDescription(title, description, titleHi, descriptionHi);
 
     const productId =
       body.product !== undefined
@@ -242,7 +269,9 @@ export async function updateVideo(req, res, next) {
     const status = validateVideoStatus(body.status, existing.status);
 
     existing.title = title;
+    existing.titleHi = titleHi;
     existing.description = description;
+    existing.descriptionHi = descriptionHi;
     existing.product = productId;
     existing.status = status;
 
@@ -278,7 +307,7 @@ export async function updateVideo(req, res, next) {
     }
 
     const populated = await Video.findById(existing._id)
-      .populate("product", "name slug sku")
+      .populate("product", "name nameHi slug sku")
       .lean();
 
     await logAdminActivity({
@@ -374,10 +403,10 @@ export async function getPublicVideos(req, res, next) {
       .populate({
         path: "product",
         match: { status: "published" },
-        select: "name slug sku",
+        select: "name nameHi slug sku",
       })
       .select(
-        "title description product videoUrl thumbnailUrl format fileSize status createdAt updatedAt"
+        "title titleHi description descriptionHi product videoUrl thumbnailUrl format fileSize status createdAt updatedAt"
       )
       .sort({ createdAt: -1 })
       .lean();
@@ -410,10 +439,10 @@ export async function getPublicVideoById(req, res, next) {
       .populate({
         path: "product",
         match: { status: "published" },
-        select: "name slug sku",
+        select: "name nameHi slug sku",
       })
       .select(
-        "title description product videoUrl thumbnailUrl format fileSize status createdAt updatedAt"
+        "title titleHi description descriptionHi product videoUrl thumbnailUrl format fileSize status createdAt updatedAt"
       )
       .lean();
 

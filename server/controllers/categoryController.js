@@ -58,7 +58,7 @@ export async function getAdminCategories(req, res, next) {
     const [categories, products] = await Promise.all([
       Category.find().sort({ displayOrder: 1, name: 1 }).lean(),
       Product.find()
-        .select("name slug sku price discountPrice stockQuantity status images category categories")
+        .select("name nameHi slug sku price discountPrice stockQuantity status images category categories")
         .sort({ createdAt: -1 })
         .lean(),
     ]);
@@ -125,8 +125,10 @@ export async function createCategory(req, res, next) {
   try {
     const {
       name,
+      nameHi = "",
       slug,
       description = "",
+      descriptionHi = "",
       image,
       isActive = true,
       displayOrder = 0,
@@ -145,8 +147,10 @@ export async function createCategory(req, res, next) {
 
     const category = await Category.create({
       name: cleanName,
+      nameHi: String(nameHi || "").trim(),
       slug: cleanSlug,
       description: String(description || "").trim(),
+      descriptionHi: String(descriptionHi || "").trim(),
       image: image?.url
         ? { url: String(image.url).trim(), publicId: String(image.publicId || "").trim() }
         : { url: "", publicId: "" },
@@ -191,8 +195,10 @@ export async function updateCategory(req, res, next) {
 
     const {
       name,
+      nameHi,
       slug,
       description,
+      descriptionHi,
       image,
       isActive,
       displayOrder,
@@ -209,6 +215,10 @@ export async function updateCategory(req, res, next) {
       category.name = String(name).trim();
     }
 
+    if (nameHi !== undefined) {
+      category.nameHi = String(nameHi || "").trim();
+    }
+
     if (slug !== undefined) {
       category.slug = slugify(slug || category.name);
     } else if (name !== undefined && !slug) {
@@ -217,6 +227,9 @@ export async function updateCategory(req, res, next) {
 
     if (description !== undefined) {
       category.description = String(description).trim();
+    }
+    if (descriptionHi !== undefined) {
+      category.descriptionHi = String(descriptionHi || "").trim();
     }
     if (isActive !== undefined) {
       category.isActive = Boolean(isActive);

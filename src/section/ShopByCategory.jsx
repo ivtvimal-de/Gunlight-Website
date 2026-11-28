@@ -32,10 +32,11 @@ export default function ShopByCategory() {
 
     return {
       key: cat.slug || cat.name,
-      name: translateCategoryName(cat.name, language),
+      name: translateCategoryName(cat, language),
       link: `/shop?category=${encodeURIComponent(cat.name)}`,
       desc: translateCategoryDescription(
-        cat.description || t("categoriesSection.defaultDesc"),
+        cat,
+        t("categoriesSection.defaultDesc"),
         language
       ),
       img: cat.previewImage || cat.image?.url || matchingProductImg,

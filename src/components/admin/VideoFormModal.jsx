@@ -24,7 +24,9 @@ export default function VideoFormModal({
   const fileInputRef = useRef(null);
 
   const [title, setTitle] = useState("");
+  const [titleHi, setTitleHi] = useState("");
   const [description, setDescription] = useState("");
+  const [descriptionHi, setDescriptionHi] = useState("");
   const [productId, setProductId] = useState("");
   const [status, setStatus] = useState("draft");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -43,14 +45,18 @@ export default function VideoFormModal({
 
     if (initialVideo) {
       setTitle(initialVideo.title || "");
+      setTitleHi(initialVideo.titleHi || "");
       setDescription(initialVideo.description || "");
+      setDescriptionHi(initialVideo.descriptionHi || "");
       const pid = initialVideo.product?._id || initialVideo.product || "";
       setProductId(String(pid));
       setStatus(initialVideo.status || "draft");
     } else {
       const firstProd = products[0]?._id ? String(products[0]._id) : "";
       setTitle("");
+      setTitleHi("");
       setDescription("");
+      setDescriptionHi("");
       setProductId(firstProd);
       setStatus("draft");
     }
@@ -124,7 +130,9 @@ export default function VideoFormModal({
 
     const fields = {
       title: cleanTitle,
+      titleHi: titleHi.trim(),
       description: cleanDescription,
+      descriptionHi: descriptionHi.trim(),
       product: productId,
       status,
     };
@@ -208,19 +216,36 @@ export default function VideoFormModal({
             </div>
           )}
 
-          <div>
-            <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-              Video Title *
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              maxLength={140}
-              disabled={saving}
-              placeholder="e.g. Eagle 3.1 Long-Range Beam Demonstration"
-              className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none disabled:opacity-60"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Video Title (English) *
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={140}
+                disabled={saving}
+                placeholder="e.g. Eagle 3.1 Long-Range Beam Demonstration"
+                className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none disabled:opacity-60"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Video Title (Hindi — हिन्दी)
+              </label>
+              <input
+                type="text"
+                value={titleHi}
+                onChange={(e) => setTitleHi(e.target.value)}
+                maxLength={160}
+                disabled={saving}
+                placeholder="वीडियो का हिन्दी शीर्षक..."
+                className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none disabled:opacity-60"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -259,19 +284,36 @@ export default function VideoFormModal({
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-              Description
-            </label>
-            <textarea
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              maxLength={2000}
-              disabled={saving}
-              placeholder="Optional overview shown alongside the video..."
-              className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none disabled:opacity-60"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Description (English)
+              </label>
+              <textarea
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                maxLength={2000}
+                disabled={saving}
+                placeholder="Optional overview shown alongside the video..."
+                className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none disabled:opacity-60"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                Description (Hindi — हिन्दी)
+              </label>
+              <textarea
+                rows={3}
+                value={descriptionHi}
+                onChange={(e) => setDescriptionHi(e.target.value)}
+                maxLength={2400}
+                disabled={saving}
+                placeholder="वीडियो का वैकल्पिक हिन्दी विवरण..."
+                className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none disabled:opacity-60"
+              />
+            </div>
           </div>
 
           {/* File Picker & Client-Side Preview Before Upload */}

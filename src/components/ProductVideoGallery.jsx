@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Play, Video as VideoIcon } from "lucide-react";
 import { api } from "../services/api";
 import { useTranslation } from "../i18n/LanguageContext";
+import { getLocalizedVideoTitle } from "../i18n/catalogI18n";
 
 /**
  * Fetch published videos for a product and refresh when the tab regains focus
@@ -54,7 +55,13 @@ export function useProductVideos(product) {
  * Enlarged 3:2 video player rendered inside the main ProductDetailTemplate gallery stage.
  */
 export function ProductStageVideo({ video, autoStart = false, videoRef: externalRef }) {
-  const { t } = useTranslation();
+  const { language, t } = useTranslation();
+  const displayVideoTitle = getLocalizedVideoTitle(
+    video,
+    language,
+    t("productDetail.productVideoLabel")
+  );
+  const hasExplicitTitle = Boolean(getLocalizedVideoTitle(video, language, ""));
   const fallbackRef = useRef(null);
   const resolvedRef = externalRef || fallbackRef;
   const [activated, setActivated] = useState(autoStart);
@@ -100,13 +107,13 @@ export function ProductStageVideo({ video, autoStart = false, videoRef: external
         <button
           type="button"
           onClick={handlePlayTrigger}
-          aria-label={`${t("productDetail.productVideoLabel")}: ${video.title || t("productDetail.productVideoLabel")}`}
+          aria-label={`${t("productDetail.productVideoLabel")}: ${displayVideoTitle}`}
           className="group/play absolute inset-0 w-full h-full bg-[#14161A] flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
         >
           {video.thumbnailUrl ? (
             <img
               src={video.thumbnailUrl}
-              alt={video.title || t("productDetail.productVideoLabel")}
+              alt={displayVideoTitle}
               className="h-full w-full object-contain opacity-95 group-hover/play:opacity-100 transition-opacity duration-200"
             />
           ) : (
@@ -121,9 +128,9 @@ export function ProductStageVideo({ video, autoStart = false, videoRef: external
             </span>
           </span>
 
-          {video.title && (
+          {hasExplicitTitle && (
             <span className="absolute top-3 left-3 max-w-[75%] truncate rounded-full bg-black/65 backdrop-blur-xs border border-white/15 px-3 py-1 text-[11px] font-medium text-white">
-              {video.title}
+              {displayVideoTitle}
             </span>
           )}
         </button>

@@ -225,11 +225,12 @@ function populateProduct(product, categories) {
   return {
     ...clone(product),
     category: primary
-      ? { _id: primary._id, name: primary.name, slug: primary.slug }
+      ? { _id: primary._id, name: primary.name, nameHi: primary.nameHi || "", slug: primary.slug }
       : null,
     categories: multi.map((c) => ({
       _id: c._id,
       name: c.name,
+      nameHi: c.nameHi || "",
       slug: c.slug,
     })),
   };
@@ -487,7 +488,7 @@ export async function handleDemoRequest(
     if (query.search && String(query.search).trim()) {
       const q = String(query.search).trim().toLowerCase();
       list = list.filter((p) =>
-        `${p.name} ${p.sku} ${p.brand} ${p.shortSpec} ${p.description}`
+        `${p.name} ${p.nameHi || ""} ${p.sku} ${p.brand} ${p.shortSpec} ${p.shortSpecHi || ""} ${p.description} ${p.descriptionHi || ""}`
           .toLowerCase()
           .includes(q)
       );
@@ -568,8 +569,10 @@ export async function handleDemoRequest(
       const created = {
         _id: makeId("cat"),
         name: String(body.name || "").trim(),
+        nameHi: String(body.nameHi || "").trim(),
         slug: makeSlug(body.slug || body.name),
         description: String(body.description || "").trim(),
+        descriptionHi: String(body.descriptionHi || "").trim(),
         image: body.image || { url: "", publicId: "" },
         isActive: body.isActive !== false,
         displayOrder: Number(body.displayOrder) || state.categories.length + 1,
@@ -637,6 +640,7 @@ export async function handleDemoRequest(
       const next = {
         ...state.categories[idx],
         name: body.name !== undefined ? String(body.name).trim() : state.categories[idx].name,
+        nameHi: body.nameHi !== undefined ? String(body.nameHi || "").trim() : state.categories[idx].nameHi || "",
         slug:
           body.slug !== undefined
             ? makeSlug(body.slug)
@@ -645,6 +649,10 @@ export async function handleDemoRequest(
           body.description !== undefined
             ? String(body.description).trim()
             : state.categories[idx].description,
+        descriptionHi:
+          body.descriptionHi !== undefined
+            ? String(body.descriptionHi || "").trim()
+            : state.categories[idx].descriptionHi || "",
         isActive:
           body.isActive !== undefined
             ? Boolean(body.isActive)
@@ -728,7 +736,9 @@ export async function handleDemoRequest(
         name: String(body.name || "").trim(),
         slug: makeSlug(body.slug || body.name),
         tagline: String(body.tagline || "").trim(),
+        taglineHi: String(body.taglineHi || "").trim(),
         description: String(body.description || "").trim(),
+        descriptionHi: String(body.descriptionHi || "").trim(),
         logo: body.logo || { url: "", publicId: "" },
         bannerImage: body.bannerImage || { url: "", publicId: "" },
         isFlagship: Boolean(body.isFlagship),

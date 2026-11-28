@@ -22,11 +22,23 @@ const brandSchema = new mongoose.Schema(
       default: "",
       maxlength: [200, "Tagline cannot exceed 200 characters"],
     },
+    taglineHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [260, "Hindi tagline cannot exceed 260 characters"],
+    },
     description: {
       type: String,
       trim: true,
       default: "",
       maxlength: [500, "Description cannot exceed 500 characters"],
+    },
+    descriptionHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [650, "Hindi description cannot exceed 650 characters"],
     },
     logo: {
       url: { type: String, default: "" },

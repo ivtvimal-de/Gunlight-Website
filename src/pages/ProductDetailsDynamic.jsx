@@ -6,6 +6,7 @@ import { useCatalog } from "../context/CatalogContext";
 import { api } from "../services/api";
 import { adaptProduct } from "../utils/productAdapter";
 import { useTranslation } from "../i18n/LanguageContext";
+import { getLocalizedProductTitle } from "../i18n/catalogI18n";
 
 export default function ProductDetailsDynamic({
   slugProp,
@@ -16,7 +17,7 @@ export default function ProductDetailsDynamic({
   const { slug: paramSlug } = useParams();
   const targetSlug = slugProp || paramSlug;
   const { getProductBySlugOrId, loading: catalogLoading } = useCatalog();
-  const { t } = useTranslation();
+  const { language, t } = useTranslation();
 
   const cachedProduct = getProductBySlugOrId(targetSlug);
   const [liveProduct, setLiveProduct] = useState(null);
@@ -89,12 +90,14 @@ export default function ProductDetailsDynamic({
     );
   }
 
+  const localizedTitle = getLocalizedProductTitle(product, language);
+
   return (
     <ProductDetailTemplate
       product={product}
       images={product.galleryImages}
       specs={product.specs}
-      seoTitle={seoTitle || `${product.title} | ${t("seo.productFallbackSuffix")}`}
+      seoTitle={seoTitle || `${localizedTitle} | ${t("seo.productFallbackSuffix")}`}
       seoDescription={seoDescription}
       seoPath={seoPath || product.link}
     />

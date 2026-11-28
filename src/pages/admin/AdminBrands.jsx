@@ -59,7 +59,9 @@ export default function AdminBrands() {
   const [slug, setSlug] = useState("");
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [tagline, setTagline] = useState("");
+  const [taglineHi, setTaglineHi] = useState("");
   const [description, setDescription] = useState("");
+  const [descriptionHi, setDescriptionHi] = useState("");
   const [logo, setLogo] = useState(emptyMedia());
   const [bannerImage, setBannerImage] = useState(emptyMedia());
   const [displayOrder, setDisplayOrder] = useState("0");
@@ -112,7 +114,9 @@ export default function AdminBrands() {
     setSlug("");
     setSlugManuallyEdited(false);
     setTagline("");
+    setTaglineHi("");
     setDescription("");
+    setDescriptionHi("");
     setLogo(emptyMedia());
     setBannerImage(emptyMedia());
     setDisplayOrder(String(brands.length + 1));
@@ -132,7 +136,9 @@ export default function AdminBrands() {
     setSlug(brand.slug || "");
     setSlugManuallyEdited(true);
     setTagline(brand.tagline || "");
+    setTaglineHi(brand.taglineHi || "");
     setDescription(brand.description || "");
+    setDescriptionHi(brand.descriptionHi || "");
     setLogo(
       brand.logo?.url
         ? { url: brand.logo.url, publicId: brand.logo.publicId || "" }
@@ -258,7 +264,9 @@ export default function AdminBrands() {
       name: name.trim(),
       slug: makeSlug(slug || name),
       tagline: tagline.trim(),
+      taglineHi: taglineHi.trim(),
       description: description.trim(),
+      descriptionHi: descriptionHi.trim(),
       logo,
       bannerImage,
       displayOrder: Number(displayOrder) || 0,
@@ -553,30 +561,60 @@ export default function AdminBrands() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-                  Brand Tagline (shown on feature showcase)
-                </label>
-                <input
-                  type="text"
-                  value={tagline}
-                  onChange={(e) => setTagline(e.target.value)}
-                  placeholder="e.g. Professional LED torches and search lights from Coimbatore."
-                  className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                    Brand Tagline (English)
+                  </label>
+                  <input
+                    type="text"
+                    value={tagline}
+                    onChange={(e) => setTagline(e.target.value)}
+                    placeholder="e.g. Professional LED torches and search lights from Coimbatore."
+                    className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                    Brand Tagline (Hindi — हिन्दी)
+                  </label>
+                  <input
+                    type="text"
+                    value={taglineHi}
+                    onChange={(e) => setTaglineHi(e.target.value)}
+                    placeholder="ब्रांड की हिन्दी टैगलाइन..."
+                    className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-                  Description
-                </label>
-                <textarea
-                  rows={2}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Optional overview shown under partner or brand cards..."
-                  className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                    Description (English)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Optional overview shown under partner or brand cards..."
+                    className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                    Description (Hindi — हिन्दी)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={descriptionHi}
+                    onChange={(e) => setDescriptionHi(e.target.value)}
+                    placeholder="ब्रांड का वैकल्पिक हिन्दी विवरण..."
+                    className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+                  />
+                </div>
               </div>
 
               {/* Brand Logo & Showcase Banner Upload */}

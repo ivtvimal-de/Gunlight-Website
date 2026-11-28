@@ -143,32 +143,44 @@ export default function Shop() {
         return true;
       }
 
-      const titleMatch = (product.title || "").toLowerCase().includes(q);
+      const titleMatch =
+        (product.title || "").toLowerCase().includes(q) ||
+        (product.nameHi || "").toLowerCase().includes(q);
       const localizedDesc = translateProductDescription(product, language);
       const descMatch =
         (product.desc || "").toLowerCase().includes(q) ||
+        (product.descHi || "").toLowerCase().includes(q) ||
         localizedDesc.toLowerCase().includes(q);
       const skuMatch = (product.sku || "").toLowerCase().includes(q);
-      const shortSpecMatch = (product.shortSpec || "").toLowerCase().includes(q);
+      const shortSpecMatch =
+        (product.shortSpec || "").toLowerCase().includes(q) ||
+        (product.shortSpecHi || "").toLowerCase().includes(q);
 
       const specsMatch = (product.specs || []).some((s) => {
-        const text = typeof s === "string" ? s : `${s.label || ""} ${s.value || ""}`;
+        const text =
+          typeof s === "string"
+            ? s
+            : `${s.label || ""} ${s.labelHi || ""} ${s.value || ""} ${s.valueHi || ""}`;
         return text.toLowerCase().includes(q);
       });
 
-      const categoryMatch = (product.categories || []).some((c) => {
-        const cLower = c.toLowerCase();
-        const cLocalLower = String(translateCategoryName(c, language) || "").toLowerCase();
-        const cClean = cLower.replace(/[\s\-_]+/g, "");
-        return (
-          cLower.includes(q) ||
-          q.includes(cLower) ||
-          cLocalLower.includes(q) ||
-          q.includes(cLocalLower) ||
-          cClean.includes(qClean) ||
-          qClean.includes(cClean)
+      const categoryMatch =
+        (product.categories || []).some((c) => {
+          const cLower = c.toLowerCase();
+          const cLocalLower = String(translateCategoryName(c, language) || "").toLowerCase();
+          const cClean = cLower.replace(/[\s\-_]+/g, "");
+          return (
+            cLower.includes(q) ||
+            q.includes(cLower) ||
+            cLocalLower.includes(q) ||
+            q.includes(cLocalLower) ||
+            cClean.includes(qClean) ||
+            qClean.includes(cClean)
+          );
+        }) ||
+        (product.categoriesMeta || []).some((catObj) =>
+          String(catObj.nameHi || "").toLowerCase().includes(q)
         );
-      });
 
       const synonymMatch =
         (q.includes("torch") &&
@@ -292,21 +304,29 @@ export default function Shop() {
             </button>
 
             {/* Category Filter Chips */}
-            {CATEGORY_LIST.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => handleCategoryClick(cat)}
-                className={`shrink-0 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-                  activeCategory === cat && !urlQuery
-                    ? "bg-[var(--accent)] text-white shadow-xs"
-                    : "border border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                {cat === "All"
+            {CATEGORY_LIST.map((cat) => {
+              const catObj =
+                cat === "All"
+                  ? null
+                  : apiCategories.find((c) => c.name === cat) || cat;
+              const chipLabel =
+                cat === "All"
                   ? t("shop.allCategory")
-                  : translateCategoryName(cat, language)}
-              </button>
-            ))}
+                  : translateCategoryName(catObj, language);
+              return (
+                <button
+                  key={cat}
+                  onClick={() => handleCategoryClick(cat)}
+                  className={`shrink-0 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
+                    activeCategory === cat && !urlQuery
+                      ? "bg-[var(--accent)] text-white shadow-xs"
+                      : "border border-[var(--border-subtle)] bg-white text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  {chipLabel}
+                </button>
+              );
+            })}
 
             {/* Active Brand Removable Chip */}
             {urlBrand && (

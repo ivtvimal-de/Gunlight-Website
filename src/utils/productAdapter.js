@@ -34,7 +34,9 @@ export function adaptBrand(doc) {
     slug,
     name: doc.name || slug,
     tagline: doc.tagline || "",
+    taglineHi: doc.taglineHi || "",
     description: doc.description || "",
+    descriptionHi: doc.descriptionHi || "",
     logo: logoUrl,
     logoWebp: resolveMediaUrl(doc.logoWebp || "") || logoUrl,
     bannerImage: bannerUrl,
@@ -109,11 +111,18 @@ export function adaptProduct(doc) {
   const heroImageUrl = resolveMediaUrl(doc.heroImage?.url) || primaryImage;
 
   const categoryList = [];
-  if (doc.category?.name) categoryList.push(doc.category.name);
+  const categoriesMeta = [];
+  if (doc.category?.name) {
+    categoryList.push(doc.category.name);
+    categoriesMeta.push(doc.category);
+  }
   if (Array.isArray(doc.categories)) {
     doc.categories.forEach((c) => {
       const name = typeof c === "string" ? c : c?.name;
       if (name && !categoryList.includes(name)) categoryList.push(name);
+      if (c && typeof c === "object" && !categoriesMeta.some((m) => String(m._id) === String(c._id))) {
+        categoriesMeta.push(c);
+      }
     });
   }
 
@@ -127,9 +136,14 @@ export function adaptProduct(doc) {
     sku: doc.sku || "",
     title: doc.name || doc.title || "",
     name: doc.name || doc.title || "",
+    nameHi: doc.nameHi || doc.titleHi || "",
+    titleHi: doc.nameHi || doc.titleHi || "",
     brand: doc.brand || "GunLite",
     desc: doc.description || doc.desc || "",
+    descHi: doc.descriptionHi || doc.descHi || "",
+    descriptionHi: doc.descriptionHi || doc.descHi || "",
     shortSpec: doc.shortSpec || "",
+    shortSpecHi: doc.shortSpecHi || "",
     specs: Array.isArray(doc.specs) ? doc.specs : [],
     price: formatPrice(effectivePriceNum),
     priceNum: effectivePriceNum,
@@ -141,12 +155,15 @@ export function adaptProduct(doc) {
     status: doc.status || "published",
     isFeatured: Boolean(doc.isFeatured),
     badge: doc.badge || "",
+    badgeHi: doc.badgeHi || "",
     warrantyEnabled: doc.warrantyEnabled !== undefined ? Boolean(doc.warrantyEnabled) : true,
     warrantyPrice: Number(doc.warrantyPrice ?? 500),
     warrantyLabel: doc.warrantyLabel || "1-Year Warranty",
+    warrantyLabelHi: doc.warrantyLabelHi || "",
     link: DEDICATED_SLUG_ROUTES[slug] || `/product/${slug}`,
     category: doc.category || null,
     categories: categoryList.length > 0 ? categoryList : ["LED Torch"],
+    categoriesMeta,
     img: primaryImage,
     imgWebp: primaryImage,
     imgPng: primaryImage,

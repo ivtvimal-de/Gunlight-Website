@@ -272,6 +272,11 @@ export default function AdminProducts() {
                               <p className="font-semibold text-[#14161A] truncate max-w-[220px]">
                                 {product.name}
                               </p>
+                              {product.nameHi && (
+                                <p className="text-[11px] text-[#4A5058] truncate max-w-[220px]">
+                                  {product.nameHi}
+                                </p>
+                              )}
                               <p className="font-mono text-[11px] text-[#6B727C]">
                                 {product.sku} · {product.brand || "GunLite"}
                               </p>

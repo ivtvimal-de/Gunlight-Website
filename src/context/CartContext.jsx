@@ -56,6 +56,9 @@ function cartReducer(state, action) {
   switch (action.type) {
     case "ADD_ITEM": {
       const { title, img } = action.payload;
+      const titleHi = action.payload.titleHi || action.payload.nameHi || "";
+      const warrantyLabel = action.payload.warrantyLabel || "";
+      const warrantyLabelHi = action.payload.warrantyLabelHi || "";
       const baseId = action.payload.baseId || action.payload.id;
       const hasWarranty = Boolean(action.payload.hasWarranty);
       const warrantyFee = hasWarranty ? (action.payload.warrantyFee ?? 500) : 0;
@@ -69,7 +72,16 @@ function cartReducer(state, action) {
       const existing = state.find((i) => i.id === cartId);
       if (existing) {
         return state.map((i) =>
-          i.id === cartId ? { ...i, quantity: i.quantity + quantityToAdd } : i
+          i.id === cartId
+            ? {
+                ...i,
+                title,
+                titleHi: titleHi || i.titleHi || "",
+                warrantyLabel: warrantyLabel || i.warrantyLabel || "",
+                warrantyLabelHi: warrantyLabelHi || i.warrantyLabelHi || "",
+                quantity: i.quantity + quantityToAdd,
+              }
+            : i
         );
       }
       return [
@@ -78,6 +90,9 @@ function cartReducer(state, action) {
           id: cartId,
           baseId,
           title,
+          titleHi,
+          warrantyLabel,
+          warrantyLabelHi,
           price,
           priceNum,
           basePriceNum,

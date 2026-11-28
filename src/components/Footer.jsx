@@ -9,10 +9,11 @@ import {
 import { WHATSAPP_URL, COMPANY } from "../config";
 import { useCatalog } from "../context/CatalogContext";
 import { useTranslation } from "../i18n/LanguageContext";
+import { getLocalizedProductTitle } from "../i18n/catalogI18n";
 
 export default function Footer() {
   const { products } = useCatalog();
-  const { t } = useTranslation();
+  const { language, t } = useTranslation();
   const shopLinks = products.slice(0, 5);
 
   return (
@@ -51,7 +52,7 @@ export default function Footer() {
               {shopLinks.map((item) => (
                 <li key={item.id}>
                   <Link to={item.link} className="hover:text-[var(--accent)] transition-colors">
-                    {(item.title || "").replace(/\s*GunLite\s*/gi, "").trim() || item.title}
+                    {getLocalizedProductTitle(item, language, { stripGunlite: true })}
                   </Link>
                 </li>
               ))}

@@ -10,11 +10,23 @@ const videoSchema = new mongoose.Schema(
       trim: true,
       maxlength: [140, "Video title cannot exceed 140 characters"],
     },
+    titleHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [160, "Hindi video title cannot exceed 160 characters"],
+    },
     description: {
       type: String,
       trim: true,
       default: "",
       maxlength: [2000, "Video description cannot exceed 2000 characters"],
+    },
+    descriptionHi: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [2400, "Hindi video description cannot exceed 2400 characters"],
     },
     product: {
       type: mongoose.Schema.Types.ObjectId,

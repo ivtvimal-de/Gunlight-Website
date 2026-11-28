@@ -10,7 +10,12 @@ import {
 import { WHATSAPP_URL } from "../config";
 import { useCatalog } from "../context/CatalogContext";
 import { useTranslation } from "../i18n/LanguageContext";
-import { formatLocalizedPrice, translateShortSpec } from "../i18n/catalogI18n";
+import {
+  formatLocalizedPrice,
+  getLocalizedProductTitle,
+  translateShortSpec,
+  translateSpecItem,
+} from "../i18n/catalogI18n";
 
 export default function Hero() {
   const { products } = useCatalog();
@@ -46,18 +51,20 @@ export default function Hero() {
   })();
 
   const HERO_SLIDES = heroProducts.map((p) => {
+    const translatedFirstSpec = p.specs?.[0] ? translateSpecItem(p.specs[0], language) : null;
     const rawSpec =
       p.shortSpec ||
-      (p.specs?.[0]?.value ? `${p.specs[0].value}` : "High-Power LED");
+      (translatedFirstSpec?.value ? `${translatedFirstSpec.value}` : "High-Power LED");
+    const slideName = getLocalizedProductTitle(p, language, { stripGunlite: true });
     return {
       id: p.id,
-      name: (p.title || "").replace(/\s*GunLite\s*/gi, "").trim() || p.title,
+      name: slideName,
       spec: translateShortSpec(p, rawSpec, language),
       price: formatLocalizedPrice(p.price, t),
       link: p.link,
       imgWebp: p.heroImg || p.imgWebp || p.img,
       imgPng: p.heroImg || p.imgPng || p.img,
-      alt: `${p.title} - ${t("hero.slideAltSuffix")}`,
+      alt: `${slideName} - ${t("hero.slideAltSuffix")}`,
     };
   });
 

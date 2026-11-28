@@ -27,7 +27,9 @@ export default function AdminCategories() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
   const [name, setName] = useState("");
+  const [nameHi, setNameHi] = useState("");
   const [description, setDescription] = useState("");
+  const [descriptionHi, setDescriptionHi] = useState("");
   const [displayOrder, setDisplayOrder] = useState("0");
   const [isActive, setIsActive] = useState(true);
   const [assignedProductIds, setAssignedProductIds] = useState([]);
@@ -64,7 +66,9 @@ export default function AdminCategories() {
   const openCreateModal = () => {
     setEditingCat(null);
     setName("");
+    setNameHi("");
     setDescription("");
+    setDescriptionHi("");
     setDisplayOrder(String(categories.length + 1));
     setIsActive(true);
     setAssignedProductIds([]);
@@ -74,7 +78,9 @@ export default function AdminCategories() {
   const openEditModal = (cat) => {
     setEditingCat(cat);
     setName(cat.name || "");
+    setNameHi(cat.nameHi || "");
     setDescription(cat.description || "");
+    setDescriptionHi(cat.descriptionHi || "");
     setDisplayOrder(String(cat.displayOrder ?? 0));
     setIsActive(cat.isActive !== false);
     setAssignedProductIds((cat.products || []).map((p) => String(p._id)));
@@ -96,7 +102,9 @@ export default function AdminCategories() {
 
     const payload = {
       name: name.trim(),
+      nameHi: nameHi.trim(),
       description: description.trim(),
+      descriptionHi: descriptionHi.trim(),
       displayOrder: Number(displayOrder) || 0,
       isActive,
       productIds: assignedProductIds,
@@ -209,6 +217,11 @@ export default function AdminCategories() {
                         {cat.isActive !== false ? "Active" : "Hidden"}
                       </span>
                     </div>
+                    {cat.nameHi && (
+                      <p className="text-xs font-medium text-[#4A5058] mt-0.5">
+                        {cat.nameHi}
+                      </p>
+                    )}
                     <p className="font-mono text-[11px] text-[#8B97A8] mt-0.5">
                       /{cat.slug}
                     </p>
@@ -308,28 +321,56 @@ export default function AdminCategories() {
             </div>
 
             <form onSubmit={handleSaveCategory} className="flex-1 overflow-y-auto p-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-                  Category Name *
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Tactical Flashlights"
-                  className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                    Category Name (English) *
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Tactical Flashlights"
+                    className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                    Category Name (Hindi — हिन्दी)
+                  </label>
+                  <input
+                    type="text"
+                    value={nameHi}
+                    onChange={(e) => setNameHi(e.target.value)}
+                    placeholder="उदा. टैक्टिकल फ्लैशलाइट"
+                    className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3.5 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
-                  Description
+                  Description (English)
                 </label>
                 <textarea
                   rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Short description shown on category tiles..."
+                  placeholder="Short English description shown on category tiles..."
+                  className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#14161A] mb-1.5">
+                  Description (Hindi — हिन्दी)
+                </label>
+                <textarea
+                  rows={2}
+                  value={descriptionHi}
+                  onChange={(e) => setDescriptionHi(e.target.value)}
+                  placeholder="श्रेणी कार्ड पर दिखने वाला हिन्दी विवरण..."
                   className="w-full rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] p-3 text-sm focus:border-[var(--accent)] focus:bg-white focus:outline-none"
                 />
               </div>

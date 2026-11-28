@@ -26,6 +26,8 @@ import { useProductVideos, ProductStageVideo } from "./ProductVideoGallery";
 import { useTranslation } from "../i18n/LanguageContext";
 import {
   formatLocalizedPrice,
+  getLocalizedProductTitle,
+  getLocalizedVideoTitle,
   translateProductDescription,
   translateSpecItem,
   translateWarrantyLabel,
@@ -105,7 +107,8 @@ export default function ProductDetailTemplate({
   const warrantyEnabled = product.warrantyEnabled !== false;
   const warrantyFeeValue = Number(product.warrantyPrice ?? WARRANTY_OPTION.fee);
   const warrantyLabelText = product.warrantyLabel || WARRANTY_OPTION.label;
-  const localizedWarrantyLabel = translateWarrantyLabel(warrantyLabelText, language);
+  const localizedWarrantyLabel = translateWarrantyLabel(product, language);
+  const localizedProductTitle = getLocalizedProductTitle(product, language);
 
   const basePriceNum = product.priceNum ?? parsePriceNum(product.price);
   const hasValidPrice = basePriceNum > 0;
@@ -189,6 +192,8 @@ export default function ProductDetailTemplate({
       ...product,
       baseId: product.id,
       basePriceNum,
+      warrantyLabel: warrantyLabelText,
+      warrantyLabelHi: product.warrantyLabelHi || "",
       hasWarranty: warrantyEnabled && withWarranty,
       warrantyFee: activeWarrantyFee,
       quantity: qty,
@@ -220,7 +225,7 @@ export default function ProductDetailTemplate({
   return (
     <>
       <SEO
-        title={seoTitle || `${product.title} | ${t("seo.productFallbackSuffix")}`}
+        title={seoTitle || `${localizedProductTitle} | ${t("seo.productFallbackSuffix")}`}
         description={seoDescription || localizedDesc}
         path={seoPath || `/${product.id}`}
         type="product"
@@ -241,7 +246,9 @@ export default function ProductDetailTemplate({
                 {t("common.shop")}
               </Link>
               <span>/</span>
-              <span className="text-[var(--text-primary)] truncate font-semibold">{product.title}</span>
+              <span className="text-[var(--text-primary)] truncate font-semibold">
+                {localizedProductTitle}
+              </span>
             </nav>
           </div>
         </div>
@@ -275,7 +282,7 @@ export default function ProductDetailTemplate({
                     <source srcSet={activeItem?.src} type="image/webp" />
                     <img
                       src={activeItem?.src}
-                      alt={t("productDetail.viewAlt", { title: product.title, index: safeIdx + 1 })}
+                      alt={t("productDetail.viewAlt", { title: localizedProductTitle, index: safeIdx + 1 })}
                       width={1536}
                       height={1024}
                       fetchPriority="high"
@@ -331,7 +338,11 @@ export default function ProductDetailTemplate({
                             aria-label={
                               item.type === "video"
                                 ? t("productDetail.goToVideoAria", {
-                                    title: item.video.title || idx + 1,
+                                    title: getLocalizedVideoTitle(
+                                      item.video,
+                                      language,
+                                      String(idx + 1)
+                                    ),
                                   })
                                 : t("productDetail.goToImageAria", { index: idx + 1 })
                             }
@@ -352,7 +363,11 @@ export default function ProductDetailTemplate({
                     type="button"
                     onClick={handleFullscreenVideo}
                     aria-label={t("productDetail.fullscreenVideoAria", {
-                      title: activeItem.video.title || t("productDetail.productVideoLabel"),
+                      title: getLocalizedVideoTitle(
+                        activeItem.video,
+                        language,
+                        t("productDetail.productVideoLabel")
+                      ),
                     })}
                     className="inline-flex items-center gap-1.5 rounded-full border border-[#E6E6E1] bg-white px-3 py-1 text-[11px] font-medium text-[#4A5058] shadow-2xs hover:border-[#CFCFC8] hover:text-[#14161A] transition-colors"
                   >
@@ -401,13 +416,21 @@ export default function ProductDetailTemplate({
                         aria-label={
                           isVideo
                             ? t("productDetail.playVideoAria", {
-                                title: item.video.title || idx + 1,
+                                title: getLocalizedVideoTitle(
+                                  item.video,
+                                  language,
+                                  String(idx + 1)
+                                ),
                               })
                             : t("productDetail.viewAngleAria", { index: idx + 1 })
                         }
                         title={
                           isVideo
-                            ? item.video.title || t("productDetail.productVideoLabel")
+                            ? getLocalizedVideoTitle(
+                                item.video,
+                                language,
+                                t("productDetail.productVideoLabel")
+                              )
                             : undefined
                         }
                       >
@@ -527,7 +550,7 @@ export default function ProductDetailTemplate({
                       : t("productDetail.stock.inStock")}
                   </div>
                   <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
-                    {product.title}
+                    {localizedProductTitle}
                   </h1>
                   {product.sku && (
                     <p className="mt-1 font-mono text-[11px] text-[var(--text-muted)]">
@@ -768,7 +791,7 @@ export default function ProductDetailTemplate({
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[var(--border-subtle)] px-4 pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 md:hidden shadow-[0_-4px_20px_rgba(20,22,26,0.08)]">
           <div className="min-w-0">
             <span className="block text-[11px] text-[var(--text-muted)] truncate">
-              {product.title}
+              {localizedProductTitle}
               {qty > 1 ? ` × ${qty}` : ""}
               {withWarranty ? t("productDetail.stickyWarrantySuffix") : ""}
             </span>

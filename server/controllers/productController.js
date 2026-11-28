@@ -110,8 +110,11 @@ export async function getPublicProducts(req, res, next) {
       const regex = new RegExp(term, "i");
       const searchCond = [
         { name: regex },
+        { nameHi: regex },
         { description: regex },
+        { descriptionHi: regex },
         { shortSpec: regex },
+        { shortSpecHi: regex },
         { sku: regex },
         { brand: regex },
       ];
@@ -129,8 +132,8 @@ export async function getPublicProducts(req, res, next) {
 
     const [products, total] = await Promise.all([
       Product.find(filter)
-        .populate("category", "name slug")
-        .populate("categories", "name slug")
+        .populate("category", "name nameHi slug")
+        .populate("categories", "name nameHi slug")
         .sort(buildSortOption(sort))
         .skip(skip)
         .limit(limitNum)
@@ -164,8 +167,8 @@ export async function getPublicProductById(req, res, next) {
       : { slug: String(id).toLowerCase().trim(), status: "published" };
 
     const product = await Product.findOne(query)
-      .populate("category", "name slug")
-      .populate("categories", "name slug")
+      .populate("category", "name nameHi slug")
+      .populate("categories", "name nameHi slug")
       .lean();
 
     if (!product) {
@@ -239,10 +242,13 @@ export async function getAdminProducts(req, res, next) {
       const regex = new RegExp(term, "i");
       const searchCond = [
         { name: regex },
+        { nameHi: regex },
         { sku: regex },
         { brand: regex },
         { shortSpec: regex },
+        { shortSpecHi: regex },
         { description: regex },
+        { descriptionHi: regex },
       ];
       if (filter.$or) {
         filter.$and = [{ $or: filter.$or }, { $or: searchCond }];
@@ -258,8 +264,8 @@ export async function getAdminProducts(req, res, next) {
 
     const [products, total] = await Promise.all([
       Product.find(filter)
-        .populate("category", "name slug")
-        .populate("categories", "name slug")
+        .populate("category", "name nameHi slug")
+        .populate("categories", "name nameHi slug")
         .sort(buildSortOption(sort))
         .skip(skip)
         .limit(limitNum)
@@ -288,8 +294,8 @@ export async function getAdminProducts(req, res, next) {
 export async function getAdminProductById(req, res, next) {
   try {
     const product = await Product.findById(req.params.id)
-      .populate("category", "name slug")
-      .populate("categories", "name slug")
+      .populate("category", "name nameHi slug")
+      .populate("categories", "name nameHi slug")
       .lean();
 
     if (!product) {
@@ -490,7 +496,9 @@ async function buildProductPayload(
         .filter((s) => s && String(s.label || "").trim() && String(s.value || "").trim())
         .map((s) => ({
           label: String(s.label).trim(),
+          labelHi: String(s.labelHi || "").trim(),
           value: String(s.value).trim(),
+          valueHi: String(s.valueHi || "").trim(),
         }))
     : [];
 
@@ -514,14 +522,26 @@ async function buildProductPayload(
 
   return {
     name,
+    nameHi:
+      body.nameHi !== undefined
+        ? String(body.nameHi || "").trim()
+        : existingProduct?.nameHi || "",
     slug,
     sku,
     brand: body.brand !== undefined ? String(body.brand).trim() || "GunLite" : existingProduct?.brand || "GunLite",
     description,
+    descriptionHi:
+      body.descriptionHi !== undefined
+        ? String(body.descriptionHi || "").trim()
+        : existingProduct?.descriptionHi || "",
     shortSpec:
       body.shortSpec !== undefined
         ? String(body.shortSpec).trim()
         : existingProduct?.shortSpec || "",
+    shortSpecHi:
+      body.shortSpecHi !== undefined
+        ? String(body.shortSpecHi || "").trim()
+        : existingProduct?.shortSpecHi || "",
     specs: cleanSpecs,
     category: primaryCategory,
     categories: categoryIds,
@@ -534,12 +554,20 @@ async function buildProductPayload(
       body.badge !== undefined
         ? String(body.badge).trim()
         : existingProduct?.badge || "",
+    badgeHi:
+      body.badgeHi !== undefined
+        ? String(body.badgeHi || "").trim()
+        : existingProduct?.badgeHi || "",
     warrantyEnabled,
     warrantyPrice,
     warrantyLabel:
       body.warrantyLabel !== undefined
         ? String(body.warrantyLabel).trim() || "1-Year Warranty"
         : existingProduct?.warrantyLabel || "1-Year Warranty",
+    warrantyLabelHi:
+      body.warrantyLabelHi !== undefined
+        ? String(body.warrantyLabelHi || "").trim()
+        : existingProduct?.warrantyLabelHi || "",
     images: normalizedImages,
     heroImage,
   };
@@ -584,8 +612,8 @@ export async function createProduct(req, res, next) {
     newlyUploadedPublicIds.length = 0;
 
     const populated = await Product.findById(created._id)
-      .populate("category", "name slug")
-      .populate("categories", "name slug")
+      .populate("category", "name nameHi slug")
+      .populate("categories", "name nameHi slug")
       .lean();
 
     await logAdminActivity({
@@ -655,8 +683,8 @@ export async function updateProduct(req, res, next) {
     }
 
     const populated = await Product.findById(existing._id)
-      .populate("category", "name slug")
-      .populate("categories", "name slug")
+      .populate("category", "name nameHi slug")
+      .populate("categories", "name nameHi slug")
       .lean();
 
     await logAdminActivity({

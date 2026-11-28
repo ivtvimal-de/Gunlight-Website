@@ -5,9 +5,11 @@ import { useCart, parsePriceNum } from "../context/CartContext";
 import { WHATSAPP_NUMBER } from "../config";
 import { useTranslation } from "../i18n/LanguageContext";
 import {
+  getLocalizedProductTitle,
   translateBadge,
   translateCategoryName,
   translateShortSpec,
+  translateSpecItem,
 } from "../i18n/catalogI18n";
 
 export default function ProductCard({ product }) {
@@ -39,20 +41,20 @@ export default function ProductCard({ product }) {
     setTimeout(() => setIsAdded(false), 1800);
   };
 
-  // Keep product model / brand names untouched across languages
-  const displayName = (product.title || "")
-    .replace(/\s*GunLite\s*/gi, "")
-    .trim();
+  // Localized display name (preserves GunLite & model names when nameHi is empty)
+  const displayName = getLocalizedProductTitle(product, language, {
+    stripGunlite: true,
+  });
 
-  const rawCategory =
-    (product.categories && product.categories[0]) ||
-    product.category?.name ||
+  const primaryCategoryObj =
     product.category ||
+    product.categoriesMeta?.[0] ||
+    (product.categories && product.categories[0]) ||
     "LED Torch";
-  const category = translateCategoryName(rawCategory, language);
+  const category = translateCategoryName(primaryCategoryObj, language);
 
   const getShortSpec = () => {
-    if (product.shortSpec) {
+    if (product.shortSpec || (language === "hi" && product.shortSpecHi)) {
       return translateShortSpec(product, product.shortSpec, language);
     }
     if (product.id === "eagle") return translateShortSpec(product, "50W LED · Type-C", language);
@@ -61,10 +63,11 @@ export default function ProductCard({ product }) {
     if (product.id === "sniper") return translateShortSpec(product, "1000 Lm · Zoom", language);
 
     if (product.specs && product.specs.length > 0) {
+      const translatedFirst = translateSpecItem(product.specs[0], language);
       const firstRaw =
-        typeof product.specs[0] === "string"
-          ? product.specs[0]
-          : product.specs[0].value || product.specs[0].label || "";
+        typeof translatedFirst === "string"
+          ? translatedFirst
+          : translatedFirst.value || translatedFirst.label || "";
       const first = firstRaw
         .replace(/\s*Chip\s*/i, "")
         .replace(/\s*Rechargeable\s*/i, "")
@@ -76,7 +79,7 @@ export default function ProductCard({ product }) {
   };
 
   const specLine = getShortSpec();
-  const localizedBadge = translateBadge(product.badge, language);
+  const localizedBadge = translateBadge(product, language);
 
   // WhatsApp enquiry prefilled URL
   const whatsappEnquiryUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(

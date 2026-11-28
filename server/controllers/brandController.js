@@ -106,7 +106,7 @@ export async function getAdminBrands(req, res, next) {
     const [brands, products] = await Promise.all([
       Brand.find().sort({ displayOrder: 1, name: 1 }).lean(),
       Product.find()
-        .select("name slug sku brand price discountPrice stockQuantity status images")
+        .select("name nameHi slug sku brand price discountPrice stockQuantity status images")
         .sort({ createdAt: -1 })
         .lean(),
     ]);
@@ -142,7 +142,9 @@ export async function createBrand(req, res, next) {
       name,
       slug,
       tagline = "",
+      taglineHi = "",
       description = "",
+      descriptionHi = "",
       logo,
       bannerImage,
       isFlagship = false,
@@ -172,7 +174,9 @@ export async function createBrand(req, res, next) {
       name: cleanName,
       slug: cleanSlug,
       tagline: String(tagline || "").trim(),
+      taglineHi: String(taglineHi || "").trim(),
       description: String(description || "").trim(),
+      descriptionHi: String(descriptionHi || "").trim(),
       logo: sanitizeMediaObject(logo),
       bannerImage: sanitizeMediaObject(bannerImage),
       isFlagship: Boolean(isFlagship),
@@ -220,7 +224,9 @@ export async function updateBrand(req, res, next) {
       name,
       slug,
       tagline,
+      taglineHi,
       description,
+      descriptionHi,
       logo,
       bannerImage,
       isFlagship,
@@ -249,7 +255,9 @@ export async function updateBrand(req, res, next) {
     }
 
     if (tagline !== undefined) brand.tagline = String(tagline).trim();
+    if (taglineHi !== undefined) brand.taglineHi = String(taglineHi || "").trim();
     if (description !== undefined) brand.description = String(description).trim();
+    if (descriptionHi !== undefined) brand.descriptionHi = String(descriptionHi || "").trim();
     if (isFlagship !== undefined) brand.isFlagship = Boolean(isFlagship);
     if (isComingSoon !== undefined) brand.isComingSoon = Boolean(isComingSoon);
     if (isActive !== undefined) brand.isActive = Boolean(isActive);
