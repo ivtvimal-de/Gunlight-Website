@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState, useRef, useEffect } from "react";
+=======
+import React, { useState, useRef, useEffect, useMemo } from "react";
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 import { Link } from "react-router-dom";
 import {
   ShieldCheck,
@@ -13,12 +17,22 @@ import {
   ZoomOut,
   ChevronLeft,
   ChevronRight,
+<<<<<<< HEAD
+=======
+  Play,
+  Maximize2,
+  Video as VideoIcon,
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 } from "lucide-react";
 import { useCart, parsePriceNum, formatPrice } from "../context/CartContext";
 import { useCatalog } from "../context/CatalogContext";
 import { WHATSAPP_NUMBER, CLAIMS, WARRANTY_OPTION } from "../config";
 import SEO from "./SEO";
 import ProductCard from "./ProductCard";
+<<<<<<< HEAD
+=======
+import { useProductVideos, ProductStageVideo } from "./ProductVideoGallery";
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
 export default function ProductDetailTemplate({
   product,
@@ -29,6 +43,7 @@ export default function ProductDetailTemplate({
   seoPath,
 }) {
   const { products: catalogProducts } = useCatalog();
+<<<<<<< HEAD
   const galleryImages =
     images.length > 0
       ? images
@@ -36,21 +51,71 @@ export default function ProductDetailTemplate({
       ? product.galleryImages
       : [product.img];
   const [activeIdx, setActiveIdx] = useState(0);
+=======
+  const productVideos = useProductVideos(product);
+  const galleryImages = useMemo(
+    () =>
+      images.length > 0
+        ? images
+        : product.galleryImages?.length > 0
+        ? product.galleryImages
+        : [product.img],
+    [images, product.galleryImages, product.img]
+  );
+  const mediaItems = useMemo(
+    () => [
+      ...galleryImages.map((src, idx) => ({
+        type: "image",
+        src,
+        key: `img-${idx}`,
+      })),
+      ...productVideos.map((video) => ({
+        type: "video",
+        video,
+        key: `video-${video._id}`,
+      })),
+    ],
+    [galleryImages, productVideos]
+  );
+
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [autoPlayVideoKey, setAutoPlayVideoKey] = useState(null);
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   const [qty, setQty] = useState(1);
   const [withWarranty, setWithWarranty] = useState(false);
   const [added, setAdded] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
+<<<<<<< HEAD
 
   useEffect(() => {
     setActiveIdx(0);
+=======
+  const stageVideoRef = useRef(null);
+
+  useEffect(() => {
+    setActiveIdx(0);
+    setAutoPlayVideoKey(null);
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     setQty(1);
     setWithWarranty(false);
     setIsZoomed(false);
   }, [product.id]);
 
+<<<<<<< HEAD
   const activeImg = galleryImages[activeIdx] || galleryImages[0];
+=======
+  useEffect(() => {
+    setActiveIdx((prev) =>
+      mediaItems.length > 0 ? Math.min(prev, mediaItems.length - 1) : 0
+    );
+  }, [mediaItems.length]);
+
+  const safeIdx = activeIdx < mediaItems.length ? activeIdx : 0;
+  const activeItem = mediaItems[safeIdx] || mediaItems[0];
+  const isVideoActive = activeItem?.type === "video";
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
   const { addItem, openCart, items } = useCart();
   const inCartCount = items
@@ -73,6 +138,7 @@ export default function ProductDetailTemplate({
   const displayUnitPrice = unitPriceNum > 0 ? formatPrice(unitPriceNum) : product.price;
   const displayTotalPrice = totalPriceNum > 0 ? formatPrice(totalPriceNum) : product.price;
 
+<<<<<<< HEAD
   const handlePrevImg = () => {
     setIsZoomed(false);
     setActiveIdx((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
@@ -81,6 +147,37 @@ export default function ProductDetailTemplate({
   const handleNextImg = () => {
     setIsZoomed(false);
     setActiveIdx((prev) => (prev + 1) % galleryImages.length);
+=======
+  const selectMediaIndex = (idx, { autoPlayVideo = false } = {}) => {
+    setIsZoomed(false);
+    setActiveIdx(idx);
+    const nextItem = mediaItems[idx];
+    setAutoPlayVideoKey(
+      autoPlayVideo && nextItem?.type === "video" ? nextItem.key : null
+    );
+  };
+
+  const handlePrevImg = () => {
+    if (mediaItems.length <= 1) return;
+    selectMediaIndex((safeIdx - 1 + mediaItems.length) % mediaItems.length);
+  };
+
+  const handleNextImg = () => {
+    if (mediaItems.length <= 1) return;
+    selectMediaIndex((safeIdx + 1) % mediaItems.length);
+  };
+
+  const handleFullscreenVideo = () => {
+    const el = stageVideoRef.current;
+    if (!el) return;
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    } else if (el.webkitEnterFullscreen) {
+      el.webkitEnterFullscreen();
+    }
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   };
 
   const handleTouchStart = (e) => {
@@ -93,7 +190,18 @@ export default function ProductDetailTemplate({
   };
 
   const handleTouchEnd = () => {
+<<<<<<< HEAD
     if (touchStartX.current === null || touchEndX.current === null || galleryImages.length <= 1) return;
+=======
+    if (
+      isVideoActive ||
+      touchStartX.current === null ||
+      touchEndX.current === null ||
+      mediaItems.length <= 1
+    ) {
+      return;
+    }
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     const distance = touchStartX.current - touchEndX.current;
     if (distance > 40) {
       handleNextImg();
@@ -165,6 +273,7 @@ export default function ProductDetailTemplate({
             {/* ── LEFT: Edge-to-Edge Studio Gallery ── */}
             <div className="lg:col-span-7 space-y-3">
               
+<<<<<<< HEAD
               {/* Main Image Stage: Pure 3:2 dark studio card with zero nested borders */}
               <div
                 className={`relative w-full aspect-[3/2] rounded-2xl overflow-hidden bg-[#14161A] ring-1 ring-black/10 shadow-[0_12px_32px_rgba(20,22,26,0.12)] select-none group ${
@@ -191,6 +300,43 @@ export default function ProductDetailTemplate({
 
                 {/* Desktop Prev / Next Arrow Controls */}
                 {galleryImages.length > 1 && (
+=======
+              {/* Main Media Stage: Pure 3:2 dark studio card for active photo or video */}
+              <div
+                className={`relative w-full aspect-[3/2] rounded-2xl overflow-hidden bg-[#14161A] ring-1 ring-black/10 shadow-[0_12px_32px_rgba(20,22,26,0.12)] select-none group ${
+                  isVideoActive ? "" : isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"
+                }`}
+                onClick={isVideoActive ? undefined : () => setIsZoomed((prev) => !prev)}
+                onTouchStart={isVideoActive ? undefined : handleTouchStart}
+                onTouchMove={isVideoActive ? undefined : handleTouchMove}
+                onTouchEnd={isVideoActive ? undefined : handleTouchEnd}
+              >
+                {isVideoActive ? (
+                  <ProductStageVideo
+                    key={activeItem.key}
+                    video={activeItem.video}
+                    autoStart={autoPlayVideoKey === activeItem.key}
+                    videoRef={stageVideoRef}
+                  />
+                ) : (
+                  <picture className="block w-full h-full">
+                    <source srcSet={activeItem?.src} type="image/webp" />
+                    <img
+                      src={activeItem?.src}
+                      alt={`${product.title} - View ${safeIdx + 1}`}
+                      width={1536}
+                      height={1024}
+                      fetchPriority="high"
+                      className={`w-full h-full object-contain transition-transform duration-300 ease-out ${
+                        isZoomed ? "scale-150" : "scale-100"
+                      }`}
+                    />
+                  </picture>
+                )}
+
+                {/* Desktop Prev / Next Arrow Controls */}
+                {mediaItems.length > 1 && (
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                   <>
                     <button
                       type="button"
@@ -198,8 +344,13 @@ export default function ProductDetailTemplate({
                         e.stopPropagation();
                         handlePrevImg();
                       }}
+<<<<<<< HEAD
                       aria-label="Previous image"
                       className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white opacity-0 group-hover:opacity-100 hover:bg-black/75 transition-all"
+=======
+                      aria-label="Previous media"
+                      className="hidden sm:flex z-10 absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white opacity-0 group-hover:opacity-100 hover:bg-black/75 transition-all"
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
@@ -209,8 +360,13 @@ export default function ProductDetailTemplate({
                         e.stopPropagation();
                         handleNextImg();
                       }}
+<<<<<<< HEAD
                       aria-label="Next image"
                       className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white opacity-0 group-hover:opacity-100 hover:bg-black/75 transition-all"
+=======
+                      aria-label="Next media"
+                      className="hidden sm:flex z-10 absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white opacity-0 group-hover:opacity-100 hover:bg-black/75 transition-all"
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -218,6 +374,7 @@ export default function ProductDetailTemplate({
                 )}
               </div>
 
+<<<<<<< HEAD
               {/* Clean Utility Row below Photo (Counter + Dots + Zoom Toggle) */}
               <div className="flex items-center justify-between gap-3 px-0.5">
                 <div className="flex items-center gap-2.5">
@@ -238,6 +395,29 @@ export default function ProductDetailTemplate({
                             aria-label={`Go to image ${idx + 1}`}
                             className={`h-1.5 rounded-full transition-all ${
                               activeIdx === idx
+=======
+              {/* Clean Utility Row below Media (Counter + Dots + Zoom / Fullscreen Toggle) */}
+              <div className="flex items-center justify-between gap-3 px-0.5">
+                <div className="flex items-center gap-2.5">
+                  {mediaItems.length > 1 && (
+                    <>
+                      <span className="font-mono text-[11px] font-semibold text-[#4A5058] tabular-nums">
+                        {String(safeIdx + 1).padStart(2, "0")} / {String(mediaItems.length).padStart(2, "0")}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {mediaItems.map((item, idx) => (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => selectMediaIndex(idx)}
+                            aria-label={
+                              item.type === "video"
+                                ? `Go to video: ${item.video.title || idx + 1}`
+                                : `Go to image ${idx + 1}`
+                            }
+                            className={`h-1.5 rounded-full transition-all ${
+                              safeIdx === idx
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                                 ? "w-5 bg-[var(--accent)]"
                                 : "w-1.5 bg-[#CFCFC8] hover:bg-[#8B97A8]"
                             }`}
@@ -248,6 +428,7 @@ export default function ProductDetailTemplate({
                   )}
                 </div>
 
+<<<<<<< HEAD
                 <button
                   type="button"
                   onClick={() => setIsZoomed((prev) => !prev)}
@@ -281,10 +462,58 @@ export default function ProductDetailTemplate({
                           setIsZoomed(false);
                         }}
                         className={`w-[74px] sm:w-[92px] aspect-[3/2] shrink-0 rounded-xl overflow-hidden bg-[#14161A] transition-all duration-200 ${
+=======
+                {isVideoActive ? (
+                  <button
+                    type="button"
+                    onClick={handleFullscreenVideo}
+                    aria-label={`Fullscreen video: ${activeItem.video.title || "Product video"}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#E6E6E1] bg-white px-3 py-1 text-[11px] font-medium text-[#4A5058] shadow-2xs hover:border-[#CFCFC8] hover:text-[#14161A] transition-colors"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5 text-[var(--accent)]" />
+                    <span>Fullscreen</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsZoomed((prev) => !prev)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#E6E6E1] bg-white px-3 py-1 text-[11px] font-medium text-[#4A5058] shadow-2xs hover:border-[#CFCFC8] hover:text-[#14161A] transition-colors"
+                  >
+                    {isZoomed ? (
+                      <>
+                        <ZoomOut className="w-3.5 h-3.5 text-[var(--accent)]" />
+                        <span>Reset Zoom</span>
+                      </>
+                    ) : (
+                      <>
+                        <ZoomIn className="w-3.5 h-3.5 text-[var(--accent)]" />
+                        <span>Tap to Zoom</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Sleek 3:2 Thumbnail Strip (photos first, published videos at the end) */}
+              {mediaItems.length > 1 && (
+                <div className="flex items-center gap-2.5 overflow-x-auto py-1 px-0.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {mediaItems.map((item, idx) => {
+                    const isActive = safeIdx === idx;
+                    const isVideo = item.type === "video";
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() =>
+                          selectMediaIndex(idx, { autoPlayVideo: isVideo })
+                        }
+                        className={`relative w-[74px] sm:w-[92px] aspect-[3/2] shrink-0 rounded-xl overflow-hidden bg-[#14161A] transition-all duration-200 ${
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                           isActive
                             ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--bg-canvas)] opacity-100 shadow-sm"
                             : "ring-1 ring-black/10 opacity-60 hover:opacity-95"
                         }`}
+<<<<<<< HEAD
                         aria-label={`View angle ${idx + 1}`}
                       >
                         <img
@@ -294,6 +523,46 @@ export default function ProductDetailTemplate({
                           height={128}
                           className="h-full w-full object-cover"
                         />
+=======
+                        aria-label={
+                          isVideo
+                            ? `Play product video: ${item.video.title || idx + 1}`
+                            : `View angle ${idx + 1}`
+                        }
+                        title={isVideo ? item.video.title || "Product video" : undefined}
+                      >
+                        {isVideo ? (
+                          <>
+                            {item.video.thumbnailUrl ? (
+                              <img
+                                src={item.video.thumbnailUrl}
+                                alt=""
+                                width={192}
+                                height={128}
+                                loading="lazy"
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-white/50">
+                                <VideoIcon className="w-5 h-5" />
+                              </div>
+                            )}
+                            <span className="absolute inset-0 bg-black/25 flex items-center justify-center">
+                              <span className="h-7 w-7 rounded-full bg-black/70 border border-white/30 text-white flex items-center justify-center shadow-sm">
+                                <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
+                              </span>
+                            </span>
+                          </>
+                        ) : (
+                          <img
+                            src={item.src}
+                            alt=""
+                            width={192}
+                            height={128}
+                            className="h-full w-full object-cover"
+                          />
+                        )}
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                       </button>
                     );
                   })}

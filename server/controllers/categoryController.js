@@ -5,6 +5,7 @@ import { slugify, logAdminActivity } from "../utils/helpers.js";
 
 /**
  * GET /api/categories (Public)
+<<<<<<< HEAD
  * Returns active categories with live active product counts and fallback thumbnail images.
  */
 export async function getPublicCategories(req, res, next) {
@@ -14,13 +15,28 @@ export async function getPublicCategories(req, res, next) {
         .sort({ displayOrder: 1, name: 1 })
         .lean(),
       Product.find({ status: "active" })
+=======
+ * Returns active categories with live published product counts and fallback thumbnail images.
+ */
+export async function getPublicCategories(req, res, next) {
+  try {
+    const [categories, publishedProducts] = await Promise.all([
+      Category.find({ isActive: true })
+        .sort({ displayOrder: 1, name: 1 })
+        .lean(),
+      Product.find({ status: "published" })
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         .select("category categories images heroImage")
         .lean(),
     ]);
 
     const enriched = categories.map((cat) => {
       const catId = String(cat._id);
+<<<<<<< HEAD
       const matching = activeProducts.filter((p) => {
+=======
+      const matching = publishedProducts.filter((p) => {
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         const primaryMatch = p.category && String(p.category) === catId;
         const listMatch =
           Array.isArray(p.categories) &&

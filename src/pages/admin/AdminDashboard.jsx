@@ -55,8 +55,13 @@ export default function AdminDashboard() {
 
   const stats = data?.stats || {
     totalProducts: 0,
+<<<<<<< HEAD
     activeProducts: 0,
     inactiveProducts: 0,
+=======
+    publishedProducts: 0,
+    draftProducts: 0,
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     outOfStockProducts: 0,
     lowStockProducts: 0,
     inStockHealthy: 0,
@@ -87,9 +92,15 @@ export default function AdminDashboard() {
       accent: "bg-[#14161A] text-white",
     },
     {
+<<<<<<< HEAD
       label: "Active Products",
       value: stats.activeProducts,
       sub: `${stats.inactiveProducts} inactive hidden`,
+=======
+      label: "Published Products",
+      value: stats.publishedProducts,
+      sub: `${stats.draftProducts} draft hidden`,
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       icon: CheckCircle2,
       accent: "bg-emerald-50 text-emerald-600 border border-emerald-200",
     },
@@ -416,7 +427,11 @@ export default function AdminDashboard() {
                       </div>
                       <span
                         className={`hidden sm:inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+<<<<<<< HEAD
                           p.status === "active"
+=======
+                          p.status === "published"
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                             ? "bg-emerald-50 text-emerald-700"
                             : "bg-[#F4F4F1] text-[#6B727C]"
                         }`}

@@ -28,6 +28,12 @@ const adminActivitySchema = new mongoose.Schema(
         "CREATE_BRAND",
         "UPDATE_BRAND",
         "DELETE_BRAND",
+<<<<<<< HEAD
+=======
+        "CREATE_VIDEO",
+        "UPDATE_VIDEO",
+        "DELETE_VIDEO",
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         "UPLOAD_IMAGE",
         "DELETE_IMAGE",
       ],
@@ -35,7 +41,11 @@ const adminActivitySchema = new mongoose.Schema(
     entityType: {
       type: String,
       required: true,
+<<<<<<< HEAD
       enum: ["auth", "product", "category", "brand", "media"],
+=======
+      enum: ["auth", "product", "category", "brand", "video", "media"],
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     },
     entityId: {
       type: String,

@@ -57,6 +57,7 @@ async function syncProductsToBrand(brand, productIds) {
 
 /**
  * GET /api/brands (Public)
+<<<<<<< HEAD
  * Returns active brands with live active product counts.
  */
 export async function getPublicBrands(req, res, next) {
@@ -66,12 +67,27 @@ export async function getPublicBrands(req, res, next) {
         .sort({ displayOrder: 1, name: 1 })
         .lean(),
       Product.find({ status: "active" })
+=======
+ * Returns active brands with live published product counts.
+ */
+export async function getPublicBrands(req, res, next) {
+  try {
+    const [brands, publishedProducts] = await Promise.all([
+      Brand.find({ isActive: true })
+        .sort({ displayOrder: 1, name: 1 })
+        .lean(),
+      Product.find({ status: "published" })
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         .select("brand images heroImage")
         .lean(),
     ]);
 
     const enriched = brands.map((brand) => {
+<<<<<<< HEAD
       const matching = activeProducts.filter((p) =>
+=======
+      const matching = publishedProducts.filter((p) =>
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         productMatchesBrand(p.brand, brand)
       );
 
@@ -119,7 +135,11 @@ export async function getAdminBrands(req, res, next) {
       return {
         ...brand,
         productCount: assignedProducts.length,
+<<<<<<< HEAD
         activeProductCount: assignedProducts.filter((p) => p.status === "active").length,
+=======
+        publishedProductCount: assignedProducts.filter((p) => p.status === "published").length,
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
         products: assignedProducts,
       };
     });

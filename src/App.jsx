@@ -30,6 +30,10 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminBrands from "./pages/admin/AdminBrands";
+<<<<<<< HEAD
+=======
+import AdminVideos from "./pages/admin/AdminVideos";
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
 function AppRoutesShell() {
   const location = useLocation();
@@ -71,6 +75,17 @@ function AppRoutesShell() {
             </ProtectedRoute>
           }
         />
+<<<<<<< HEAD
+=======
+        <Route
+          path="/admin/videos"
+          element={
+            <ProtectedRoute>
+              <AdminVideos />
+            </ProtectedRoute>
+          }
+        />
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       </Routes>
     );
   }

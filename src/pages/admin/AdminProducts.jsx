@@ -73,7 +73,11 @@ export default function AdminProducts() {
   }, [loadData]);
 
   const handleToggleStatus = async (product) => {
+<<<<<<< HEAD
     const nextStatus = product.status === "active" ? "inactive" : "active";
+=======
+    const nextStatus = product.status === "published" ? "draft" : "published";
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     try {
       await api.updateAdminProduct(product._id, { status: nextStatus });
       toast.success(`"${product.name}" marked ${nextStatus}.`);
@@ -191,8 +195,13 @@ export default function AdminProducts() {
             className="h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] px-3 text-xs font-medium text-[#14161A] focus:border-[var(--accent)] focus:outline-none"
           >
             <option value="">All Statuses</option>
+<<<<<<< HEAD
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
+=======
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
           </select>
 
           <select
@@ -335,7 +344,11 @@ export default function AdminProducts() {
                             type="button"
                             onClick={() => handleToggleStatus(product)}
                             className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase transition-colors ${
+<<<<<<< HEAD
                               product.status === "active"
+=======
+                              product.status === "published"
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                                 ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                                 : "bg-[#F4F4F1] text-[#6B727C] hover:bg-[#E6E6E1]"
                             }`}
@@ -408,7 +421,11 @@ export default function AdminProducts() {
                           type="button"
                           onClick={() => handleToggleStatus(product)}
                           className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase shrink-0 ${
+<<<<<<< HEAD
                             product.status === "active"
+=======
+                            product.status === "published"
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
                               ? "bg-emerald-50 text-emerald-700"
                               : "bg-[#F4F4F1] text-[#6B727C]"
                           }`}

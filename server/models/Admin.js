@@ -7,6 +7,10 @@ const adminSchema = new mongoose.Schema(
       type: String,
       required: [true, "Admin name is required"],
       trim: true,
+<<<<<<< HEAD
+=======
+      maxlength: [80, "Admin name cannot exceed 80 characters"],
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       default: "GunLite Administrator",
     },
     email: {
@@ -15,6 +19,10 @@ const adminSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+<<<<<<< HEAD
+=======
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid admin email"],
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     },
     passwordHash: {
       type: String,
@@ -31,7 +39,25 @@ const adminSchema = new mongoose.Schema(
       default: null,
     },
   },
+<<<<<<< HEAD
   { timestamps: true }
+=======
+  {
+    timestamps: true,
+    toJSON: {
+      transform(_doc, ret) {
+        delete ret.passwordHash;
+        return ret;
+      },
+    },
+    toObject: {
+      transform(_doc, ret) {
+        delete ret.passwordHash;
+        return ret;
+      },
+    },
+  }
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 );
 
 adminSchema.methods.comparePassword = function comparePassword(plainPassword) {

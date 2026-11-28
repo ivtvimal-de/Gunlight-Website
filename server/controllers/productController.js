@@ -7,6 +7,10 @@ import {
 import {
   slugify,
   normalizeProductImages,
+<<<<<<< HEAD
+=======
+  validateNonDataImageUrl,
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   logAdminActivity,
   parseMaybeJSON,
 } from "../utils/helpers.js";
@@ -79,7 +83,11 @@ export async function getPublicProducts(req, res, next) {
       sort = "featured",
     } = req.query;
 
+<<<<<<< HEAD
     const filter = { status: "active" };
+=======
+    const filter = { status: "published" };
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
     if (featured === "true") {
       filter.isFeatured = true;
@@ -159,8 +167,13 @@ export async function getPublicProductById(req, res, next) {
   try {
     const { id } = req.params;
     const query = mongoose.Types.ObjectId.isValid(id)
+<<<<<<< HEAD
       ? { _id: id, status: "active" }
       : { slug: String(id).toLowerCase().trim(), status: "active" };
+=======
+      ? { _id: id, status: "published" }
+      : { slug: String(id).toLowerCase().trim(), status: "published" };
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
     const product = await Product.findOne(query)
       .populate("category", "name slug")
@@ -202,7 +215,11 @@ export async function getAdminProducts(req, res, next) {
 
     const filter = {};
 
+<<<<<<< HEAD
     if (status === "active" || status === "inactive") {
+=======
+    if (status === "published" || status === "draft") {
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
       filter.status = status;
     }
     if (featured === "true") filter.isFeatured = true;
@@ -310,7 +327,15 @@ export async function getAdminProductById(req, res, next) {
 /**
  * Extract and validate product body fields cleanly.
  */
+<<<<<<< HEAD
 async function buildProductPayload(req, existingProduct = null) {
+=======
+async function buildProductPayload(
+  req,
+  existingProduct = null,
+  newlyUploadedPublicIds = []
+) {
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   const body = req.body || {};
 
   const name = body.name !== undefined ? String(body.name).trim() : existingProduct?.name;
@@ -372,6 +397,7 @@ async function buildProductPayload(req, existingProduct = null) {
     throw err;
   }
 
+<<<<<<< HEAD
   // Primary category & optional multi-category list
   const primaryCatInput = body.category ?? existingProduct?.category;
   const primaryCatDoc = await Category.findById(primaryCatInput);
@@ -379,6 +405,32 @@ async function buildProductPayload(req, existingProduct = null) {
     const err = new Error("Selected product category does not exist.");
     err.statusCode = 400;
     throw err;
+=======
+  // Primary category (required on create or when explicitly supplied on update; preserved if valid on update)
+  let primaryCategory = null;
+  if (!existingProduct || body.category !== undefined) {
+    const catInput = body.category;
+    if (!catInput || !mongoose.Types.ObjectId.isValid(String(catInput))) {
+      const err = new Error("Please select a valid product category.");
+      err.statusCode = 400;
+      throw err;
+    }
+    const catDoc = await Category.findById(catInput);
+    if (!catDoc) {
+      const err = new Error("Selected product category does not exist.");
+      err.statusCode = 400;
+      throw err;
+    }
+    primaryCategory = catDoc._id;
+  } else if (
+    existingProduct.category &&
+    mongoose.Types.ObjectId.isValid(String(existingProduct.category))
+  ) {
+    const existingCatDoc = await Category.findById(existingProduct.category);
+    if (existingCatDoc) {
+      primaryCategory = existingCatDoc._id;
+    }
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   }
 
   const parsedCategories = parseMaybeJSON(body.categories, null);
@@ -386,23 +438,86 @@ async function buildProductPayload(req, existingProduct = null) {
     ? parsedCategories.map(String)
     : existingProduct?.categories?.map((c) => String(c)) || [];
 
+<<<<<<< HEAD
   if (!categoryIds.includes(String(primaryCatDoc._id))) {
     categoryIds.unshift(String(primaryCatDoc._id));
+=======
+  if (primaryCategory && !categoryIds.includes(String(primaryCategory))) {
+    categoryIds.unshift(String(primaryCategory));
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   }
   categoryIds = [...new Set(categoryIds)].filter((id) =>
     mongoose.Types.ObjectId.isValid(id)
   );
 
+<<<<<<< HEAD
   // Images: combine existing/client-provided list + any freshly attached files
   let images = parseMaybeJSON(body.images, existingProduct?.images || []);
   if (!Array.isArray(images)) images = [];
+=======
+  // Validate status before any uploads or writes
+  let status = existingProduct?.status || "draft";
+  if (body.status !== undefined) {
+    if (body.status !== "draft" && body.status !== "published") {
+      const err = new Error('Product status must be either "draft" or "published".');
+      err.statusCode = 400;
+      throw err;
+    }
+    status = body.status;
+  }
+
+  // Validate existing/client-provided images and heroImage BEFORE uploading any files
+  const rawImages = parseMaybeJSON(body.images, existingProduct?.images || []);
+  let images = normalizeProductImages(Array.isArray(rawImages) ? rawImages : []);
+
+  let heroImage = existingProduct?.heroImage
+    ? {
+        url: validateNonDataImageUrl(existingProduct.heroImage.url || "", "hero image"),
+        publicId: existingProduct.heroImage.publicId || "",
+      }
+    : { url: "", publicId: "" };
+
+  if (body.heroImage !== undefined) {
+    const parsedHero = parseMaybeJSON(body.heroImage, body.heroImage);
+    if (parsedHero === null || parsedHero === "") {
+      heroImage = { url: "", publicId: "" };
+    } else if (typeof parsedHero === "string") {
+      const safeHeroUrl = validateNonDataImageUrl(parsedHero, "hero image");
+      heroImage = safeHeroUrl ? { url: safeHeroUrl, publicId: "" } : { url: "", publicId: "" };
+    } else if (typeof parsedHero === "object") {
+      const safeHeroUrl = validateNonDataImageUrl(parsedHero.url || "", "hero image");
+      const rawHeroPid =
+        typeof parsedHero.publicId === "string"
+          ? parsedHero.publicId
+          : typeof parsedHero.public_id === "string"
+          ? parsedHero.public_id
+          : "";
+      heroImage = safeHeroUrl
+        ? { url: safeHeroUrl, publicId: rawHeroPid.trim() }
+        : { url: "", publicId: "" };
+    } else {
+      const err = new Error("Invalid heroImage format.");
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
   if (req.files && req.files.length > 0) {
     const uploaded = await Promise.all(
       req.files.map((file) =>
+<<<<<<< HEAD
         uploadBufferToCloudinary(file.buffer, "gunlite/products", file.mimetype)
       )
     );
+=======
+        uploadBufferToCloudinary(file.buffer, "gunlite/products")
+      )
+    );
+    for (const u of uploaded) {
+      if (u.publicId) newlyUploadedPublicIds.push(u.publicId);
+    }
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     images = [
       ...images,
       ...uploaded.map((u) => ({
@@ -429,11 +544,14 @@ async function buildProductPayload(req, existingProduct = null) {
   const desiredSlug = body.slug || (existingProduct ? existingProduct.slug : name);
   const slug = await ensureUniqueSlug(desiredSlug, existingProduct?._id);
 
+<<<<<<< HEAD
   const status =
     body.status === "inactive" || body.status === "active"
       ? body.status
       : existingProduct?.status || "active";
 
+=======
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   const isFeatured =
     body.isFeatured !== undefined
       ? body.isFeatured === true || body.isFeatured === "true"
@@ -460,7 +578,11 @@ async function buildProductPayload(req, existingProduct = null) {
         ? String(body.shortSpec).trim()
         : existingProduct?.shortSpec || "",
     specs: cleanSpecs,
+<<<<<<< HEAD
     category: primaryCatDoc._id,
+=======
+    category: primaryCategory,
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     categories: categoryIds,
     price,
     discountPrice,
@@ -478,16 +600,60 @@ async function buildProductPayload(req, existingProduct = null) {
         ? String(body.warrantyLabel).trim() || "1-Year Warranty"
         : existingProduct?.warrantyLabel || "1-Year Warranty",
     images: normalizedImages,
+<<<<<<< HEAD
+=======
+    heroImage,
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   };
 }
 
 /**
+<<<<<<< HEAD
  * POST /api/admin/products
  */
 export async function createProduct(req, res, next) {
   try {
     const payload = await buildProductPayload(req, null);
     const created = await Product.create(payload);
+=======
+ * Best-effort Cloudinary cleanup that logs failures without masking caller errors.
+ */
+async function cleanupCloudinaryAssets(publicIds, context) {
+  if (!Array.isArray(publicIds) || publicIds.length === 0) return;
+  try {
+    await Promise.all(
+      publicIds.map(async (pid) => {
+        try {
+          await deleteFromCloudinary(pid);
+        } catch (cleanupErr) {
+          console.error(
+            `Cloudinary cleanup failed (${context}, publicId=${pid}):`,
+            cleanupErr?.message || cleanupErr
+          );
+        }
+      })
+    );
+  } catch (cleanupErr) {
+    console.error(
+      `Cloudinary cleanup failed (${context}):`,
+      cleanupErr?.message || cleanupErr
+    );
+  }
+}
+
+/**
+ * POST /api/admin/products
+ */
+export async function createProduct(req, res, next) {
+  const newlyUploadedPublicIds = [];
+  let saved = false;
+  try {
+    const payload = await buildProductPayload(req, null, newlyUploadedPublicIds);
+    const created = await Product.create(payload);
+    saved = true;
+    newlyUploadedPublicIds.length = 0;
+
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     const populated = await Product.findById(created._id)
       .populate("category", "name slug")
       .populate("categories", "name slug")
@@ -507,6 +673,15 @@ export async function createProduct(req, res, next) {
       product: populated,
     });
   } catch (err) {
+<<<<<<< HEAD
+=======
+    if (!saved && newlyUploadedPublicIds.length > 0) {
+      await cleanupCloudinaryAssets(
+        newlyUploadedPublicIds,
+        "createProduct rollback"
+      );
+    }
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     next(err);
   }
 }
@@ -515,6 +690,11 @@ export async function createProduct(req, res, next) {
  * PUT /api/admin/products/:id
  */
 export async function updateProduct(req, res, next) {
+<<<<<<< HEAD
+=======
+  const newlyUploadedPublicIds = [];
+  let saved = false;
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   try {
     const existing = await Product.findById(req.params.id);
     if (!existing) {
@@ -524,6 +704,7 @@ export async function updateProduct(req, res, next) {
       });
     }
 
+<<<<<<< HEAD
     const oldPublicIds = (existing.images || [])
       .map((img) => img.publicId)
       .filter(Boolean);
@@ -531,15 +712,39 @@ export async function updateProduct(req, res, next) {
     const payload = await buildProductPayload(req, existing);
     const newPublicIdSet = new Set(
       (payload.images || []).map((img) => img.publicId).filter(Boolean)
+=======
+    const oldPublicIds = [
+      ...(existing.images || []).map((img) => img.publicId),
+      existing.heroImage?.publicId,
+    ].filter(Boolean);
+
+    const payload = await buildProductPayload(req, existing, newlyUploadedPublicIds);
+    const newPublicIdSet = new Set(
+      [
+        ...(payload.images || []).map((img) => img.publicId),
+        payload.heroImage?.publicId,
+      ].filter(Boolean)
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     );
 
     const removedPublicIds = oldPublicIds.filter((pid) => !newPublicIdSet.has(pid));
 
     Object.assign(existing, payload);
     await existing.save();
+<<<<<<< HEAD
 
     if (removedPublicIds.length > 0) {
       await Promise.all(removedPublicIds.map((pid) => deleteFromCloudinary(pid)));
+=======
+    saved = true;
+    newlyUploadedPublicIds.length = 0;
+
+    if (removedPublicIds.length > 0) {
+      await cleanupCloudinaryAssets(
+        removedPublicIds,
+        "updateProduct removed images"
+      );
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     }
 
     const populated = await Product.findById(existing._id)
@@ -561,6 +766,15 @@ export async function updateProduct(req, res, next) {
       product: populated,
     });
   } catch (err) {
+<<<<<<< HEAD
+=======
+    if (!saved && newlyUploadedPublicIds.length > 0) {
+      await cleanupCloudinaryAssets(
+        newlyUploadedPublicIds,
+        "updateProduct rollback"
+      );
+    }
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     next(err);
   }
 }
@@ -589,7 +803,14 @@ export async function deleteProduct(req, res, next) {
     await existing.deleteOne();
 
     if (publicIdsToDelete.length > 0) {
+<<<<<<< HEAD
       await Promise.all(publicIdsToDelete.map((pid) => deleteFromCloudinary(pid)));
+=======
+      await cleanupCloudinaryAssets(
+        publicIdsToDelete,
+        "deleteProduct cleanup"
+      );
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
     }
 
     await logAdminActivity({

@@ -12,12 +12,73 @@ export function slugify(value = "") {
 }
 
 /**
+<<<<<<< HEAD
  * Normalize an image list so every entry has { url, publicId, isPrimary }
  * and exactly one entry is marked isPrimary when non-empty.
+=======
+ * Check whether a persisted media URL uses an allowed scheme (http/https/relative) and is not a data: URL.
+ */
+export function isSafeMediaUrl(url, { allowEmpty = true } = {}) {
+  if (url === undefined || url === null) return allowEmpty;
+  if (typeof url !== "string") return false;
+  const trimmed = url.trim();
+  if (!trimmed) return allowEmpty;
+  if (/^data:/i.test(trimmed)) return false;
+  return /^(https?:\/\/|\/)/i.test(trimmed);
+}
+
+/**
+ * Reject Base64 data: URLs and unsafe protocols for persisted media URLs.
+ */
+export function validateNonDataMediaUrl(
+  url,
+  label = "media",
+  mediaKind = "media"
+) {
+  if (url === undefined || url === null) return "";
+  if (typeof url !== "string") {
+    const err = new Error(`Invalid ${label} URL format.`);
+    err.statusCode = 400;
+    throw err;
+  }
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  if (/^data:/i.test(trimmed)) {
+    const err = new Error(
+      `Base64 data: URLs are not allowed for ${label}. Upload ${mediaKind} through Cloudinary.`
+    );
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (!/^(https?:\/\/|\/)/i.test(trimmed)) {
+    const err = new Error(
+      `Unsupported URL scheme for ${label}. Expected https://, http://, or relative path.`
+    );
+    err.statusCode = 400;
+    throw err;
+  }
+
+  return trimmed;
+}
+
+/**
+ * Reject Base64 data: URLs and unsafe protocols for persisted image URLs.
+ */
+export function validateNonDataImageUrl(url, label = "image") {
+  return validateNonDataMediaUrl(url, label, "images");
+}
+
+/**
+ * Normalize an image list so every entry has { url, publicId, isPrimary },
+ * reject any Base64 data: URLs, and mark exactly one entry isPrimary when non-empty.
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
  */
 export function normalizeProductImages(images = []) {
   if (!Array.isArray(images) || images.length === 0) return [];
 
+<<<<<<< HEAD
   const cleaned = images
     .filter((img) => img && typeof img.url === "string" && img.url.trim())
     .map((img) => ({
@@ -25,6 +86,26 @@ export function normalizeProductImages(images = []) {
       publicId: typeof img.publicId === "string" ? img.publicId.trim() : "",
       isPrimary: Boolean(img.isPrimary),
     }));
+=======
+  const cleaned = [];
+  for (const img of images) {
+    if (!img || typeof img !== "object") continue;
+    if (img.url !== undefined && img.url !== null && String(img.url).trim() !== "") {
+      const safeUrl = validateNonDataImageUrl(img.url, "product image");
+      const rawPid =
+        typeof img.publicId === "string"
+          ? img.publicId
+          : typeof img.public_id === "string"
+          ? img.public_id
+          : "";
+      cleaned.push({
+        url: safeUrl,
+        publicId: rawPid.trim(),
+        isPrimary: Boolean(img.isPrimary),
+      });
+    }
+  }
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 
   if (cleaned.length === 0) return [];
 

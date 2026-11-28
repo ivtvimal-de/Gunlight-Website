@@ -5,6 +5,10 @@ import {
   Package,
   Layers,
   Award,
+<<<<<<< HEAD
+=======
+  Video,
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   LogOut,
   ExternalLink,
   Menu,
@@ -21,6 +25,10 @@ const NAV_ITEMS = [
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: Layers },
   { to: "/admin/brands", label: "Brands", icon: Award },
+<<<<<<< HEAD
+=======
+  { to: "/admin/videos", label: "Videos", icon: Video },
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
 ];
 
 export default function AdminLayout({ title = "Dashboard", subtitle = "", actions = null, children }) {

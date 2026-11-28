@@ -45,6 +45,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
+<<<<<<< HEAD
     try {
       const res = await api.adminLogin({ email, password });
       setAdmin(res?.admin || null);
@@ -59,6 +60,12 @@ export function AuthProvider({ children }) {
       }
       throw err;
     }
+=======
+    const res = await api.adminLogin({ email, password });
+    setAdmin(res?.admin || null);
+    setIsDemoMode(false);
+    return res;
+>>>>>>> 526e98c (Update GunLite store, video management, 1 MB image limit, and gallery video viewer)
   }, []);
 
   const logout = useCallback(async () => {
