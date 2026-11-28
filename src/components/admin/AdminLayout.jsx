@@ -142,7 +142,7 @@ export default function AdminLayout({ title = "Dashboard", subtitle = "", action
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-[#14161A] font-['Inter'] flex">
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:block w-64 shrink-0 sticky top-0 h-screen">
+      <aside className="hidden lg:block lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 w-64">
         <SidebarContent />
       </aside>
 
@@ -160,7 +160,7 @@ export default function AdminLayout({ title = "Dashboard", subtitle = "", action
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col lg:pl-64">
         {/* Top Navigation Bar */}
         <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-[#E6E6E1] px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
