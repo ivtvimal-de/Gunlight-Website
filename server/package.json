@@ -9,6 +9,7 @@
     "dev": "node --watch server.js",
     "start": "node server.js",
     "create-admin": "node scripts/createAdmin.js",
+    "update-admin": "node scripts/updateAdmin.js",
     "migrate:status": "node scripts/migrateStatus.js",
     "seed": "node scripts/seed.js"
   },
