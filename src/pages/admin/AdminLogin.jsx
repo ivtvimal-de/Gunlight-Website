@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { Lock, Mail, Eye, EyeOff, ArrowLeft, ShieldCheck, Sparkles } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Lock, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useCatalog } from "../../context/CatalogContext";
 import { useToast } from "../../context/ToastContext";
 import { api } from "../../services/api";
 
 export default function AdminLogin() {
-  const { isAuthenticated, authLoading, login, enterDemoMode } = useAuth();
+  const { isAuthenticated, authLoading, login } = useAuth();
   const { refreshCatalog } = useCatalog();
   const toast = useToast();
   const navigate = useNavigate();
@@ -32,13 +32,6 @@ export default function AdminLogin() {
       navigate(redirectTo, { replace: true });
     }
   }, [authLoading, isAuthenticated, navigate, redirectTo]);
-
-  const handleOpenSampleMode = async () => {
-    enterDemoMode(email.trim() || undefined);
-    await refreshCatalog();
-    toast.success("Opened Admin Panel in Sample UI Preview Mode.");
-    navigate(redirectTo, { replace: true });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,14 +63,6 @@ export default function AdminLogin() {
     <main className="min-h-screen bg-[#FAFAF8] text-[#14161A] font-['Inter'] flex flex-col justify-center px-4 py-12">
       <div className="mx-auto w-full max-w-md">
         <div className="mb-6 text-center">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6B727C] hover:text-[#14161A] transition-colors mb-5"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to GunLite Storefront</span>
-          </Link>
-
           <div className="mx-auto flex justify-center mb-3">
             <img src="/images/logo.png" alt="GunLite" className="h-10 w-auto object-contain" />
           </div>
@@ -150,16 +135,7 @@ export default function AdminLogin() {
             </button>
           </form>
 
-          <div className="mt-4 pt-4 border-t border-[#F1F1ED] space-y-3">
-            <button
-              type="button"
-              onClick={handleOpenSampleMode}
-              className="w-full h-10 rounded-xl border border-[#E6E6E1] bg-[#FAFAF8] hover:bg-[#F4F4F1] text-xs font-semibold text-[#14161A] inline-flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
-              <span>Preview Admin UI (Sample Mode — No Backend)</span>
-            </button>
-
+          <div className="mt-5 pt-4 border-t border-[#F1F1ED]">
             <div className="flex items-center justify-center gap-2 text-[11px] text-[#6B727C]">
               <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />
               <span>Protected with HTTP-only JWT authentication</span>
